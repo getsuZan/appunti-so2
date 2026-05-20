@@ -68,10 +68,19 @@ void free(void *ptr);
 - `calloc` inizializza a zero.
 - `free` libera la memoria.
 
+### `malloc` vs `calloc`
+- `malloc(size)` alloca un blocco di `size` byte non inizializzati.
+- `calloc(nmemb, size)` alloca `nmemb * size` byte e li inizializza a 0.
+- `calloc` rende esplicita la dimensione di un array, mentre `malloc` richiede il calcolo manuale.
+
 ### Regole importanti
 - `free` solo su puntatori ottenuti da `malloc/calloc/realloc`.
 - `free` doppio sullo stesso puntatore = comportamento indefinito.
 - Il programmatore gestisce la garbage collection.
+
+### Note su `free`
+- Usare un puntatore dopo `free` produce comportamento indefinito (use-after-free).
+- Passare a `free` un puntatore non valido produce comportamento indefinito.
 
 ## Strutture (`struct`)
 - Tipo di dato composto con membri di tipi diversi.
@@ -124,6 +133,14 @@ struct point3D pointA = {1.1, 1.2, 3.5};
 - `fgets`, `fputs`
 - `feof` per verificare EOF
 
+## Funzioni di memoria utili
+- `memset` e `memcpy` sono utili per inizializzare o copiare blocchi.
+```c
+void *memset(void *s, int c, size_t n);
+void *memcpy(void *dest, const void *src, size_t n);
+```
+- `memcpy` richiede che le aree non si sovrappongano.
+
 ### Note su `fgets`
 - Legge al massimo `size-1` caratteri o fino a `\n`.
 - Restituisce `NULL` su errore o EOF.
@@ -133,3 +150,9 @@ struct point3D pointA = {1.1, 1.2, 3.5};
 - Usare `malloc` e `calloc` per allocare e copiare blocchi.
 - Modificare strutture e passaggio parametri.
 - Leggere/scrivere file con `fscanf`, `fgets`, `fputs`.
+
+## Riferimenti agli esempi (da slide)
+- `pointer.c`, `aritmeticaPtr.c`, `arrayPtr.c` per puntatori e aritmetica.
+- `heapAlloc.c` per allocazione su heap.
+- `taxPayers.c`, `taxPayersAlloc.c`, `taxPayersParams.c` per strutture e parametri.
+- `file.c`, `filefsfpf.c`, `filefgets.c`, `filefputs.c` per file I/O.

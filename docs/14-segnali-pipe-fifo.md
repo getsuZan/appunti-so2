@@ -18,6 +18,16 @@
 - SIGINT, SIGTERM, SIGKILL, SIGSTOP, SIGSEGV, SIGPIPE, SIGALRM.
 - SIGKILL e SIGSTOP non sono gestibili o bloccabili.
 
+### Azioni predefinite (esempi)
+- SIGSEGV, SIGFPE: terminazione con core dump.
+- SIGTERM, SIGINT: terminazione.
+- SIGCHLD: ignorato di default.
+- SIGSTOP, SIGTSTP: stop del processo.
+
+### Perche' SIGKILL e SIGSTOP non sono gestibili
+- Il kernel deve garantire un modo certo per fermare o sospendere un processo.
+- Permettere la gestione potrebbe impedire il controllo amministrativo.
+
 ## Azioni possibili
 - Ignorare (tranne SIGKILL/SIGSTOP).
 - Catturare con un handler.
@@ -60,6 +70,10 @@ int sigaction(int signum, const struct sigaction *act,
 - Lettura da pipe vuota blocca.
 - Scrittura su pipe piena blocca.
 - Scrittura su pipe senza lettori -> SIGPIPE.
+
+### Semantica di chiusura
+- Se il lato di scrittura e' chiuso, `read` ritorna 0 (EOF).
+- Se il lato di lettura e' chiuso, `write` fallisce con SIGPIPE.
 
 ## IPC: FIFO (named pipe)
 - File speciale creato con `mkfifo`.

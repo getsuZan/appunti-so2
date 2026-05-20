@@ -33,6 +33,10 @@ pid_t fork(void);
   - al figlio: 0
 - Ritorna `-1` su errore.
 
+### Attributi ereditati e non ereditati
+- Ereditati: UID/GID reali, cwd, ambiente, file descriptor aperti, maschera segnali.
+- Non ereditati: PID, contatori risorse, timer, lock.
+
 ### Attributi ereditati
 - UID/GID reali, cwd, ambiente, fd aperti.
 - Non ereditati: PID, timers, contatori risorse, lock.
@@ -40,6 +44,11 @@ pid_t fork(void);
 ## Terminazione: `_exit` vs `exit`
 - `_exit` (syscall): termina subito, non svuota buffer stdio.
 - `exit` (libreria): chiama handler `atexit`, svuota buffer.
+
+### Nota su Linux
+- La syscall `_exit` termina un singolo thread.
+- La syscall `exit_group` termina tutti i thread del processo.
+- La wrapper `_exit()` in glibc invoca `exit_group`.
 
 ## `abort`
 - Invia SIGABRT, termina in modo anomalo.
@@ -51,6 +60,11 @@ pid_t waitpid(pid_t pid, int *status, int options);
 ```
 - Permettono di raccogliere l'exit status dei figli.
 - Evitano zombie.
+
+### Opzioni `waitpid`
+- `WNOHANG`: ritorna subito se nessun figlio ha cambiato stato.
+- `WUNTRACED`: ritorna anche per figli stoppati.
+- `WCONTINUED`: ritorna anche per figli ripresi da SIGCONT.
 
 ### Macro di stato
 - `WIFEXITED`, `WEXITSTATUS`.
@@ -72,6 +86,10 @@ int execve(const char *filename,
 ```
 - `argv[0]` deve essere il nome del programma.
 - `envp` definisce il nuovo ambiente.
+
+### Attributi mantenuti con `exec`
+- Mantiene: PID, PPID, cwd, file descriptor (salvo `FD_CLOEXEC`), maschera segnali.
+- Non mantiene: memoria del processo, mapping, timer.
 
 ## Ambiente di processo
 - Array di stringhe `KEY=VALUE` terminato da `NULL`.

@@ -16,10 +16,12 @@
 - System call: interfaccia minimale, non sostituibili.
 - Funzioni di libreria: piu' comode, spesso usano system call.
 - Esempio: `malloc` usa `sbrk`/`mmap`.
+- Esempio pratico: `printf` usa `write` per scrivere su stdout.
 
 ## Documentazione
 - System call: `man 2 <nome>`.
 - Funzioni di libreria: `man 3 <nome>`.
+- `man man` mostra la separazione per sezioni.
 
 ## Gestione errori
 - Molte system call ritornano `-1` in caso di errore.
@@ -42,6 +44,8 @@ char *strerror(int errnum);
 - `strace` mostra le system call invocate.
 - Esempio:
   - `strace -o strace.txt -s 100 /path/to/prog`
+- `-p <pid>` per agganciare un processo esistente.
+- `-e trace=...` per filtrare system call specifiche.
 
 ## Allocazione memoria
 - Funzioni di libreria:
@@ -74,6 +78,14 @@ void *mmap(void *addr, size_t len, int prot,
 - `MAP_PRIVATE`: copy-on-write.
 - `msync` forza la scrittura su disco.
 - `munmap` rilascia la mappatura.
+
+### `msync` e `munmap`
+```c
+int msync(void *addr, size_t len, int flags);
+int munmap(void *addr, size_t len);
+```
+- `msync` chiede al kernel di sincronizzare i dati modificati con il file.
+- `munmap` dealloca l'area mappata.
 
 ## Esercizi (da slide)
 - Gestire errori con `errno` e `perror`.

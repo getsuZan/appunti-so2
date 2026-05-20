@@ -22,10 +22,19 @@
 - Thread: memoria condivisa, context switch leggero.
 - Comunicazione tra thread piu' veloce, ma rischi di concorrenza.
 
+### Riepilogo sintetico
+- Processi: isolamento forte, IPC piu' lento.
+- Thread: isolamento debole, condivisione immediata.
+
 ## Modelli di implementazione
 - Many-to-one (user-level): un thread kernel per tanti thread utente.
 - One-to-one (kernel-level): ogni thread utente ha thread kernel.
 - Many-to-many: mappatura flessibile.
+
+### Pro e contro (sintesi)
+- Many-to-one: semplice e veloce, ma una syscall bloccante ferma tutti.
+- One-to-one: vero parallelismo, ma piu' overhead.
+- Many-to-many: compromesso, piu' complesso.
 
 ## Libreria pthread
 - Standard POSIX.
@@ -51,14 +60,25 @@ int pthread_join(pthread_t tid, void **retval);
 - `pthread_attr_t` controlla stack, detach, scheduling.
 - Funzioni: `pthread_attr_init`, `pthread_attr_setstacksize`, ecc.
 
+### Esempi di attributi
+- `pthread_attr_setdetachstate` per thread joinable/detached.
+- `pthread_attr_setschedpolicy` per politica di schedulazione.
+
 ## Terminazione processo multithread
 - `exit()` termina l'intero processo.
 - `pthread_exit()` termina il thread chiamante.
+
+### Nota su Linux
+- La syscall `exit_group` termina tutti i thread.
+- `pthread_exit` non termina gli altri thread.
 
 ## Implementazione Linux
 - Basata su `clone()` con flag `CLONE_XXX`.
 - `fork()` = `clone()` senza condivisioni.
 - `pthread_create()` = `clone()` con condivisione completa.
+
+### Cenni su `clone`
+- `clone` con flag `CLONE_VM`, `CLONE_THREAD`, `CLONE_FILES` implementa i thread.
 
 ## Esercizi (da slide)
 - Thread che stampa numeri con sleep.

@@ -34,6 +34,12 @@
 	- `SOCK_RAW`
 - Protocol: di solito 0.
 
+### Differenze principali
+- `AF_LOCAL` usa nomi di file nel filesystem.
+- `AF_INET`/`AF_INET6` usano IP e porte.
+- `SOCK_STREAM` e' orientato alla connessione (TCP).
+- `SOCK_DGRAM` e' a datagrammi (UDP), senza connessione.
+
 ## Anatomia server TCP
 1. `socket()`
 2. `bind()`
@@ -57,6 +63,10 @@
 	- `INADDR_ANY`
 	- `INADDR_LOOPBACK`
 
+### Conversioni di byte order
+- `htons` per porte, `htonl` per indirizzi.
+- `inet_aton` per convertire stringhe IP.
+
 ## Conversioni
 - `htonl`, `htons` per host->network.
 - `inet_aton` per IP stringa.
@@ -65,6 +75,23 @@
 ## Note operative
 - Scrittura su socket chiusa -> SIGPIPE.
 - `accept` ritorna un nuovo fd per la connessione.
+
+## Esempio minimale server con fork
+```c
+int sd = socket(AF_INET, SOCK_STREAM, 0);
+bind(sd, (struct sockaddr *)&addr, sizeof(addr));
+listen(sd, 16);
+while (1) {
+	int client_sd = accept(sd, NULL, NULL);
+	if (client_sd < 0) continue;
+	if (fork() == 0) {
+		// read/write su client_sd
+		close(client_sd);
+		_exit(0);
+	}
+	close(client_sd);
+}
+```
 
 ## Esercizi (da slide)
 - Passare porta come parametro client/server.
