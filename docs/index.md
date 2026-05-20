@@ -20,5 +20,10 @@ Benvenuto negli appunti del corso di Sistemi Operativi 2. Questo sito raccoglie 
 8. Progetti Multi-File e Makefile
 9. Allocazione Dinamica, Strutture e File I/O
 10. Chiamate di Sistema e System Programming
-11. System Calls Processi, Segnali e Pipe
-12. Reti, Thread e Rust
+11. System Call per File I/O
+12. System Call per i Processi
+13. Funzioni e Variabili Esterne/Statiche, GDB
+14. Segnali, Pipe, FIFO
+15. Socket
+16. Thread
+17. Introduzione a Rust
