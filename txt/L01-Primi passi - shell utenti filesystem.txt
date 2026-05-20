@@ -1,0 +1,239 @@
+Primi passi - shell, utenti,
+filesystem
+Lezione 1
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• La shell
+• Il prompt
+• Il comando
+• Gli utenti
+• Il file system
+
+zuliani@di.uniroma1.it
+
+2
+
+Premessa
+• Per fare tutti gli esercizi in queste slides e in quelle che verranno è
+opportuno installare sul proprio computer una versione di Linux delle
+famiglie Debian, Fedora, etc. ad esempio
+• Ubuntu
+• Fedora
+• Rocky
+• …
+
+• Vedi pagina comune del corso (sezione Software (gratis) per il Corso)
+• https://twiki.di.uniroma1.it/twiki/view/SO/SO1213AL/SistemiOperativi12CFUModul
+o220182019
+
+zuliani@di.uniroma1.it
+
+3
+
+La shell
+• Interprete di comandi
+• Un programma che esegue altri comandi
+• Spesso chiamato terminale (terminal)
+
+• Vari tipi di shell
+• Thompson/Bourne shell: sh
+• Bourne-Again shell: bash
+• KornShell: ksh
+• Friendly Interactive shell: fish
+•…
+
+• Apriamo la bash (Bourne Again Shell)
+• LXterminal
+zuliani@di.uniroma1.it
+
+4
+
+La shell
+• Per verificare la versione della shell che state usando
+
+Casalicchio@di.uniroma1.it
+
+5
+
+La «history» della bash
+• Con i tasti «freccia su» e «freccia giù» potete scorrere la lista dei
+comandi dati
+• Una volta visualizzato il comando selezionato, questo può essere
+modificato
+• Potete ricercare un comando data una certa keyword con la
+combinazione di tasti CTRL+r
+
+zuliani@di.uniroma1.it
+
+6
+
+Il prompt
+• La bash scrive un prompt ed attende che l'utente
+scriva un “comando”
+• il prompt tipico e così costituito:
+nomeutente@nomemacchina:~cammino$
+• dove cammino è il percorso dalla cartella (directory o
+folder) home alla cartella attuale
+
+• quindi, se si è semplicemente nella home, c'è solo
+la tilde ~
+• se la cartella corrente non si trova nel sottoalbero
+radicato nella home, allora cammino è il percorso
+assoluto
+zuliani@di.uniroma1.it
+
+7
+
+Il comando
+• Ogni comando verrà nel seguito indicato come segue
+• comando [opzioni] argomenti_obbligatori
+
+• Ci dev'essere almeno un argomento (ma ce ne puo essere anche più d'uno) se
+{argomento}
+• cp [-r] [-i] [-a] [-u] {filesorgenti} file_destinazione
+
+• Ci possono essere 0, 1 o più argomenti opzionali se [opzione...]
+• ps [opzioni] [pid...]
+
+• Argomenti vanno separati da carattere indicato se
+[carattere opzione...]
+• chmod mode[, mode...] file_name
+
+zuliani@di.uniroma1.it
+
+8
+
+Il comando (cont.)
+• Opzioni tipicamente composte da
+• -carattere (vecchia versione)
+• --parola (nuova versione)
+
+• Ad esempio sono equivalenti per il comando cp
+• -i
+• --interactive
+
+-r
+--recursive
+
+• Le opzioni possono avere un argomento
+• -k1, -k 1, --key=1
+
+• Le opzioni senza argomento sono raggruppabili
+• -b -r -c sono equivalente a -brc
+
+• Esistono anche le opzioni in stile BSD, senza dash ‘-’
+• tar xfz nomefile.tgz
+zuliani@di.uniroma1.it
+
+9
+
+Esempio: il comando man
+• Sinossi del comando
+• man [sezione] comando
+
+• Provate man man
+Sezione
+
+Casalicchio@di.uniroma1.it
+
+10
+
+Esercizi
+1. Provate qualche opzione del comando man
+2. Usando il comando man scoprite la sinossi completa dei comandi
+cp, ps, ls e a cosa servono
+3. Dal man di ps cercate di capire perché
+ps –p $$ –ocmd –h
+Restituisce bash come output
+4. Trovate un’apposita invocazione di ps che ritorni solo il pid (process
+id) della shell.
+
+zuliani@di.uniroma1.it
+
+11
+
+Gli utenti
+• Durante l’installazione di Linux è necessario specificare (almeno) un utente
+(utente principale)
+• Alcune versioni creano un utente automaticamente ad es.
+• Utente osboxes
+• Password osboxes.org
+
+• root è il superutente: ha tutti i privilegi (amministratore di sistema)
+• Non tutti gli utenti possono «entrare» nel sistema (to log in)
+• root non può fare login da un terminale qualsiasi (di solito solo dalla console) ma
+un utente può acquisire i diritti di root mediante il comando su e sudo
+
+• Ogni utente appartiene almeno ad un gruppo
+• automaticamente creato con lo stesso nome dell’utente principale
+
+• Esistono molti gruppi definiti per scopi «amministrativi»
+• groups [nome_utente]
+zuliani@di.uniroma1.it
+
+12
+
+sudo
+• Nelle distribuzioni della famiglia Debian l’utente
+principale è un sudoer, appartiene al gruppo
+predefinito sudo
+• Gli utenti del gruppo sudo possono eseguire
+comandi da super utente (root) usando il
+comando sudo
+• sudo comando
+• guardare il man per la sinossi completa
+
+• sudo è un comando che prende in ingresso un
+altro comando
+zuliani@di.uniroma1.it
+
+13
+
+Creazione di altri utenti
+• adduser nuovo_utente
+• Di default l’utente creato non appartiene al gruppo sudo
+
+• Esercizio [da fare sul vostro pc]:
+• Studiare la sinossi del comando adduser
+• creare 2 nuovi utenti (utente1 e utente2)
+• con utente principale (sudoer) eseguire il comando apt-get update
+• con utente principale eseguire il comando sudo apt-get update
+
+• Per aggiungere un utente ad un gruppo
+• adduser nuovo_utente gruppo
+zuliani@di.uniroma1.it
+
+14
+
+Cambiare utente (sul vostro pc)
+• su [- | -l | --login] nome_utente
+• Tipico uso per diventare root su - | su - root | su -l root
+
+• Esercizio
+1.
+2.
+3.
+4.
+
+con utente utente1 eseguire il comando apt-get update
+con utente utente1 eseguire il comando sudo apt-get update
+rendere utente1 sudoer
+riprovare passi 1 e 2
+
+zuliani@di.uniroma1.it
+
+15
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+16
+
+

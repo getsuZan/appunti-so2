@@ -1,0 +1,873 @@
+Il filesystem
+Lezione 2
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Comandi per la gestione del file system, ovvero di file e directory
+
+zuliani@di.uniroma1.it
+
+2
+
+Ottimo video di
+introduzione a Unix,
+dai suoi autori!
+
+zuliani@di.uniroma1.it
+
+3
+
+Il filesystem
+• Organizzazione di un area di memoria di massa basata sul
+concetto di file (raccoglitore, schedario) e di directory/folder
+(cartella, fascicolo)
+• Directory contiene file e directory
+• Struttura gerarchica ad albero
+• Solo le directory possono avere figli
+• I file sono foglie
+
+• File regolari contengono sequenze di bit dell’area di
+memoria sulla quale c'è il filesystem
+• Esistono file non regolari, ad es. per l’accesso di basso
+livello (raw access) a periferiche o dispositivi vari
+zuliani@di.uniroma1.it
+
+Il filesystem (cont.)
+• Linux e Unix hanno un solo filesystem principale che ha come
+directory radice / (root)
+• Provate il comando cd /
+
+• Tutto (file e directory) è contenuto direttamente o indirettamente in /
+• In una stessa directory è vietato creare
+• 2 file con lo stesso nome
+• 2 directory con lo stesso nome
+• Un file ed una directory con lo stesso nome
+
+• I nomi dei file e delle directory sono case sensitive
+• Amore.txt ≠ amore.txt
+zuliani@di.uniroma1.it
+
+5
+
+Cammini
+• Ogni file o directory è raggiungibile dalla radice /
+mediante un cammino (path) assoluto
+• Sequenza di directory separate da /
+• /home/utente1/dir1/dir11/dir112/file.pdf
+
+• Eccezione di cammino assoluto (es: per l’utente userX)
+• ~/dir1/dir11/dir112/file.pdf
+• ~ equivale a /home/userX
+
+zuliani@di.uniroma1.it
+
+6
+
+La current working directory (cwd)
+• Per conoscere la directory in cui attualmente state lavorando, si usa pwd
+• Per cambiare cwd usare il comando cd [path]
+• [Path] può essere assoluto o relativo
+• cd senza path ritorna alla home
+
+• Nel path si possono usare .. (directory «genitore») e . directory attuale
+
+zuliani@di.uniroma1.it
+
+7
+
+Cose strane!!!
+• Usando il comando mkdir create le directory
+• ~/Immagini
+• ~/Immagini/faces
+• Consultate il man per la sinossi di mkdir
+• Se le directory già esistono o se la directory Immagini già esiste non c'è bisogno di crearla
+
+• Partendo da ~ quale sarà la cwd dopo il comando seguente?
+• cd Immagini/../Immagini/faces/
+• In quale cwd deve essere dato il comando seguente per far si che la cwd
+risultante sia ~/Immagini/faces?
+• cd ../.././Immagini/./faces/
+zuliani@di.uniroma1.it
+
+8
+
+Cose strane!!! (soluzioni)
+
+zuliani@di.uniroma1.it
+
+9
+
+Quale è la differenza tra cammino (path)
+assoluto e relativo?
+• Path assoluto è valido qualunque sia la cwd
+• Path relativo può non essere valido quando si cambia cwd
+
+zuliani@di.uniroma1.it
+
+10
+
+Contenuto di una directory
+• Comando ls
+• restituisce la lista dei file contenuti in una directory
+
+• Date un’occhiata al man per avere un idea delle opzioni disponibili e
+delle modalità d’uso
+• ls
+• Mostra contenuto cwd
+
+• ls nomedir
+• Mostra contenuto directory nomedir
+
+zuliani@di.uniroma1.it
+
+11
+
+Contenuto di una directory (cont.)
+• In una directory ci sono file «nascosti»
+• Tipicamente file di configurazione o file usati a
+supporto di comandi e applicazioni
+
+• ad es.
+• .bash_history contiene la lista dei
+comandi eseguiti. Provate less
+.bash_history
+• .bashrc contiene la configurazione della
+bash
+
+• ls [ -a | --all ] visualizza i file
+nascosti
+zuliani@di.uniroma1.it
+
+12
+
+Contenuto di una directory (cont.)
+• Se vogliamo ricorsivamente visualizzare il contenuto delle sotto
+directory abbiamo l’opzione [ -R | --recursive ]
+• ad esempio
+
+zuliani@di.uniroma1.it
+
+13
+
+Contenuto di una directory (cont.)
+• Si può visualizzare l’albero delle directory con il comando
+• tree [-a] [-L maxdepth] [-d] [-x] [nomedir]
+• Se non è installato, installatelo eseguendo sudo apt install tree
+
+zuliani@di.uniroma1.it
+
+14
+
+zuliani@di.uniroma1.it
+
+15
+
+zuliani@di.uniroma1.it
+
+16
+
+Creazione di directory e file
+• mkdir [-p] nomedir
+• crea directory nomedir vuota
+• se volete creare un intero path di directory? Ad esempio
+./dir11/dir12/dir13
+• provate: mkdir dir11/dir12/dir13
+• Non funziona … provate ora con l’opzione -p ?
+
+• touch nomefile
+• crea file nomefile vuoto
+• Per modificare il contenuto di un file gedit, nano, pico, vi
+• Provate gedit nomefile & oppure nano nomefile &
+• Se gedit non è installato … sapete cosa fare … (vedi installazione del commando tree)
+
+zuliani@di.uniroma1.it
+
+17
+
+Esercizio 1
+• Creare l'intero albero di directory
+/home/utente1/dir1/dir3/dir7/
+(dove utente1 siete voi)
+• Posizionarsi dentro dir7 e poi in dir1 sia usando sia non usando la
+directory parent ..; per controllare il risultato usare il comando ls
+o pwd; controllare come cambia il path riportato nel prompt
+• Creare un file vuoto in dir7 e poi aprirlo e modificarlo con gedit (o
+nano)
+
+zuliani@di.uniroma1.it
+
+18
+
+Fine della I parte
+
+zuliani@di.uniroma1.it
+
+19
+
+Il filesystem root (/) contiene elementi
+eterogenei
+• Disco interno solido o magnetico
+• Filesystem su disco esterno (e.g., usb)
+• Filesystem di rete
+• Filesystem virtuali (usati dal kernel per
+gestire risorse)
+• Filesystem in memoria principale
+• Tutto questo è possibile grazie al
+meccanismo del mounting
+zuliani@di.uniroma1.it
+
+20
+
+Mounting
+Una chiavetta USB
+
+Disco principale
+/
+
+/
+
+Documenti
+
+src
+
+CV.doc
+
+main.c
+
+Documenti
+
+media
+
+Lezioni
+
+L02-FS.pptx
+
+CV.pdf
+
+L05-Proc.pptx
+
+zuliani@di.uniroma1.it
+
+21
+
+Mounting
+
+/
+
+Documenti
+
+src
+
+CV.doc
+
+main.c
+
+CV.pdf
+
+media
+
+Documenti
+
+Lezioni
+L02-FS.pptx
+L05-Proc.pptx
+
+zuliani@di.uniroma1.it
+
+22
+
+Mounting
+• Una qualsiasi directory D dell'albero gerarchico può diventare il punto
+di mount per un altro (nuovo) filesystem F se e solo se la directory
+root di F diventa accessibile da D
+• Se D è vuota, dopo il mount conterrà F
+• Se D non è vuota, dopo il mount conterrà F ma ciò non significa che i dati che
+vi erano dentro sono persi… saranno di nuovo accessibili dopo l’unmount di F
+
+• Una qualsiasi directory dell'albero gerarchico può diventare il punto di
+mount per un altro (nuovo) filesystem
+
+zuliani@di.uniroma1.it
+
+23
+
+Partizioni e mounting
+• Un singolo disco può essere suddiviso in due o più partizioni
+• Una partizione A può contenere il sistema operativo e la partizione B
+i dati degli utenti (home directory degli utenti)
+• La partizione A verrà montata su /
+• La partizione B verrà montata su /home
+
+• Quali sono i vantaggi? (fermatevi e riflettete)
+• Se devo reinstallare il sistema operativo in A non tocco i dati e rimonto B in
+/home del nuovo filesystem
+• Se voglio installare una diversa versione di Linux in un’altra partizione C o
+altro disco D posso sempre montare B su /home del nuovo filesystem senza
+dover ricopiare i dati
+zuliani@di.uniroma1.it
+
+24
+
+Tipi di filesystem
+• Dal punto di vista dell’utente
+• Dimensione max partizione
+• Dimensione max file
+• Lunghezza max nome file
+• Se Journal filesystem o no (ricordate cosa significa? Vedi I Modulo)
+
+• Dal punto di vista del programmatore
+• Il tipo di filesystem definisce la codifica dei dati
+
+Scelta tipo fs
+
+Formattazione
+partizione
+specificando tipo
+fs scelto
+zuliani@di.uniroma1.it
+
+Montare la
+partizione
+specificando il
+tipo di fs
+
+25
+
+Tipi di filesystem (cont.)
+• Ci sono file system non Linux, ad esempio Windows:
+• NTFS, MSDOS, FAT32, FAT64
+
+• FAT (16, 32, 64bit) e NTFS possono essere montati su di un fs Linux
+• mount è il comando per montare un fs e visualizzare i fs montati
+• consultare il man, ad esempio le sezioni con le opzioni per montare
+filesystem FAT e NTFS
+
+zuliani@di.uniroma1.it
+
+26
+
+mount
+• mount visualizza fs correntemente montati
+• cat /etc/mtab visualizza fs montati
+• cat /etc/fstab visualizza fs montati all’avvio (bootstrap)
+cat permette di concatenare più
+files e stamparne il contenuto su
+standard output (stdout). Forma
+più semplice:
+cat nomefile
+
+Vedi man per altri opzioni
+zuliani@di.uniroma1.it
+
+27
+
+Fine della II parte
+
+zuliani@di.uniroma1.it
+
+28
+
+File passwd e group
+• /etc/passwd
+• /etc/group
+• Visualizzare sullo schermo il loro contenuto
+• /etc/passwd contiene tutti gli utenti
+• /etc/group contiene tutti i gruppi
+
+• Rappresentano una delle filosofie di Linux
+• Usare file di testo (con codifica ASCII a 8 bit) con una struttura definita e
+conosciuta dai programmi che devono interagire con quei file
+• Ad es. il comando adduser conosce la struttura di questi file
+
+zuliani@di.uniroma1.it
+
+29
+
+Vediamo la struttura di questi file
+• Organizzati per righe
+• Riga = sequenza di caratteri terminata con line feed LF (0x0A)
+• Ogni riga contiene vari campi separati da :
+• passwd ha la seguente struttura
+• username:password:uid:gid:gecos:homedir:shell
+• al posto della password potete notare una x (cifrata)
+
+zuliani@di.uniroma1.it
+
+30
+
+Vediamo la struttura di questi file (II)
+• group ha la seguente struttura
+• groupname:password:groupID:lista utenti
+• Gli utenti nella Lista utenti sono separati da ,
+• Anche qui la password non è visualizzata
+• Nell’immagine a lato i gruppi sono quelli usati dal sistema
+e nessun utente vi appartiene
+
+• Solitamente se una riga inizia per # significa
+che contiene un commento o che il suo
+contenuto non deve essere interpretato
+dalle applicazioni che usano il file
+zuliani@di.uniroma1.it
+
+31
+
+Sgranchiamoci le dita
+• Fate la seguente prova
+• Verificare che utente3 non sia presente in /etc/passwd, createlo, e
+poi controllare che sia presente
+• Verificare che utente3 non sia nel gruppo sudo, aggiungerlo al gruppo
+sudo, e poi controllare che sia presente
+
+zuliani@di.uniroma1.it
+
+32
+
+Fine della III parte
+
+zuliani@di.uniroma1.it
+
+33
+
+I file
+• Ogni file nel filesystem è
+rappresentato da una struttura
+dati inode ed è univocamente
+identificato da un inode
+number
+• La cancellazione di un file libera
+l’inode number che verrà
+riutilizzato quando necessario
+per un nuovo file
+Struttura dati inode
+34
+
+Principali attributi struttura dati inode
+• Type: Tipo di file (regular, block, fifo ...)
+• User ID: id dell'utente proprietario del file
+• Group ID: id del gruppo a cui è associato il file
+• Mode: Permessi (read, write, execute) di accesso per il proprietario, il gruppo e
+tutti gli altri
+• Size: Dimensione in byte del file
+• Timestamps: ctime (inode changing time: cambiamento di un attributo), mtime
+(content modification time: solo scrittura), atime (content access time: solo lettura)
+
+• Link count: Numero di hard links (collegamenti “rigidi”)
+• Data pointers: Puntatore alla lista dei blocchi che compongono il file; se si tratta
+di una directory, il contenuto su disco è costituito da una tabella con 2 colonne:
+nome del file/directory e suo inode number
+zuliani@di.uniroma1.it
+
+35
+
+http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html
+
+Tabella inode
+• Si trova all’inizio del
+disco
+• Esempio per ext2
+
+inode per una directory
+
+zuliani@di.uniroma1.it
+
+36
+
+inode: come viene seguito un path
+
+zuliani@di.uniroma1.it
+
+37
+
+Come visualizzare le informazioni contenute
+nell’inode di un file?
+• ls [-a] [-c] [-u] [-R] [-l] [-i] [-n] [-S] [-h]
+[-1] [nomedir1] ... [nomedirn] [nomefile1] ...
+[nomefilen]
+• inode number: opzione -i
+• diritti, user, group, date, size, time: opzione -l
+
+zuliani@di.uniroma1.it
+
+38
+
+ls
+• Dimensione
+• quanto effettivamente occupato dal file
+• per le directory dimensione del file speciale contenente lista di coppie
+(nomefile, inode_number)- solitamente 4K ma più file ci sono più la
+dimensione è grande (anche se fossero tutti file vuoti)
+• Prova a vedere le dimensione /etc o /lost+found
+
+• Il numero dopo i diritti di accesso indica il numero di directory e file
+all’interno della directory (vengono contate anche . e .. ) - per i file è
+ovviamente 1
+zuliani@di.uniroma1.it
+
+39
+
+• Totale: si tratta delle dimensione della directory in blocchi su disco
+(normalmente, 1 blocco ha dimensione tra 1kB e 4kB)
+• riguarda solo la directory attuale, non tutto il sottoalbero
+• per ogni sottodirectory, ne considera solo la dimensione, come definita sopra
+(dimensione file speciale)
+
+zuliani@di.uniroma1.it
+
+40
+
+ls
+• opzione -n consente di visualizzare ID utente e ID gruppo invece del
+nome esteso
+• per vedere i timestamp sempre con l'opzione -l, ma in combinazione
+con
+• -c per ctime, ad es. ls -l -c nomefile oppure ls -lc nomefile
+• -u per atime
+• senza niente (per mtime)
+
+• Esercizio: creare un file, modificarlo, poi leggerlo e verificare che i
+valori per atime ed mtime cambino di conseguenza
+NOTA: notare che queste ed altre informazioni potrebbero non
+essere sono sul man. In tal caso, cercate nelle informazioni estese,
+reperibili
+con il comando info ls
+zuliani@di.uniroma1.it
+41
+
+stat [-c format] {nomefile}
+
+• Ad es:
+• stat filename restituisce varie informazioni
+
+• stat -c %B filename restituisce la dimensione del blocco su disco
+che coincide con la dimensione di un settore di disco
+• sudo fdisk -l /dev/sdax
+
+dove x=1, 2, …
+
+zuliani@di.uniroma1.it
+
+42
+
+Fine della IV parte
+
+zuliani@di.uniroma1.it
+
+43
+
+Permessi di accesso ai file: chi può fare cosa
+• Utente proprietario: solitamente chi crea il file/directory
+• Gruppo proprietario: gruppo primario dell’utente proprietario
+(specificato in /etc/passwd)
+• Proprietario definisce i permessi di accesso: chi può leggere, scrivere,
+eseguire un file/directory
+
+zuliani@di.uniroma1.it
+
+44
+
+Permessi di accesso a file
+
+Scrittura significa
+- Sovrascrivere
+- Append (scrivere alla fine)
+- Cancellare (ma servono specifici diritti
+sulla directory)
+
+zuliani@di.uniroma1.it
+
+45
+
+Permessi di accesso a directory
+Permesso Ottale
+
+Significato
+
+---
+
+0
+
+Non si può fare niente
+
+--x
+
+1
+
+Si può impostare come cwd (ma solo se il permesso c'è per tutte le directory nel
+path); si può anche “attraversare", se già se ne conosce il contenuto
+
+-w-
+
+2
+
+Non si può fare niente
+
+-wx
+
+3
+
+Come il permesso 7, ma non si può elencare il contenuto
+
+r--
+
+4
+
+Solo elencare il contenuto (senza vedere attributi file), non può essere
+«attraversata»
+
+r-x
+
+5
+
+Si può leggere (attributi compresi), impostare come cwd ed attraversare; non è
+possibile cancellare o aggiungere file/directory
+
+rw-
+
+6
+
+Come il permesso 4
+
+rwx
+
+7
+
+Elencare contenuto (attributi compresi), aggiungere file e directory, cancellare file
+contenuti in essa (anche senza avere il permesso di scrittura sul file! Correggibile
+con lo sticky bit, vedere più avanti), cancellare directory contenute in essa (ma
+occorrono tutti i permessi su zuliani@di.uniroma1.it
+tali directory)
+
+46
+
+Permessi speciali
+• sticky bit (t)
+• setuid bit (s)
+• setgid bit (s)
+• Possono essere applicati a file e directory
+
+zuliani@di.uniroma1.it
+
+47
+
+Sticky bit (t)
+• Inutile sui file
+• Applicato su directory corregge il comportamento di w+x
+permettendo la cancellazione di file se si hanno permessi di scrittura
+su di essi
+
+zuliani@di.uniroma1.it
+
+48
+
+Sticky bit (t)
+• Siano
+• D una directory,
+• Usr1 e Usr2 due utenti Usr1 ≠ Usr2
+• D appartiene a Usr1
+• D non appartiene a Usr2 ne’ al gruppo di Usr2
+• f un file in D
+
+• Se Usr2 cerca di cancellare f allora,
+• Senza sticky bit su D, sarà sufficiente avere i diritti di scrittura su D (nel
+Gruppo “other”...) per cancellare f, anche se non si hanno i permessi di
+scrittura su f (sempre su “other”).
+• Con sticky bit, è necessario anche il permesso di scrittura su f per cancellare f.
+zuliani@di.uniroma1.it
+
+49
+
+Setuid bit (s)
+• Si usa solo per i file eseguibili
+• quando vengono eseguiti, i privilegi con cui opera il corrispondente processo
+non sono quelli dell'utente che esegue il file, bensì quelli dell'utente
+proprietario del file
+• quindi, se il proprietario è root, viene eseguito con i privilegi di root,
+indipendentemente da chi lo ha eseguito
+
+• Ad esempio, il comando passwd ha il setuid, che permette ad un
+utente di modificare la propria password
+• Il proprietario del comando è root!
+
+• setuid può essere troppo ‘potente’, quindi si cerca di limitarlo:
+• https://blogs.oracle.com/solaris/post/when-setuid-root-no-longer-means-setuid-root-forced-privileges
+zuliani@di.uniroma1.it
+
+50
+
+Setgid bit (s)
+• Analogo di setuid ma con i gruppi
+• i privilegi sono quelli del gruppo che è proprietario del file eseguibile
+
+• Può essere applicato anche ad una directory, e allora ogni file creato lì
+dentro ha il gruppo della directory, anziché quello primario di chi crea
+i files
+
+zuliani@di.uniroma1.it
+
+51
+
+Visualizzazione attributi di accesso
+• Con comando ls o stat
+
+zuliani@di.uniroma1.it
+
+52
+
+Visualizzazione permessi speciali
+• Vengono visualizzati al posto del bit di esecuzione:
+• il setuid nella terna utente (user)
+• il setgid nella terna gruppo (group)
+• lo sticky nella terna altro (other)
+
+• Provate il commando
+• stat /tmp /usr/bin/passwd
+
+• Se il permesso di esecuzione c'è, allora la s o la t saranno minuscoli,
+altrimenti saranno Maiuscoli
+
+zuliani@di.uniroma1.it
+
+53
+
+Esercizio 2
+• Capire perché il comando adduser va usato solo da un utente
+amministratore, mentre il comando groups no
+
+zuliani@di.uniroma1.it
+
+54
+
+chmod mode[, mode...] filename
+• Cambia la modalità (diritti) di accesso a file o directory
+• Formato ottale
+• 4 numeri tra 0 e 7, come nelle Tabelle viste nelle precedenti slides;
+• il primo numero indica setuid (4), setgid (2) e sticky (1), gli altri sono per
+utente, gruppo ed altri
+
+• Si possono fornire 3 numeri se si assume setuid, setgid e sticky impostati a 0
+zuliani@di.uniroma1.it
+
+55
+
+Esercizio 3
+
+5 minuti
+
+creare un file e, usando la modalità ottale, impostarne i permessi a
+• rw- r-- r–
+
+poi a
+• rws r-S -w-
+
+ed infine a
+• rwx r-- -wT
+
+zuliani@di.uniroma1.it
+
+56
+
+chmod - modalità simbolica (lettere)
+• Per impostare il mode usando dei simboli il formato è
+• [ugoa][+-=][perms...]
+
+• Dove perms è
+• zero
+• una o più lettere nell'insieme {rxwXst}
+• oppure una lettera nell'insieme {ugo}
+
+• Capire dal manuale come funziona (attenzione alla a, che tiene conto
+del masking, di cui si tratterà più avanti)
+
+zuliani@di.uniroma1.it
+
+57
+
+Esercizi 4
+
+10 minuti
+
+1. Creare un file e, usando la modalità simbolica, impostarne i
+permessi a
+• rws r-S -w- e poi a
+• rwx r-- -wT
+
+2. Togliere il permesso di lettura ad un file di testo, e poi provare ad
+aprirlo con gedit/vi/nano
+3. Il comando chmod modica il ctime del file, verificarlo
+Precisazione su ctime: dovrebbe essere modificato ogni volta che cambiano gli
+attributi. C'è però un'eccezione: se si accede in lettura al file si modicano gli attributi,
+perché viene modificato il timestamp di accesso; tuttavia, il ctime, in questo caso, non
+viene modificato
+zuliani@di.uniroma1.it
+58
+
+chown [-R] proprietario {file}
+chgrp [-R] gruppo {file}
+• Possono essere usati solo da root (richiedono quindi sudo)
+• Se file è una directory con l’opzione -R si applica il comando a tutte
+le sotto directory
+• Esercizio 5:
+• riprendendo l'esempio (Esercizio 1) dell'albero di directory
+/home/utente1/dir1/dir3/dir7/, creare un file (vuoto) filei
+dentro ciascuna directory diri (i=1,3,7), e cambiare i proprietari in
+questo modo:
+• la directory dir3 diventa di utente3,
+• tutti i file dentro dir3 diventano di utente2,
+• dir7 diventa di utente2 e file7 diventa di utente3.
+
+• Dopodiché, provare a cambiare i permessi di file3 e dir7.
+zuliani@di.uniroma1.it
+
+59
+
+Esercizio 6
+
+10 minuti
+
+• Creare una nuova directory e copiarci (o spostarci) dentro
+• create_dirs_and_files.script
+• lo script è disponibile su classroom/Lezione 03
+
+• Eseguire con il seguente comando:
+
+• bash create_dirs_and_files.script
+
+• Eseguire ls -lR
+• Come si può vedere, ora ci sono 8 file, uno per ogni permesso, e 8 directory, una
+per ogni permesso all'interno di ciascuna directory, si ripete lo schema: 8 file e 8
+directory, ciascuna di queste ultime con dentro 8 file
+• Ora testare i vari permessi, come sono riportati nella tabella introdotta
+precedentemente. Ad esempio, provare a leggere un file solo eseguibile, o ad
+appendere testo ad un file solo leggibile, o ad attraversare una directory senza
+permesso di esecuzione...
+zuliani@di.uniroma1.it
+
+60
+
+• Esercizio 7: provare a fare un esempio funzionante di sticky bit. A tal proposito,
+creare da root (usando sudo) una directory avente tutti i diritti per tutti i gruppi, e
+crearci dentro un file, togliendo a quest'ultimo i permessi per il gruppo “other";
+infine, provare a cancellarlo. Fare lo stesso dopo aver aggiunto lo sticky bit alla
+directory.
+
+• Esercizo 8: provare a fare un esempio funzionante di setuid bit. A tal proposito,
+copiate /bin/cat in una directory, e abilitategli il setuid bit. Create un file da root
+(usando sudo), e dategli il solo permesso di lettura per il solo gruppo «owner».
+Provare a vedere il contenuto di questo file usando il comando cat di sistema:
+fallirà. Ora provate a farlo usando ./cat...
+zuliani@di.uniroma1.it
+
+61
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+62
+
+

@@ -1,0 +1,4409 @@
+Le Chiamate di Sistema
+Lezione 10
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Panoramica
+• Introduzione alla programmazione di sistema
+• System call memoria
+• (richiami)
+
+• System call file I/O
+
+zuliani@di.uniroma1.it
+
+2
+
+Programmazione di sistema
+• Il Kernel
+• componente del sistema operativo che gestisce le risorse disponibili
+• offre l'accesso e l'utilizzo delle risorse da parte dei processi
+
+• Le risorse principali gestite sono:
+• CPU Central Processing Unit
+• RAM Random Access Memory
+• I/O I dispositivi di Input e Output
+
+• System call
+• Limitato numero di punti di accesso al kernel
+• Il numero varia con la versione del sistema: UnixV7 50, 4.4BSD 110, Linux 380, …
+
+• Permettono ad un processo di accedere ai servizi offerti dal kernel
+• quindi … permettono al programmatore di creare programmi che interagiscono
+direttamente con il kernel
+zuliani@di.uniroma1.it
+
+3
+
+Applicazioni utente (in C, C++, etc.)
+Chiamate a funzioni di libreria
+
+Librerie standard C,
+C++, Objective C, Rust,
+GNU, etc.
+
+Chiamate di sistema
+
+Chiamate di sistema
+
+Kernel Sistema Operativo
+
+HARDWARE (CPU, RAM, dischi, rete, etc.)
+zuliani@di.uniroma1.it
+
+4
+
+Applicazioni utente (in C, C++, etc.)
+Chiamate a funzioni di libreria
+
+Librerie standard C,
+C++, Objective C, Rust,
+GNU, etc.
+
+Chiamate di sistema
+
+Chiamate di sistema
+
+Kernel Sistema Operativo
+Baseboard Management Controller
+
+HARDWARE (CPU, RAM, dischi, rete, etc.)
+zuliani@di.uniroma1.it
+
+5
+
+System call
+interfaccia del Kernel per
+la programmazione
+
+https://en.wikipedia.org/wiki/Linux_kernel_interfaces - /media/File:Linux_kernel_System_Call_Interface_and_glibc.svg
+zuliani@di.uniroma1.it
+
+6
+
+System call (cont.)
+• Definizione delle system call è in linguaggio C indipendentemente
+dalla tecnica usata per invocare la system call
+• Per ogni system call esiste una funzione C avente lo stesso nome
+• Il processo utente invoca questa funzione usando la sequenza standard C
+• Questa funzione invoca il corrispondente servizio del kernel utilizzando la
+tecnica necessaria
+• Ad esempio mettendo i parametri della funzione C in un registro e poi generando un
+interrupt per il kernel usando istruzioni macchina
+
+zuliani@di.uniroma1.it
+
+7
+
+Dove trovare la descrizione delle SysCall
+$ man man
+
+• Sezione 2 del man
+• Informazioni dettagliate
+sull'utilizzo ed il funzionamento
+delle system call
+• man 2 nome_system_call
+
+zuliani@di.uniroma1.it
+
+8
+
+Funzioni di libreria generali
+• Non sono punti di accesso ai servizi del kernel
+• Possono invocare una o più system call
+• Ad esempio printf può usare la system call write per scrivere una stringa in
+output
+
+• … ma anche nessuna
+• ad es: strcpy, atoi
+
+zuliani@di.uniroma1.it
+
+9
+
+Dove trovare la descrizione delle funzioni di
+libreria generali
+$ man man
+
+• Sezione 3 del man
+• Informazioni dettagliate
+sull'utilizzo ed il funzionamento
+delle funzioni di libreria
+• man 3
+nome_funz_libreria
+
+zuliani@di.uniroma1.it
+
+10
+
+Differenza tra system call e funzioni generali
+• Entrambe sono funzioni C
+• Entrambe forniscono servizi ad
+un’applicazione
+• Una funzione generale può essere
+rimpiazzata ma una system call no!!!
+
+• La syscall sbrk permette di allocare la memoria
+• La malloc è implementata usando la sbrk
+• Possiamo implementare la nostra malloc ma
+dovremo sempre utilizzare la sbrk
+
+• Le system call introducono una separazione
+di compiti (o responsabilità)
+
+• La sbrk alloca porzioni di memoria (kernel mode)
+per il processo utente. La malloc gestisce l’area
+di memoria in user mode
+
+zuliani@di.uniroma1.it
+
+11
+
+Differenza tra system call e funzioni general purpose
+• Le funzioni di libreria semplificano l’uso delle
+system call
+
+• System call espongono un interfaccia minimale
+• Le funzioni di libreria forniscono funzionalità
+elaborate e semplificano la gestione delle strutture
+dati di input e output
+• Maggiore portabilità delle applicazioni
+
+• Ad esempio:
+
+• Le system call per la gestione dei processi sono
+solitamente invocate direttamente dall’applicazione
+• Da un processo possiamo invocare la syscall time
+per ottenre il tempo in secondi trascorso dal 1
+gennaio 1970 ma possiamo anche invocare funzioni
+come la ctime o asctime per ottenere una stringa
+“Fri Apr 9 16:05:01 2021”
+zuliani@di.uniroma1.it
+
+12
+
+Le system call
+• File
+• File e Directory
+• Inter Process Communication (IPC): pipe e fifo
+• Socket e Socket di rete (networking)
+
+• Gestione della memoria
+• Processi
+• Gestione di processi
+• Gestione dei thread (POSIX Thread)
+• Segnali
+
+zuliani@di.uniroma1.it
+
+13
+
+System call: Files
+• Gestione dei file e directory
+• creazione
+• accesso/modifica contenuto
+• accesso/modifica attributi
+
+• Comunicazione tra processi
+• pipe e fifo
+• comunicazione tra processi che risiedono sulla stessa macchina fisica/virtuale
+
+• socket
+• comunicazione tra processi mediante protocolli di rete (incluso IPV4/V6)
+
+zuliani@di.uniroma1.it
+
+14
+
+System call: Processi
+• Gestione dei processi
+• creazione/terminazione, esecuzione,
+• sincronizzazione,
+• accesso/modifica attributi/ambiente
+
+• Gestione dei segnali
+• interazione/comunicazione tra processi
+• creazione sezioni critiche
+
+• POSIX Thread
+• processi cosiddetti lightweight (leggeri)
+• creazione/terminazione, sincronizzazione
+zuliani@di.uniroma1.it
+
+15
+
+System call: funzioni di libreria correlate
+• Errori
+• perror
+• strerror
+• errno
+
+zuliani@di.uniroma1.it
+
+16
+
+Gestione errori system call
+• L'esecuzione di una system call può interrompersi e non andare a
+buon fine per diversi motivi, tra cui principalmente:
+• il processo che la invoca non ha sufficienti privilegi per l'esecuzione
+• non ci sono sufficienti risorse per l'esecuzione
+• gli argomenti in ingresso alla system call non sono validi
+
+• E’ fondamentale controllare i valori di ritorno per rilevare e segnalare
+all’utente il verificarsi di errori.
+• Per un corretto funzionamento del programma è FONDAMENTALE
+GESTIRE IN MANIERA OPPORTUNA l’eventuale errore verificatosi
+zuliani@di.uniroma1.it
+
+17
+
+errno
+• Le system call che terminano con un errore
+• tipicamente ritornano il valore -1 (controllare caso per caso!!)
+• impostano la variabile globale errno con il codice specifico dell'errore che si
+è generato durante l'esecuzione
+
+• Le system call che terminano con successo lasciano invariato errno
+• La variabile errno rappresenta il codice di errore dell’ultima system
+call invocata che ha generato un errore
+• Ha senso utilizzare tale variabile solo dopo essersi accertati che la system call
+ha ritornato un valore di errore (-1). Altrimenti si rischia di considerare il
+valore di errno inconsistente.
+zuliani@di.uniroma1.it
+
+18
+
+perror()
+• funzione della libreria standard
+#include <stdio.h>
+void perror(const char *prefix);
+
+• stampa su stderr il messaggio di errore convertendo il codice di
+errore errno in una stringa formata da
+<prefix>:<errno_string>
+• <errno_string> rappresenta il messaggio di errore in formato di stringa (e
+quindi mnemonico) associato al valore di errno.
+• ad es. perror(“main”); invia su stderr la stringa
+“main:messaggio_errore_mnemonico_=_errno”
+zuliani@di.uniroma1.it
+
+19
+
+strerror()
+• funzione di libreria che consente di convertire un codice di errore
+numerico errno che acquisisce come parametro di input nella sua
+equivalente rappresentazione in stringa.
+#include <string.h>
+char *strerror(int errnum);
+
+• ad esempio:
+printf(”Si è verificato errore:%s\n”,strerror(errno));
+
+zuliani@di.uniroma1.it
+
+20
+
+Esempio gestione errore
+..
+#include <syscall_lib.h>
+#include <stdio.h> /* per perror() */
+#include <string.h> /* per strerror() */
+#include <errno.h>
+..
+if (una-syscall() == -1) {
+int errsv = errno;
+perror("main"); // stderr
+printf(”Si è verificato errore:%s\n”, strerror(errsv)); //stdout
+if (errsv == ...) {
+... }
+} ..
+
+zuliani@di.uniroma1.it
+
+21
+
+‘Disinfestare’ programmi usanti system calls
+• È spesso utile monitorare il comportamento di un processo
+relativamente all’invocazione di system call.
+• strace traccia l’invocazione di system call da parte di un processo.
+• strace consente di stampare la lista di system call invocate da un
+processo e relativi parametri
+$strace –o strace.txt –s <max_string_size> /path2/program
+$strace –p <pid> -e trace=syscall1,syscall2… -o strace_<pid>.txt
+$strace –o passwd.strace –s 100 cat /etc/passwd
+$cat passwd.strace
+zuliani@di.uniroma1.it
+
+22
+
+Allocazione della memoria
+#include <stdlib.h> /*funzioni di libreria, non sono
+system call */
+/* allocano nell’heap (vedi Lezione 9) */
+void *malloc(size_t size);
+void *calloc(size_t nmemb, size_t size);
+void *realloc(void *ptr, size_t size);
+void free(void *ptr);
+#include <alloca.h> /* alloca nello stack */
+void *alloca(size_t size);
+zuliani@di.uniroma1.it
+
+23
+
+mmap, brk, sbrk system call
+• Le varie m/c/re/alloc usano le vere system call per la gestione
+della memoria, ad es.
+• mmap - ‘mappa’ file o dispositivi in memoria
+• brk - cambia dimensione data segment processo
+
+void *mmap(void *addr, size_t length, int prot,
+int flags, int fd, off_t offset);
+• crea un area di memoria per mappare un file a partire da un indirizzo specificato, con
+livello di protezione indicato
+• da usare solo se sapete veramente cosa state facendo!!!! Soprattutto brk
+• Studiarle sul man (o sul libro APUE*)
+• $ man 2 mmap
+• $ man 2 brk
+
+*Advanced Programming In the Unix Environment. 3rd Edition
+zuliani@di.uniroma1.it
+
+24
+
+Allocazione della memoria (cont.)
+• Le funzioni ritornano un puntatore (void *)
+• Serve fare il casting al tipo di puntatore relativo al tipo di dato
+contenuto nella memoria per poter utilizzare correttamente
+l’aritmetica dei puntatori
+• Ad esempio:
+char *strPtr = NULL;
+const int SIZE_OF_ARRAY = 30;
+strPtr=(char *) calloc(SIZE_OF_ARRAY, sizeof(char));
+
+zuliani@di.uniroma1.it
+
+25
+
+void *realloc(void *ptr, size_t size)
+• modifica la dimensione dell’area di memoria precedentemente allocata con
+m/calloc e puntata da ptr nella dimensione specificata dal valore di
+size
+• Ritorna NULL in caso di errore
+• ad es. (da es. precedente)
+strptr1=(char *) realloc(strptr, 10*SIZE_OF_ARRAY);
+
+• strptr1 potrebbe essere diverso da strptr infatti, nel caso di
+aumento della dimensione!
+• Se realloc non riesce ad allargare l’area correntemente allocata e
+puntata da ptr, allora quest’ultima viene liberata e una nuova area
+allocata e ritornata al chiamante.
+zuliani@di.uniroma1.it
+
+26
+
+realloc (cont.)
+• Il contenuto dell’area di memoria puntata da ptr non viene
+modificato
+• La nuova area di memoria allocata NON viene inizializzata (se ad
+esempio quella originale lo era)
+• In caso di errore (ad esempio non c'è memoria a sufficienza) l’area di
+memoria originale rimane intatta.
+• Leggete il man!!
+
+zuliani@di.uniroma1.it
+
+27
+
+Memory leakage («perdita» di memoria)
+• L'esecuzione di un programma che non gestisce correttamente la
+liberazione della memoria non più utilizzata, può causare un aumento
+del consumo della memoria del sistema. Questo può portare al
+fallimento del programma stesso, non riuscendo più ad allocare altra
+memoria da utilizzare, ed in generale può portare al deterioramento
+delle prestazioni e del funzionamento del sistema.
+• Usare sempre free() dopo che avete terminato l’uso della
+memoria allocata dinamicamente
+
+zuliani@di.uniroma1.it
+
+28
+
+memset()e memcpy()
+void *memset(void *s, int c, size_t n);
+• assegna il valore intero c ad n bytes contigui dell’area di memoria puntata
+da s
+void *memcpy(void *dest, const void *src, size_t n);
+• copia n bytes contigui a partire da src in dest
+• le due aree di memoria non devono sovrapporsi
+• utile per duplicare rapidamente un array
+
+• ESERCIZIO: Rifare Es.6 Lezione 9 (slide 16, copia di blocchi di memoria)
+usando memcpy. E’ più semplice?!?!?
+• Vediamo soluzione Es6L9.c (file con vecchio nome!!!)
+zuliani@di.uniroma1.it
+
+29
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• Implementa memory-mapped I/O
+• Mappa un file su disco in un area di
+memoria (buffer)
+• Lettura/scrittura dal/sul buffer risultano
+in lettura scrittura dal/sul disco (senza
+accedere al disco)
+• Uso:
+• #include <sys/mman.h>
+• Restituisce l’indirizzo di partenza della
+regione mappata (buffer) se OK,
+MAP_FAILED se errore
+
+zuliani@di.uniroma1.it
+
+30
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• addr è l’indirizzo iniziale dell’area di memoria in cui vogliamo mappare il file. Se addr =
+NULL, il kernel sceglie per noi
+• fd è il file descriptor (il file va aperto prima)
+• len il numero di byte da trasferire
+• off l’offset nel file
+
+• prot indica il livello di protezione
+• flag
+• MAP_SHARED le operazioni sulla memoria modificano il file (R/W)
+• MAP_PRIVATE viene create una copia private del mapped file e solo questa viene modificata
+
+zuliani@di.uniroma1.it
+
+31
+
+Sync e de-mapping
+#include <sys/mman.h>
+int msync(void *addr, size_t len, int flags);
+• Le modifiche ad una regione mappata (con MAP_SHARED, ovviamente) non vengono
+scritte immediatamente nel file – il kernel decide quando farlo
+• Con msync comunicate al kernel che volete scrivere sul file le modifiche in memoria
+
+#include <sys/mman.h>
+int munmap(void *addr, size_t len);
+• Quando il processo termina la memoria viene automaticamente de-mappata, ma ciò
+non significa che il contenuto è scritto sul file (dipende dalla politica di gestione della
+memoria virtuale)
+• Ciò non avviene se chiudo il file, quindi sempre buona regola de-mappare la
+memoria con munmap
+zuliani@di.uniroma1.it
+
+32
+
+Esempio uso mmap (pag. 529 di APUE)
+• Lo vediamo la prossima volta perché dobbiamo introdurre
+altre funzioni.
+
+zuliani@di.uniroma1.it
+
+33
+
+Le Chiamate di Sistema
+Lezione 11
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Panoramica
+• Introduzione alla programmazione di sistema
+• System call memoria
+• (richiami)
+
+• System call file I/O
+
+zuliani@di.uniroma1.it
+
+2
+
+System call gestione file I/O
+Noi abbiamo finora visto le funzioni di libreria del C.
+
+zuliani@di.uniroma1.it
+
+3
+
+Operare sui file
+• File, astrazione che descrive ogni risorsa, ad es. file su disco,
+dispositivi, socket, fifo
+• Sequenza tipica di azioni
+1. apertura file mediante open; viene creato un file descriptor
+2. operazione su file mediante syscall; e.g. write, read
+3. chiusura del file mediante close
+
+• Quando un processo termina, chiude automaticamente tutti i file
+correntemente aperti, tuttavia, è sempre consigliabile e buona regola
+di programmazione chiudere esplicitamente un file invocando la
+close
+zuliani@di.uniroma1.it
+
+4
+
+File descriptor
+• E’ il riferimento ad un file aperto: è un intero
+piccolo, generato sequenzialmente a partire
+dal valore 0. Per default, ogni processo, ha
+associato i seguenti file descriptors:
+• 0; stdin
+• 1; stdout
+• 2; stderr
+
+• Quando un file viene chiuso, il suo file
+descriptor viene liberato e può essere
+riutilizzato. È possibile aprire uno stesso file
+ed ottenere file descriptor diversi che
+puntano allo stesso file (e.g., due utenti
+aprono lo stesso file in lettura).
+zuliani@di.uniroma1.it
+
+5
+
+File flags associati ad un File descriptor
+• File status flags:
+• Associati allo stato di un file
+• Sono condivisi tra tutti i file descriptor ottenuti per duplicazione da un unico
+file descriptor.
+
+• File descriptor flags:
+• Associati al file descriptor
+• Indipendenti dal contenuto o status del file
+• Descrivono proprietà e comportamento delle operazioni effettuate sul file
+• File descriptor diversi che fanno riferimento ad uno stesso file hanno ognuno
+il proprio insieme di descriptor flags
+• Alcuni definiti solo per alcuni tipi di file speciali (es: fifo socket)
+zuliani@di.uniroma1.it
+
+6
+
+Rappresentazione dei Flag
+• Mediante maschere di bit
+• se il bit è a 1 (settato) il flag è settato
+
+• Per ogni flag è stata definita una maschera di bit o MACRO
+• ad es. O_RDONLY
+
+• I flag possono essere combinati mettendo in OR bit a bit (bitwise) le
+maschere
+• ad es.
+• MACRO1 = 01000000;
+• MACRO2 = 00010000
+• MACRO1 | MACRO2 = 01010000
+• dopo l’OR entrambi i flag sono settati
+
+zuliani@di.uniroma1.it
+
+7
+
+File status flags: 3 categorie
+• Modalità di accesso
+• read, write, read+write.
+• specificati nella open
+• non possono essere modificati una volta aperto il file
+
+• Di apertura
+• definiscono il comportamento della open e non vengono mantenuti
+
+• Modalità operative
+• definiscono il comportamento delle operazioni read e write.
+• Specificati nella open.
+• Possono essere modificati anche dopo l’apertura del file.
+zuliani@di.uniroma1.it
+
+8
+
+System call principali
+• open
+• chown
+• read
+• chmod
+• write
+• stat
+• lseek
+• select
+• close
+
+• ioctl
+• unlink
+• fnctl
+• symlink
+• rename
+• mkdir
+• rmdir
+• chdir
+
+zuliani@di.uniroma1.it
+
+9
+
+Open()
+int open(const char *pathname, int flags);
+int open(const char *pathname, int flags, mode_t mode);
+• restituisce -1 se errore altrimenti file descriptor
+• parametro flags (file status flags); equivalente
+al parametro mode della fopen
+
+$ man fopen
+
+• O_CREAT richiede di specificare i permessi di
+accesso al file (ad es. 644)
+
+• mode indica le modalità di creazione del file
+
+zuliani@di.uniroma1.it
+
+10
+
+Differenza open e fopen (APUE Ch. 5)
+• fopen returns a pointer to a FILE object.
+• This object is normally a structure that contains all the information required by
+the standard I/O library to manage the stream:
+• the file descriptor used for actual I/O,
+• a pointer to a buffer for the stream,
+• the size of the buffer,
+• a count of the number of characters currently in the buffer,
+• an error flag,
+• and the like.
+
+zuliani@di.uniroma1.it
+
+11
+
+Flags open
+• Flags modalità accesso
+• O_RDONLY, O_WRONLY, O_RDWR
+
+• Flags di apertura
+
+ci sono 8 flags ...
+rappresentabili, ad esempio,
+con una maschera a 8 bit
+
+• O_CREAT
+• O_EXCL quando specificato insieme a O_CREAT genera errore se il file esiste già
+
+• Flags modalità operativa
+• O_APPEND
+• O_SYNC scrittura sincrona, ovvero la call ritorna solamente quando la scrittura dei
+dati nel file è terminata
+• O_TRUNC se il file esiste, è un file regolare, e la modalità di accesso consente la
+scrittura, allora il file viene troncato dalla posizione 0
+zuliani@di.uniroma1.it
+
+12
+
+ssize_t read(int fd, void *buf,
+size_t count)
+• fd file descriptor
+• buf puntatore ad area di memoria in cui memorizzare i byte letti
+• count numero di byte da leggere
+• restituisce -1 se errore, altrimenti il numero di byte letti (che può
+essere < di count se si raggiunge EOF)
+• i codici di errore, restituiti in errno, sono elencati su
+• man 2 read
+
+zuliani@di.uniroma1.it
+
+13
+
+Differenza tra read e fread
+
+fopen returns a pointer to a
+FILE object. This object is
+normally a structure that
+contains all the information
+required by the standard I/O
+• size_t fread(void *ptr, size_t size, size_t
+library to manage the
+nmemb, FILE *stream)
+stream: the file descriptor
+• legge da uno stream di tipo FILE (bufferizzata)
+used for actual I/O, a pointer
+to a buffer for the stream,
+• dimensione del tipo di dato da leggere
+the size of the buffer, a count
+of the number of characters
+currently in the buffer, an
+• ssize_t read(int fd, void *buf, size_t count); error flag, and the like.
+
+• non bufferizzata
+• lavora sui byte indipendentemente dal tipo di dato in essi contenuto
+
+zuliani@di.uniroma1.it
+
+14
+
+ssize_t write(int fd, const void *buf,
+size_t count)
+• fd file descriptor
+• buf area di memoria da cui leggere i dati; dichiarata const per
+non essere modificata dalla funzione
+• count numero di byte da scrivere
+• restituisce -1 se errore o numero di byte scritti (può essere < di
+count se write interrotta, ad esempio da un segnale)
+• i codici di errore, restituiti in errno, sono elencati su
+• man 2 write
+
+zuliani@di.uniroma1.it
+
+15
+
+int close(int fd);
+• Chiude il file descriptor fd
+• Il file descriptor viene liberato e può essere quindi riutilizzato
+
+• Ritorna -1 in caso di errore e 0 in caso la chiamata termini
+correttamente
+• Nel caso venga chiuso l'ultimo file descriptor che fa riferimento ad un
+file rimosso, allora il file viene cancellato.
+• I codici di errore, restituiti in errno, sono elencati su
+• man 2 close
+
+zuliani@di.uniroma1.it
+
+16
+
+Esempio
+• file file.c della Lezione 9
+• Esercizio 1: rifare l’Esercizio 6 lezione 9 usando le syscall read e write
+(aggiungere #include <fcntl.h> al vostro codice).
+• Esercizio 2: realizzare un programma che legge da riga comando tre
+argomenti: (1) il nome di un file di input, (2) il nome di un file di
+output, (3) un numero naturale n. Si deve copiare il file di input nel
+file di output invertendo ciascun blocco di dimensione n.
+
+zuliani@di.uniroma1.it
+
+17
+
+Altre system call e funzioni di libreria
+• int dup(int oldfd);
+• int stat(const char *path, struct stat *buf);
+• int chmod(const char *path, mode_t mode)
+• int chown(const char *path, uid_t owner, gid_t group)
+• int rename(const char *oldpath, const char *newpath);
+• int mkdir(const char *pathname, mode_t mode);
+• DIR *opendir(const char *name); //Libreria
+vediamone
+• struct dirent *readdir(DIR *dirp); //Libreria
+alcune
+• int closedir(DIR *dirp); //Libreria
+• int chdir(const char *path);
+• int fcntl(int fd, int cmd, ... /* arg */ );
+• int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set
+*exceptfds, struct timeval *timeout); // la vedremo dopo
+zuliani@di.uniroma1.it
+
+18
+
+• int dup(int oldfd);
+• duplica il file descriptor oldfd e restituisce il valore del nuovo fd.
+Restituisce -1 in caso di errore
+
+• int stat(const char *path, struct stat *buf);
+• int fstat(int fd, struct stat *buf);
+• restituisce in buf le informazioni di stato del file specificato con nome file
+path o con file descriptor fd.
+• Ritorna 0 se termina correttamente; -1 altrimenti
+
+vedi la lista
+completa dei campi
+di struct stat
+con
+man 2 stat
+
+zuliani@di.uniroma1.it
+
+19
+
+stat (cont.)
+• Sono definite anche una serie di macro da utilizzare sulla struttura
+dati stat (buf) per verificare il tipo del file:
+• S_ISREG(m), S_ISDIR(m), S_ISCHR(m),
+• S_ISBLK(m), S_ISFIFO(m), S_ISLNK(m),
+• S_ISSOCK(m)
+• e maschere da usare per verificare i diritti di accesso (vedi prossima
+slide e man 2 stat oppure man 7 inode)
+
+zuliani@di.uniroma1.it
+
+20
+
+int chmod(const char *pathname, mode_t mode)
+int fchmod(int fd, mode_t mode)
+• cambia il file mode. Ritorna -1 se errore; 0 altrimenti
+• mode è un numero ottale, e.g. 0755. Si possono usare le maschere
+predefinite (vedi man 2 chmod), tipo
+• S_ISUID
+• S_ISGID
+• S_ISVTX
+• S_IRUSR
+• ...
+• S_IRGRP
+• ...
+• S_IROTH
+
+(04000)
+(02000)
+(01000)
+(00400)
+
+set-user-ID
+set-group-ID
+sticky bit
+read by owner
+
+(00040)
+
+read by group
+
+(00004)
+
+read by others
+zuliani@di.uniroma1.it
+
+Eventualmente
+in bitwise OR
+
+21
+
+• vedi esempio dupstat.c
+• Vedi dup.c, dup2.c dup3.c
+
+zuliani@di.uniroma1.it
+
+22
+
+DIR *opendir(const char *name)
+struct dirent *readdir(DIR *dirp)
+int closedir(DIR *dirp)
+• Non sono system call ma funzioni di libreria (sezione 3 del man)
+• Permettono di aprire una directory il cui stream è ritornato da opendir
+• readdir legge il contenuto della directory (prossimo elemento disponibile)
+ritornando la struttura dirent o NULL se non ci sono più elementi
+
+zuliani@di.uniroma1.it
+
+23
+
+• vedi esempio directory.c, readdir.c
+
+zuliani@di.uniroma1.it
+
+24
+
+int fcntl(int fd, int cmd, ...
+/* arg */ )
+• System call - Permette di effettuare operazioni sul file descriptor fd, ad
+esempio
+• duplicazione del fd
+• manipolazione flag file descriptor
+• manipolazione flag di stato
+• gestione lock su fd
+
+• A tali insiemi di operazioni sono associati un insieme di comandi passata
+con il parametro cmd di fcntl
+• Gli argomenti del comando cmd, se presenti, si passano come parametri
+arg della syscall e vanno messi dopo cmd
+• Il valore di ritorno di fcntl dipende dall’operazione effettuata
+• man 2 fcntl per i dettagli
+
+zuliani@di.uniroma1.it
+
+25
+
+fcntl - manipolazione flag di stato
+• F_GETFL(void)
+• restituisce, come risultato di fcntl, file access mode e file status flag
+• e.g. val=fcntl(fd, F_GETFL)
+
+• F_SETFL(int)
+• imposta i file status flag O_APPEND, O_ASYNC, O_DIRECT,
+O_NOATIME, O_NONBLOCK
+• e.g. fcntl(fd, F_SETFL, O_APPEND)
+
+• vediamo fcntl.c
+
+zuliani@di.uniroma1.it
+
+26
+
+fcntl - lock su file
+• F_SETLK, acquisisce/rilascia lock
+• F_SETLKW, acquisisce/rilascia lock,
+bloccante
+
+struct flock {
+...
+• F_GETLK, testa esistenza lock
+short l_type; /* Type of lock: F_RDLCK,
+• L’argomento è la struttura flock
+F_WRLCK, F_UNLCK */
+short l_whence; /* How to interpret l_start:
+• l_whence dice da dove parte
+SEEK_SET, SEEK_CUR, SEEK_END */
+l_start (> o < 0)
+off_t l_start; /* Starting offset for lock */
+• SEEK_SET=inizio file
+off_t l_len; /* Number of bytes to lock */
+pid_t l_pid; /* PID of process blocking our lock
+• SEEK_CUR=posizione corrente
+(set by F_GETLK and F_OFD_GETLK) */
+• SEEK_END=fine file
+...
+• l_len = 0 tutto il file viene bloccato };
+
+altrimenti vengono bloccati l_len byte
+a partire da l_start
+
+vediamo fcnlt2.c
+
+zuliani@di.uniroma1.it
+
+27
+
+fcntl - lock su file (cont’d)
+• F_SETLK
+• acquisisce lock se l_type = F_RDLCK o F_WRLCK,
+• rilascia se l_type= F_UNLCK
+• restituisce -1 se un altro processo ha il lock
+
+• F_SETLKW
+• come la F_SETLK ma se c'è un lock sul file attende (wait) che questo venga rilasciato
+
+• F_GETLK, testa esistenza lock
+• la struttura flock contiene il lock che si vuole mettere
+• se il lock può essere messo fcntl aggiorna l_type a F_UNLCK
+• deve quindi essere seguita da F_SETLK/LKW
+
+zuliani@di.uniroma1.it
+
+28
+
+fcntl - lock su file - considerazioni
+• Il lock è advisory, ovvero richiede cooperazione tra processi
+• tutti i processi fanno una F_GETLK o F_SETLK/LKW e osservano il
+risultato
+• cercare di scrivere un file sul quale un processo detiene un lock non ha
+l'effetto di bloccare la scrittura
+
+• Per avere un lock mandatory (obbligatorio) ovvero che impedisce la
+scrittura o lettura richiede che il file system supporti il mandatory
+locking
+vediamo fcnlt2.c
+
+zuliani@di.uniroma1.it
+
+29
+
+int select(int nfds, fd_set *readfds, fd_set
+*writefds, fd_set *exceptfds, struct timeval
+*timeout)
+• System call - Permette di monitorare uno o più file descriptor
+rimanendo in attesa che almeno uno di essi sia disponibile per
+effettuare l'operazione richiesta
+• L'utilizzo della select consente di sincronizzare dei processi tramite il
+monitoraggio della disponibilità di accesso ad un file
+• nfds numero del file descriptor con il valore più alto aumentato di 1 tra
+quelli da monitorare
+• readfds insieme contenente i file descriptor per cui si richiede la lettura
+• writefds insieme contenente i file descriptor per cui si richiede la scrittura
+• exceptfds insieme contenente i file descriptor da controllare per le
+eccezioni
+• timeout timeout di attesa.
+zuliani@di.uniroma1.it
+
+30
+
+select - valore di ritorno
+• La funzione ritorna il numero dei file descriptor disponibili per
+l'operazione richiesta, oppure ritorna -1 in caso di errore.
+• Il valore ritornato può essere 0 se la chiamata termina per il timeout,
+prima che uno dei descrittori diventi disponibile.
+• Al termine dell'esecuzione, la funzione aggiorna le strutture dati
+contenenti i file descriptor da monitorare, per indicare quali di questi
+è disponibile per l'operazione richiesta.
+
+zuliani@di.uniroma1.it
+
+31
+
+select - valori timeout
+• infinito la chiamata è bloccante, ovvero termina quando è disponibile
+almeno un descrittore, oppure si genera un errore
+• intervallo definito la chiamata ritorna se è disponibile almeno un
+descrittore, oppure se è scaduto il timeout, oppure se si genera un
+errore
+• zero la chiamata non è bloccante, ritorna subito dopo aver controllato
+i descrittori. Questa modalità può essere utilizzata per effettuare
+polling.
+
+zuliani@di.uniroma1.it
+
+32
+
+select - insiemi dei file descriptor
+• Sono messe a disposizioni quattro macro per la gestione degli insiemi dei
+file descriptor
+• FD_ZERO() svuota un insieme.
+• FD_SET() aggiunge un file descriptor ad un insieme
+• FD_CLR() rimuove (clear) un file descriptor da un insieme
+• FD_ISSET() testa se un file descriptor appartiene ad un insieme. Utile quando
+select ritorna
+
+• I prototipi sono:
+• void FD_ZERO(fd_set *set);
+• void FD_SET(int fd, fd_set *set);
+• void FD_CLR(int fd, fd_set *set);
+• int FD_ISSET(int fd, fd_set *set);
+zuliani@di.uniroma1.it
+
+33
+
+Esercizio
+• Progettare un programma C che:
+• legga il contenuto di una directory dir passata come parametro di ingresso.
+dir può contenere file e directory. Il programma deve visitare dir e l’albero
+delle sotto directory a partire da dir fino ad una profondità n data come
+parametro di ingresso.
+• Ogni file eseguibile deve essere copiato in una directory nominata exec
+(fuori da dir) e, dopo essere stato copiato, deve poter essere eseguibile solo
+dal proprietario.
+• I file non eseguibili, ma regolari, devono essere copiati in una directory
+nominata regular
+• [Il programma deve poter svolgere il suo compito sfruttando p processi che
+lavorano in parallelo, dove p è un parametro di ingresso. La scelta della
+politica di suddivisione del lavoro tra più processi è lasciata a voi.]
+zuliani@di.uniroma1.it
+
+34
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• Implementa il memory-mapped I/O
+• Mappa un file su disco in un area di
+memoria (buffer)
+• Lettura/scrittura dal/sul buffer
+risultano in lettura scrittura dal/sul
+disco (senza accedere al disco)
+• Uso:
+• #include <sys/mman.h>
+• Restituisce l’indirizzo di partenza della
+regione mappata (buffer) se OK,
+MAP_FAILED se errore
+
+zuliani@di.uniroma1.it
+
+35
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• addr è l’indirizzo iniziale dell’area di memoria in cui vogliamo mappare il file. Se
+addr = NULL, il kernel sceglie per noi
+• fd è il file descriptor (il file va aperto prima)
+• len il numero di byte da trasferire
+• off l’offset nel file
+
+• prot indica il livello di protezione dell’area mappata
+• flag (attributi dell’area mappata)
+• MAP_SHARED le operazioni sulla memoria modificano il file (R/W)
+• MAP_PRIVATE viene create una copia private del mapped file e solo questa viene modificata
+• MAP_FIXED dice al kernel di mappare a partire da addr [NON USARE!!!!]
+zuliani@di.uniroma1.it
+
+36
+
+Sync e de-mapping
+#include <sys/mman.h>
+int msync(void *addr, size_t len, int flags);
+• Le modifiche ad una regione mappata (con MAP_SHARED, ovviamente) non vengono
+scritte immediatamente nel file – il kernel decide quando farlo
+• Con msync comunicate al kernel che volete scrivere sul file le modifiche in memoria
+• Il kernel farà sempre l’I/O in multipli della dimensione di una pagina di memoria
+
+#include <sys/mman.h>
+int munmap(void *addr, size_t len);
+• Quando il processo termina la memoria viene automaticamente de-mappata, ma ciò
+non significa che il contenuto è scritto sul file (vedi sopra)
+• Ciò non avviene se chiudo il file, quindi sempre buona regola de-mappare la
+memoria con munmap
+
+msync e munmap ritornano -1 se errore
+zuliani@di.uniroma1.it
+
+37
+
+Esempio uso mmap (pag. 529 di APUE)
+
+zuliani@di.uniroma1.it
+
+38
+
+Esercizio su mmap
+• Scrivere un programma C che:
+• legga un file di testo e produca in output un file di testo in cui ogni carattere
+minuscolo è trasformato in maiuscolo, e viceversa
+
+• Requisiti implementativi:
+• Usare mmap per mappare l’intero file in memoria
+• Manipolare il testo di output direttamente in memoria (usate il flag
+MAP_SHARED in mmap per permettere al kernel di scrivere il file)
+
+zuliani@di.uniroma1.it
+
+39
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+40
+
+Chiamate di sistema
+per i processi
+Lezione 12
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• La gerarchia dei processi
+• System calls e funzioni di libreria per la gestione dei processi
+
+zuliani@di.uniroma1.it
+
+2
+
+La creazione: fork
+• init è il processo (pid = 1) genitore di
+tutti i processi del sistema in
+esecuzione
+• da esso vengono creati tutti i processi
+mediante system call fork()
+• la creazione consiste nella duplicazione
+del processo chiamante e creare
+relazioni genitore -- figlio
+• con pstree 1 possiamo
+visualizzare l’albero (genealogico) dei
+processi
+zuliani@di.uniroma1.it
+
+3
+
+• e vediamo che la nostra bash è figlia di lxterminal e il pstree che
+stiamo usando è figlio di bash
+
+• ESERCIZIO: provate dalla vostra bash lanciate in background gedit e
+firefox e poi visualizzate l’albero «locale» con pstree
+zuliani@di.uniroma1.it
+
+4
+
+Nascita e morte (di processi)
+• Ogni processo nella gerarchia fa
+riferimento al processo genitore, ovvero
+
+lanciamo comando vi
+
+• quando nasce eredita codice e parte dello
+stato dal genitore
+• quando termina/muore ritorna l’exit status
+(codice di uscita) al genitore
+
+• In caso il genitore termini/muoia prima
+del processo figlio, quest’ultimo è
+adottato da init
+
+zuliani@di.uniroma1.it
+
+5
+
+Stato
+processo
+
+Zombie
+• Un processo attraversa le fasi a lato
+• R=running, Z=zombie
+
+R
+
+Azioni
+• Termina
+• Invia exit status al genitore
+
+• Rimane in stato zombie fino a
+• Un processo Zombie è quindi un
+che il genitore non riceve exit
+processo terminato, ma il cui Process
+Z
+status
+Control Block è mantenuto nella Process
+Table dal kernel per dare modo al
+processo genitore di leggere l’exit status
+di tale processo.
+• Il genitore ha ricevuto exit
+• Se il genitore di un processo
+terminato status
+muore/termina il processo rimane in
+stato Zombie
+zuliani@di.uniroma1.it
+
+6
+
+System calls controllo processi
+
+zuliani@di.uniroma1.it
+
+7
+
+Syscall
+
+Azione
+
+Risultato
+
+pid_t getpid(void);
+
+Ritorna pid processo chiamante
+
+pid_t getppid(void);
+
+Ritorna pid genitore del processo
+chiamante
+
+Terminano sempre con
+successo
+
+uid_t getuid(void);
+
+Ritorna uid processo chiamante
+
+uid_t geteuid(void);
+
+Ritorna effective uid processo
+chiamante
+
+int setuid(uid_t uid);
+
+Imposta effective uid processo
+chiamante a uid (parametro
+input);
+
+int setgid(uid_t uid);
+
+Imposta effective gid processo
+chiamante a gid (parametro
+input);
+
+Richiedono
+#include <sys/types.h>
+#include <unistd.h>
+zuliani@di.uniroma1.it
+
+ritornano -1 in caso di
+errore, 0 in caso di
+successo
+
+Per dettagli vedi
+man 2 <syscall_name>
+
+8
+
+Esempi ed esercizi
+• Vedere gli esempi:
+• getgid.c
+• getppid.c
+• getuid.c
+• setgid.c
+• setuid.c
+
+• Nei file .c ci sono anche esercizi da fare
+
+zuliani@di.uniroma1.it
+
+9
+
+pid_t fork(void);
+• Crea un nuovo processo che è la copia del
+processo chiamante, a parte alcune strutture
+dati, come ad esempio il pid
+• Una chiamata fork() viene eseguita una
+volta sola, ma ritorna due volte
+• una volta al processo che l’ha invocata
+• una volta ritorna al nuovo processo che è
+stato generato dall'esecuzione della fork
+stessa.
+
+• In caso di errore ritorna -1 al chiamante e
+non viene creato nessun processo figlio
+
+zuliani@di.uniroma1.it
+
+10
+
+Ereditarietà attributi (processo figlio)
+NON ereditati
+
+Ereditati
+
+• process id (pid)- Il figlio ha il suo proprio
+pid
+
+• real ed effective user e group ID
+
+• parent pid (ppid) - Nel figlio il parent pid è
+uguale al pid del genitore
+
+• working directory
+
+• i timer - Ogni processo ha i propri timer
+• record lock / memory lock - Due processi
+non possono detenere gli stessi lock
+• contatori risorse - I contatori dell'utilizzo
+delle risorse sono impostati a zero nel
+figlio
+
+• groups id
+• ambiente del processo
+• descrittori dei file
+• terminale di controllo
+• memoria condivisa
+
+• coda dei segnali - La coda dei segnali in
+attesa viene svuotata nel figlio
+
+zuliani@di.uniroma1.it
+
+11
+
+void _exit(int status); (#include <unistd.h>)
+void exit(int status); (#include stdlib.h)
+• _exit (syscall)
+
+• Termina direttamente il processo che la invoca senza invocare handler (gestore)
+• Chiude tutti i file descriptor
+• I figli vengono ereditati dal processo 1 (init)
+• Invia il segnale SIGCHLD al processo genitore
+• Ritorna status e l’exit status al processo genitore
+
+• exit (funzione libreria)
+
+• Invoca tutti gli handler registrati con atexit e on_exit
+• Chiude tutti i file descriptor, svuota gli stream stdio e li chiude
+• Termina il processo
+• Ritorna (status & 0377) al genitore (vedi wait())
+• EXIT_SUCCESS e EXIT_FAILURE sono 2 costanti predefinite che possono
+essere passate come status (soluzione portabile)
+zuliani@di.uniroma1.it
+
+12
+
+Lancio e
+terminazione di
+un programma C
+
+zuliani@di.uniroma1.it
+
+13
+
+Esercizi
+• Aprite exit.c e fate l’esercizio
+• Aprite fork2.c e modificate il codice in modo che:
+• apra il file passato sulla linea di comando in modalità scrittura e lettura
+• le due printf alla fine avvengano su tale file
+
+zuliani@di.uniroma1.it
+
+14
+
+void abort(void); (#include stdlib.h)
+• Invia SIGABRT al processo chiamante: il processo termina in modo
+anormale
+• La SIGABRT può essere intercettata e gestita (ma poi il processo verrà
+terminato comunque)
+• [Fino alla glibc 2.26, abort chiudeva e «svuotava» (flush) tutti i file.
+POSIX permette (ma non richiede!) tale comportamento da abort.
+Vedi man abort.]
+
+• vedi abort.c
+zuliani@di.uniroma1.it
+
+15
+
+wait(), waitpid() #include <sys/types.h>
+#include <sys/wait.h>
+
+• Queste chiamate di sistema si usano per
+
+• attendere cambiamenti di stato in un figlio del processo chiamante, e
+• ottenere informazioni sul figlio il cui stato è cambiato
+
+• Un cambiamento di stato avviene quando
+• il processo figlio è terminato
+• il figlio è stato arrestato da un segnale
+• il figlio è stato ripristinato da un segnale
+
+• Se un figlio è terminato
+
+• wait/waitpid permettono al sistema di rilasciare le risorse associate al figlio;
+• se non viene eseguita un'attesa, allora il figlio terminato rimane in uno stato
+"zombie"
+
+• Se un figlio ha già cambiato stato, allora le chiamate ritornano
+immediatamente
+• Altrimenti esse si bloccano fino a quando un figlio cambia stato o un
+gestore di segnale interrompe la chiamata
+zuliani@di.uniroma1.it
+
+16
+
+pid_t wait(int *status);
+• La chiamata di sistema wait() sospende l'esecuzione del
+processo chiamante fino a quando uno dei suoi figli termina
+• ritorna -1 in caso di errore, altrimenti il pid del figlio terminato
+• status punta ad un intero contenente informazioni di stato (vedi
+man)
+
+zuliani@di.uniroma1.it
+
+17
+
+pid_t waitpid(pid_t pid, int
+*status, int options);
+• Sospende l'esecuzione del processo chiamante fino a quando un figlio
+specificato dall'argomento pid ha cambiato stato
+• Il valore di pid può essere:
+• < -1 : attesa di qualunque processo figlio il cui gruppo ID del processo sia
+uguale al valore assoluto di pid
+• -1 : aspetta qualunque processo figlio
+• 0 : aspetta qualunque processo figlio il cui gruppo ID del processo sia uguale
+a quello del processo chiamante
+• > 0 : aspetta il figlio il cui ID di processo sia esattamente pid
+
+zuliani@di.uniroma1.it
+
+18
+
+pid_t waitpid(… int options);
+(cont.)
+• Il comportamento predefinito di waitpid() è attendere solo i figli
+terminati
+• Questo comportamento è modificabile attraverso options
+• WNOHANG ritorna immediatamente se nessun figlio è uscito (exit).
+• WUNTRACED ritorna anche se un figlio si è arrestato (ma non tracciato
+attraverso ptrace(2)). Lo stato del figlio non tracciato che è stato arrestato è
+fornito anche se l'opzione non è specificata.
+• WCONTINUED (A partire da Linux 2.6.10) ritorna anche se un figlio arrestato
+è stato riesumato inviando SIGCONT
+
+• i valori W* possono essere messi in OR.
+zuliani@di.uniroma1.it
+
+19
+
+Verifica dello stato ritornato alla
+int s;
+wait/waitpid
+wait(&s);
+• wait memorizza in status (se non NULL)
+
+WIFEXITED(s); //o altra macro W*
+
+• il valore dello stato del processo figlio
+
+• status può essere verificato con le seguenti macro
+• WIFEXITED ritorna true se terminato normalmente
+• WEXITSTATUS ritorna l’exit status del figlio
+• WIFSIGNALED ritorna true se è terminato per la ricezione di un segnale
+• WTERMSIG ritorna il numero del segnale che ha causato la terminazione
+• WCOREDUMP ritorna true se ha generato un core dump
+• WIFSTOPPED ritorna true se il processo è in stato stopped per la ricezione di un segnale
+• WSTOPSIG ritorna il numero del segnale che ha causato lo switch in stato di stopped
+• WIFCONTINUED ritorna true se il processo ha continuato per la ricezione di un segnale
+SIGCONT
+
+zuliani@di.uniroma1.it
+
+20
+
+• wait.c
+• wait2.c
+• waitpid.c
+
+zuliani@di.uniroma1.it
+
+21
+
+Esercizio
+• Riprendete l’esercizio su fork2.c e fate in modo che il processo
+figlio scriva per primo sul file.
+
+zuliani@di.uniroma1.it
+
+22
+
+Come rimpiazzare un processo figlio con un
+altro processo
+• fork() crea 2 processi identici con attributi comuni e altri no
+• posso usare il controllo di flusso per far si che il processo figlio faccia qualcosa di
+diverso dal genitore ... ma poco efficiente
+• posso usare invece la syscall execve o le funzioni della famiglia exec
+• sostituiscono l'immagine del processo che la invoca con una nuova immagine
+
+funzioni
+di libreria
+
+int execve(const char *filename, char *const argv[], char *const envp[]);
+int execl(const char *path, const char *arg, ...);
+int execlp(const char *file, const char *arg, ...);
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+zuliani@di.uniroma1.it
+
+23
+
+Esempio
+• exec esegue il
+programma vi
+
+zuliani@di.uniroma1.it
+
+24
+
+int execve(const char *filename, char *const
+argv[], char *const envp[])
+• sostituisce l’immagine del processo con quella contenuta in filename , il
+quale può essere:
+• Un file binario (cioè un eseguibile), oppure
+• Uno script che inizia con #! interpreter [optional-arg]
+
+• argv[] contiene gli argomenti in input per il comando eseguito; argv[0]
+deve essere il comando stesso; l’array deve essere terminato con NULL
+• envp[] contiene l’ambiente della nuova immagine (dopo)
+• execve sostituisce le zone di memoria text, bss, e stack del processo che
+la invoca con quelle del nuovo programma mandato in esecuzione
+• execve ritorna -1 se errore, altrimenti non ritorna (ovviamente!)
+
+zuliani@di.uniroma1.it
+
+25
+
+execve e gli attributi di processo
+Mantenuti
+
+Non mantenuti
+
+• process ID (PID) e parent PID
+• real uid e real gid
+• groups id
+• session ID
+• terminale di controllo
+• working directory e root directory
+• maschera creazione file (umask)
+• file locks
+• file descriptors (ad eccezione di quelli con
+flag FD_CLOEXEC impostato)
+• maschera dei segnali
+• segnali in attesa
+
+• effective uid ed effective gid.
+• memory mapping
+• timers
+• memoria condivisa
+• memory lock
+
+zuliani@di.uniroma1.it
+
+26
+
+Le funzioni di libreria exec*
+• execl, execlp, execle
+• prendono in ingresso un numero variabile di puntatori per specificare gli argomenti
+in ingresso alla nuova immagine del processo; un puntatore per ogni argomento
+
+• execv, execvp, execvpe
+• prendono in ingresso un puntatore ad un vettore per specificare gli argomenti in
+ingresso alla nuova immagine; un vettore dove ogni elemento è un argomento in
+ingresso.
+int execl(const char *path, const char *arg, ...);
+int execlp(const char *file, const char *arg, ...);
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+zuliani@di.uniroma1.it
+
+27
+
+Le funzioni di libreria exec* (cont.)
+• execlp, execvp ed execvpe
+• nel caso il nome del file non contenga uno slash (/), usano la variabile d'ambiente
+PATH per cercare il file da utilizzare per la nuova immagine
+• le altre usano path relativo o assoluto specificato in filename
+
+• execle, execvpe
+• il parametro envp consente di specificare l'environment (l'ambiente) della nuova
+immagine
+int execl(const char *path, const char *arg, ...);
+int execlp(const char *file, const char *arg, ...);
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+zuliani@di.uniroma1.it
+
+28
+
+Ambiente di un processo
+• E’ costituito da una serie di stringhe della forma key=value. Di solito
+key è in maiuscolo, ad es.:
+PATH=/home/pz/.local/bin:/home/pz/bin:/usr/local/bin:/us
+r/local/sbin:/usr/bin:/usr/sbin
+
+• E’ definito tramite un array di puntatori a caratteri, terminato da NULL
+• Per default, l'ambiente di un processo coincide con l'ambiente del
+processo genitore (ereditato mediante fork)
+• Permettono di cambiare l’ambiente mediante parametro envp[]
+int execve(const char *filename, char *const argv[], char *const envp[]);
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+zuliani@di.uniroma1.it
+
+29
+
+Modifica ambiente
+• Per poter accedere all'ambiente da un programma C si può:
+• Aggiungere l'argomento envp ai parametri del main
+
+main(int argc, char *argv[], char *envp[])
+• Non è POSIX compatibile, quindi poco portabile
+
+• Potete invece utilizzare la variabile globale **environ
+extern char **environ;
+
+zuliani@di.uniroma1.it
+
+30
+
+Funzioni utili per la gestione dell’ambiente
+(#include <stdlib.h>)
+
+• char *getenv(const char *name);
+• ritorna il valore nella variabile name
+
+• int setenv(const char *name, const char *value,
+int overwrite);
+• imposta (o aggiunge la variabile) name = value
+
+• int putenv(char *string);
+• come sopra string=“name=value”
+
+• int unsetenv(const char *name);
+• rimuove name dalle variabili di ambiente
+
+• int clearenv(void);
+• «ripulisce» l’ambiente e imposta environ=NULL
+zuliani@di.uniroma1.it
+
+31
+
+Esempi
+• getenv.c
+• print_env.c
+• setenv.c
+• execve.c
+
+zuliani@di.uniroma1.it
+
+32
+
+Cambiare working dir o root dir del nuovo
+processo
+#include <unistd.h>
+int chdir(const char *path);
+int chroot(const char *path);
+
+zuliani@di.uniroma1.it
+
+33
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+34
+
+Funzioni/Variabili
+Esterne e Statiche
+Lezione 13
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Variabili esterne e statiche
+• Funzioni statiche
+• Ricorsione
+• Puntatori a funzione
+• gdb (‘disinfestatore’)
+
+zuliani@di.uniroma1.it
+
+2
+
+Visibilità (scoping) delle variabili
+• In C, una variabile locale (o anche automatica) è visibile solo nel
+blocco in cui è dichiarata
+• Una variabile globale è visibile dal punto di dichiarazione fino alla fine
+del file sorgente
+int
+
+myvar;
+
+void fun1() {
+if (myvar == 4) { …}}
+void main() {
+myvar = 4;
+fun1();}
+zuliani@di.uniroma1.it
+
+3
+
+Variabili esterne
+• Dichiarazione di una variabile: affermo tipo e dimensione della var.
+• Definizione: viene allocata anche la memoria per la var.
+• Per usare una variabile che non è visibile (ad es. è definita in un altro
+file) la si dichiara con la clausola extern
+extern
+extern
+
+int
+char
+
+myvar;
+str[];
+
+zuliani@di.uniroma1.it
+
+4
+
+Variabili esterne e visibilità delle funzioni
+void func1() {
+// myvar non ancora definita, uso extern
+
+extern int myvar;
+void nestfunc1() {
+
+printf("sono nestfunc1\n");
+}
+nestfunc1();
+myvar = 1;
+}
+int myvar = 0;
+
+// definizione di myvar!
+
+void main(void) {
+printf("myvar = %d\n", myvar);
+
+Il codice stampa:
+
+func1();
+
+myvar = 0
+sono nestfunc1
+myvar = 1
+
+printf("myvar = %d\n", myvar);
+}
+zuliani@di.uniroma1.it
+
+5
+
+Esercizio
+• Aprite nestedf.c
+• Spostare la dichiarazione di myvar da func1() ad un altro file
+(chiamatelo ad esempio myv.c)
+• Ricompilate il tutto: il programma dovrebbe stampare come prima
+• Dovete compilare entrambi i file, ad es.: gcc nestedf.c myv.c
+
+zuliani@di.uniroma1.it
+
+6
+
+Variabili statiche
+• Possono essere locali o esterne
+• Locali:
+• dichiarate all’interno di una funzione
+• sono mantenute tra una chiamata e l’altra della funzione
+• Costituiscono una memoria privata della funzione
+
+zuliani@di.uniroma1.it
+
+7
+
+Le variabili static vengono
+automaticamente inizializzate (una volta)
+
+Variabili statiche
+void fun() {
+static int myvar;
+
+//inizializzata automaticamente a 0
+
+myvar++;
+printf("myvar = %d\n", myvar);
+}
+void main(void) {
+fun();
+
+Il codice stampa:
+
+fun();
+
+myvar = 1
+myvar = 2
+
+}
+
+zuliani@di.uniroma1.it
+
+8
+
+Variabili statiche esterne
+• Sono variabili statiche dichiarate al di fuori di ogni funzione (in un
+dato file sorgente)
+• Sono visibili dal punto di dichiarazione fino alla fine del file sorgente
+
+zuliani@di.uniroma1.it
+
+9
+
+Funzioni statiche
+• Non visibili al di fuori del file sorgente in cui sono dichiarate
+• La clausola static permette quindi di variare la visibilità di un
+oggetto, non solo la sua permanenza in memoria
+
+zuliani@di.uniroma1.it
+
+10
+
+Funzioni statiche
+// file fstatic.c
+
+// file fun.c
+
+void fun() {
+
+static void fun() {
+
+static int myvar;
+
+printf("sono fun() static\n");
+}
+
+myvar++;
+printf("myvar = %d\n", myvar);
+}
+
+Compiliamo ed eseguiamo:
+
+void main(void) {
+
+$> gcc fstatic.c fun.c
+$> ./a.out
+myvar = 1
+
+fun();
+}
+zuliani@di.uniroma1.it
+
+11
+
+Esercizio
+• Modificate l’esempio precedente in modo che main() chiami
+fun() del file fun.c
+
+zuliani@di.uniroma1.it
+
+12
+
+Ricorsione
+• In C è possibile scrivere funzioni ricorsive, cioè che chiamano se
+stesse
+• Svantaggi: in generale codice più lento e più consumo di memoria
+(perché?)
+• [Variabili locali/automatiche salvate nello stack.]
+
+• Vantaggi: codice più compatto e semplice da scrivere
+• Esercizio [max 5 minuti!]: scrivere una funzione ricorsiva per il
+fattoriale di un intero (provatela con numeri minori di 20…)
+zuliani@di.uniroma1.it
+
+13
+
+Puntatori a funzione
+• Il C permette puntatori a funzione, anche se una funzione NON è una
+variabile!
+• Dichiarazione:
+int (* funptr)();
+//funptr è un puntatore ad
+una funzione che ritorna
+un intero
+• Chiamata:
+int a;
+a = (* funptr)();
+zuliani@di.uniroma1.it
+
+14
+
+Puntatori a funzione
+• Possono essere usati per rendere il codice più generico
+• Vediamo:
+• funptr.c
+• qsort-generic.c
+
+zuliani@di.uniroma1.it
+
+15
+
+Puntatori a funzione: altri esempi
+• Una forma “primitiva” di programmazione ad oggetti usando variabili
+statiche e puntatori a funzione.
+• Vediamo:
+• oo.[ch] e oo-main.c
+
+zuliani@di.uniroma1.it
+
+16
+
+Esercizio
+• Aggiungere a oo.[ch] un ‘metodo’ che permetta di applicare una
+qualsiasi funzione da double a double agli elementi della struttura
+myclass. Il metodo ritorna i risultati in un array.
+• Passate la funzione come parametro (ovviamente come puntatore a funzione).
+• Il metodo deve chiamare SOLO funzioni passate come parametro (potete metterle
+tutte in un array).
+
+[Per usare le funzioni matematiche dovete includere <math.h> e
+compilare aggiungendo –lm]
+zuliani@di.uniroma1.it
+
+17
+
+gdb
+Materiale didattico per cortesia del prof. Emanuele Gabrielli
+
+zuliani@di.uniroma1.it
+
+18
+
+‘Disinfestare’
+programmi?
+
+Vera tarma/falena
+trovata in un relè del
+Mark II ad Harvard, 1947.
+
+U.S. Naval Historical Center Online Library Photograph NH 96566-KN
+zuliani@di.uniroma1.it
+
+19
+
+‘Disinfestare’ programmi?
+• Nello sviluppo di codice è spesso utile far girare e fermare un
+programma a piacimento, vedere il contenuto delle variabili, quali
+funzioni sono chiamate, etc.
+• Con gcc, c'è l’opzione –g
+
+gcc
+
+-g
+
+miosorgente.c
+
+(vedi man per tutte le opzioni di debug di gcc)
+
+zuliani@di.uniroma1.it
+
+20
+
+gdb
+• gdb è il GNU Project Debugger
+• Open source, portabile, linea di comando. Linguaggi supportati:
+• Ada
+• Assembly
+• C
+• C++
+• D
+• Fortran
+• Go
+• Objective-C
+• OpenCL
+• Modula-2
+• Pascal
+• Rust
+
+zuliani@di.uniroma1.it
+
+21
+
+gdb
+
+zuliani@di.uniroma1.it
+
+22
+
+gdb
+
+zuliani@di.uniroma1.it
+
+23
+
+gdb
+
+zuliani@di.uniroma1.it
+
+24
+
+gdb
+
+zuliani@di.uniroma1.it
+
+25
+
+gdb
+
+zuliani@di.uniroma1.it
+
+26
+
+gdb
+
+zuliani@di.uniroma1.it
+
+27
+
+gdb: punti di fermo (breakpoint)
+
+zuliani@di.uniroma1.it
+
+28
+
+gdb: punti di fermo (breakpoint)
+
+zuliani@di.uniroma1.it
+
+29
+
+gdb: rimuovere le informazioni di debug
+• strip rimuove tutte le info di debug da un file oggetto/eseguibile
+strip miosorgente.o
+
+(vedi man per tutte le opzioni di strip)
+zuliani@di.uniroma1.it
+
+30
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+31
+
+Segnali, pipe, FIFO
+Lezione 14
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Segnali
+• Gestione dei segnali
+• Handler sicuri - gestione segnali - sezione critica
+• Esecuzione di handler dei segnali - signal() e sigaction()
+• Altre system call utili per i segnali
+• Pipe e FIFO
+
+zuliani@di.uniroma1.it
+
+2
+
+Segnali
+• Sono interruzioni software
+• Inviati dal kernel ad un processo
+• Inviati da un processo ad un altro processo
+
+zuliani@di.uniroma1.it
+
+3
+
+Segnali
+• Condizioni anomale che si verificano generano INTERRUPTS ovvero il
+kernel invia un segnale ai processi in esecuzione.
+• Condizioni anomale possono essere:
+1. Richiesta di sospensione da parte dell’utente (Control-Z = SIGSTOP)
+2. Richiesta di terminazione da parte dell’utente (Control-C = SIGINT)
+3. Una eccezione hardware (divisione per 0; riferimento di memoria
+non valido; etc...)
+
+zuliani@di.uniroma1.it
+
+4
+
+Segnali
+• Un segnale può essere generato anche da condizioni NON anomale:
+• La terminazione di un processo figlio
+• Un cronometro impostato con alarm scade
+• Un segnale inviato da un processo ad un altro mediante la syscall kill
+• Un segnale mandato da terminale mediante il comando kill
+• Un dato arriva su di una connessione di rete (SIGURG)
+• Un processo scrive su di una pipe che non ha un "lettore" (SIGPIPE)
+•…
+
+zuliani@di.uniroma1.it
+
+5
+
+Segnali
+• La lista completa dei segnali (costanti intere) è in <signal.h>
+(in /usr/include/signal.h per debian)
+• Ad ogni evento è associato un segnale
+
+zuliani@di.uniroma1.it
+
+6
+
+I principali segnali ed eventi sono: (man 7 signal)
+SIGINT
+
+2 terminazione <CTRL+C> da tastiera
+
+SIGQUIT
+
+3 Core dump Uscita
+
+SIGILL
+
+4 Core dump Istruzione illegale
+
+SIGABR
+
+6 Core dump Abort
+
+SIGFPE
+
+8 Core dump Eccezione di tipo aritmetico
+
+SIGKILL
+
+9 terminazione Kill (non gestibile)
+
+SIGUSR1
+
+10 terminazione Definito dall’utente
+
+SIGSEGV
+
+11 Core dump Segmentation Fault
+
+SIGUSR2
+
+12 terminazione Definito dall’utente
+
+SIGPIPE
+
+13 terminazione Scrittura senza lettori su pipe o socket
+
+SIGALRM 14 Terminazione Allarme temporizzato
+
+SIGTERM 15 terminazione Terminazione software
+SIGCHLD 17 ignorato Status del figlio cambiato
+SIGSTOP
+
+19 Stop Sospende del processo (non gestibile)
+
+SIGTSTP
+
+20 stop Stop da tastiera
+
+SIGTTIN
+
+21 stop Lettura su tty in background
+
+SIGTTOU 22 stop Scrittura su tty in background
+zuliani@di.uniroma1.it
+
+7
+
+Gestione dei Segnali
+• I segnali sono un esempio di eventi asincroni:
+• occorrono ad un tempo non predeterminato
+• il processo deve dire al kernel cosa fare se e quando l'evento occorre
+
+• "Cosa fare" è detto azione associata al processo, e sono tre:
+1. IGNORARE IL SEGNALE (Ignore): si può fare con tutti tranne che con SIGKILL
+e SIGSTOP. [[Perché????]]
+2. CATTURARE IL SEGNALE (Catch): il processo chiede al kernel di eseguire una
+funzione definita dal programmatore (Signal handler o gestore del segnale).
+I segnali SIGKILL e SIGSTOP non possono essere catturati
+3. ESEGUIRE L'AZIONE PREDEFINITA: ad ogni segnale è associato un sdefault
+handler
+zuliani@di.uniroma1.it
+
+8
+
+Gestione dei Segnali
+• Handler di default sono (vedi fig 10.1 su APUE per la lista completa):
+• Termina il processo e genera il core dump (file core)
+• Termina il processo senza generare il core dump
+• Ignora e rimuovi il segnale
+• Sospende il processo
+• Riesuma il processo
+
+• Su APUE c'è una descrizione dettagliata per ogni segnale
+
+zuliani@di.uniroma1.it
+
+9
+
+Handler, gestione segnali, sezione critica
+Quando un processo riceve un segnale che deve gestire con un handler:
+1. Interrompe il proprio flusso di esecuzione
+2. Esegue l’handler associato al segnale
+3. Riprende l’esecuzione dal punto in cui era stato interrotto
+
+Tali passi possono essere realizzati con:
+/* funzione di libreria*/
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+/* system call */
+
+int rt_sigprocmask(int how, const kernel_sigset_t *set,
+kernel_sigset_t *oldset, size_t sigsetsize);
+zuliani@di.uniroma1.it
+
+10
+
+sigprocmask()
+• Consente di leggere/impostare la maschera segnali (ci dice i segnali
+bloccati)
+• Un segnale bloccato non viene perso ma considerato ‘pendente’
+(pending) e consegnato al processo quando viene sbloccato
+• Ad eccezione di SIGCHILD, istanze multiple di segnali pendenti non
+vengono considerate
+
+zuliani@di.uniroma1.it
+
+11
+
+int sigprocmask(int how, const
+sigset_t *set, sigset_t *oldset)
+• how dice come gestire il segnale e può assumere i seguenti valori
+• SIG_BLOCK: blocca i segnali definiti in set
+• SIG_UNBLOCK sblocca i segnali definiti in set
+• SIG_SETMASK imposta la maschera a set
+
+• set è la maschera da usare
+• old_set è la maschera prima dell'invocazione della funzione. Utile
+per ripristinare la maschera dopo la chiamata
+
+• vediamo sigprocmask.c
+zuliani@di.uniroma1.it
+
+12
+
+sigprocmask()
+• E’ applicabile solo a processi e NON a threads (che vedremo più
+avanti) perché ognuno ha una sua maschera
+• SIGKILL e SIGSTOP non possono essere bloccati
+• Ogni processo creato tramite fork() eredita maschera segnali
+• La maschera dei segnali è mantenuta dopo exec()
+
+zuliani@di.uniroma1.it
+
+13
+
+Esercizi su sigprocmask.c
+1. aggiungere tutti i controlli mancanti sui possibili errori delle syscall.
+In caso di errore stampate un messaggio su stderr e poi chiamate
+exit(EXIT_FAILURE). Nel messaggio di errore potete
+consultare errno (vedi lezione 10).
+2. scrivere una funzione print_set che prenda un sigset_t e stampi i
+segnali in esso contenuti (usare sigpending() e
+sigismember() dentro un ciclo for).
+3. Modificare il codice in modo tale che ogni 5 secondi controlli se
+l'utente ha premuto CTRL+C o CTRL+Z o abbia inviato un SIGUSR1, e
+in tal caso si limiti a scrivere sullo stdout tale evento. [Suggerimento:
+usate un ciclo infinito e sleep(). ]
+
+zuliani@di.uniroma1.it
+
+14
+
+Esecuzione di handler dei segnali signal() e sigaction()
+(L'USO DELLA SIGNAL E’ SCONSIGLIATO PERCHE' L'IMPLEMENTAZIONE
+NON E' STANDARD E PUO' VARIARE DA SISTEMA A SISTEMA)
+sighandler_t signal(int signum, sighandler_t handler)
+
+• Imposta il gestore del segnale signum alla funzione handler
+• Ritorna: SIG_ERR o il valore del precedente gestore
+• Sono definite 2 macro
+• SIG_IGN ignora il segnale
+• SIG_DFL assegna il gestore di default. Utile per ripristinare il gestore del segnale a
+default
+
+• vedere signal.c
+zuliani@di.uniroma1.it
+
+15
+
+int sigaction(int signum, const struct
+sigaction *act, struct sigaction *oldact)
+• signum: segnale
+• act: gestore del segnale (vedi struct sigaction) se act=NULL è
+usato oldact
+• oldact: gestore precedente
+struct sigaction {
+void (*sa_handler)(int);
+
+/*Puntatore alla funzione signal
+handler. Può essere SIG_IGN, SIG_DFL
+o puntatore a funzione.*/
+void (*sa_sigaction)(int, siginfo_t *, void *); /*Alternativo
+a sa_handler*/
+sigset_t sa_mask;
+/*Specifica la maschera dei segnali che
+dovrebbero essere bloccati durante
+l’esecuzione dell’handler*/
+int sa_flags;
+/*Flags per modificare il comportamento del
+segnale*/
+void (*sa_restorer)(void); /*obsoleto*/};
+zuliani@di.uniroma1.it
+
+16
+
+Altre system calls utili
+• int kill(pid_t pid, int sig);
+• unsigned int alarm(unsigned int seconds);
+• invia un SIGALARM dopo seconds secondi
+
+• int pause(void);
+
+• il processo chiamante rimane bloccato finché un segnale non viene ricevuto
+• vedi pause.c
+
+• int sigpending(sigset_t *set);
+• restituisce in set i segnali pendenti
+
+• int sigsuspend(const sigset_t *mask);
+
+• sospende il processo che invoca la call e rimpiazza la maschera con mask
+• il processo rimane sospeso finché non arriva un segnale per cui è definito un gestore
+o un segnale di terminazione
+• vedi sigsuspend.c
+zuliani@di.uniroma1.it
+
+17
+
+Inter Process Communication
+(IPC)
+
+zuliani@di.uniroma1.it
+
+18
+
+Pipe e FIFO
+• Unix ha due tipi di IPC: FIFO (o named pipe) e pipe (o unnamed pipe)
+• La scrittura dei dati su una pipe/fifo e quindi anche la lettura avviene in
+maniera sequenziale (First In First Out)
+• La FIFO è uno speciale tipo di file che può essere creato dalle system call
+mkfifo o mknod. Può essere utilizzata da più processi, full-duplex
+• La pipe è una struttura dati in memoria, è half-duplex. La creazione della
+pipe può essere effettuata con la system call pipe che crea due file
+descriptor (uno in lettura ed uno in scrittura)
+• Esempio: un processo crea una pipe, poi crea un figlio e usa la pipe per
+comunicare con il figlio che eredita i descrittori dei file
+• La pipe può anche essere usata tra 2 processi che hanno un antenato
+comune
+zuliani@di.uniroma1.it
+
+19
+
+int pipe(int pipefd[2])
+• Se tutto OK, pipe crea due file descriptors e ritorna 0
+pipefd[0]: file descriptor di lettura
+pipefd[1]: file descriptor di scrittura
+
+• In caso di problemi, pipe ritorna -1 e imposta errno (pipefd non
+viene modificato)
+kernel
+
+fd[0]
+
+fd[1]
+
+processo ‘consumatore’
+
+processo ‘produttore’
+zuliani@di.uniroma1.it
+
+20
+
+int pipe(int pipefd[2])
+I dati scritti sulla pipe sono «bufferizzati» dal kernel finché non sono
+letti. Le pipe hanno una dimensione massima:
+• Se un processo legge da una pipe vuota allora rimane bloccato
+• Se un processo scrive su una pipe piena allora rimane bloccato
+• Una pipe viene chiusa quando tutti e due i processi hanno invocato la close
+• Operazioni di lettura (read) su una pipe il cui fd di scrittura è stato chiuso
+con close ritorna 0
+• Operazioni di scrittura (write) su una pipe il cui fd di lettura è stato chiuso
+con close ritornano -1 e ricevono il segnale SIGPIPE
+
+• vedi: pipe.c, pipequater.c e pipe_quintes.c
+zuliani@di.uniroma1.it
+
+21
+
+int mkfifo(const char *pathname,
+mode_t mode)
+• Crea una FIFO con nome pathname e modalità di accesso mode.
+• Una volta creata una FIFO, può essere acceduta da qualsiasi processo
+(che abbia i diritti per l’accesso al file) in lettura/scrittura, tuttavia, le
+operazioni devono essere simultanee. Un processo che apre la FIFO in
+lettura rimane bloccato finché non c’è nessun processo che la apre in
+scrittura (e viceversa).
+• mkfifo ritorna 0 in caso di successo e -1 in caso di errore
+impostando errno di conseguenza.
+• Una volta creata, la FIFO può essere gestita (open, read write e close) come
+un qualsiasi altro file
+• È possibile aprire una FIFO in maniera non bloccante passando l’attributo
+O_NONBLOCK alla system call open
+zuliani@di.uniroma1.it
+
+22
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+23
+
+Socket
+Lezione 15
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Pipe – riepilogo
+• Socket
+
+zuliani@di.uniroma1.it
+
+2
+
+Pipe - riepilogo
+Processo
+
+fd[0]
+
+fd[1]
+
+scrittura
+Kernel
+
+Stato delle connessioni alle pipe1 e pipe2 dopo la fork
+write
+
+lettura
+
+write
+
+Pipe
+buffer
+
+fd1[1] pipe1 fd1[0]
+read
+
+• Pipe: usate per IPC, sono unidirezionali
+• Dopo un fork, Pparent e Pchild possono
+leggere e scrivere
+
+read
+Pchild
+
+Pparent
+read
+
+read
+
+write
+
+• Se un processo scrive e legge dalla stessa pipe
+ottiene quello che ha scritto
+• Quindi, per comunicare bidirezionalmente:
+
+fd2[1] pipe2 fd2[0]
+write
+
+• una pipe per Pparent -> Pchild e
+• una pipe per Pchild -> Pparent
+zuliani@di.uniroma1.it
+
+3
+
+Pipe - riepilogo
+Stato delle connessioni alle pipe1 e pipe2 dopo la fork
+write
+
+write
+
+Stato delle connessioni alle pipe1 e pipe2 dopo
+la chiusura appropriata dei canali di R e W
+• Pchild: close(fd1[1]); close(fd2[0])
+• Pparent: close(fd1[0]); close(fd2[1])
+
+fd1[1] pipe1 fd1[0]
+read
+
+read
+write
+
+fd1[1] pipe1 fd1[0]
+
+Pchild
+
+Pparent
+read
+
+read
+
+read
+Pchild
+
+Pparent
+read
+
+write
+fd2[1] pipe2 fd2[0]
+write
+
+fd2[1] pipe2 fd2[0]
+
+zuliani@di.uniroma1.it
+
+write
+
+4
+
+Pipe - riepilogo
+• Vediamo pipe-esempio.c
+
+zuliani@di.uniroma1.it
+
+5
+
+Socket
+
+Socket
+• Consentono la comunicazione tra processi (anche residenti su
+macchine diverse) nel paradigma client-server
+• Server:
+• Definisce la socket (“presa”)
+• Il riferimento (nome di file o indirizzo di rete) è noto al client
+• Accetta connessioni sulla socket da parte di uno o più client: ricava un file
+descriptor (full-duplex) sulla connessione
+
+• Client:
+• Definisce la socket
+• Crea una connessione sulla socket: ricava un file descriptor (full-duplex) sulla
+connessione
+zuliani@di.uniroma1.it
+
+7
+
+System call di interesse
+• socket
+• crea struttura dati della socket
+
+• bind
+• associa un nome alla socket
+
+• listen
+• mette un processo in ascolto su di una socket
+
+• accept
+• accetta una connessione su di una socket
+
+zuliani@di.uniroma1.it
+
+8
+
+Tipologia Socket: definite da 3 attributi
+• Domain (o family) - modalità collegamento
+• AF_LOCAL (o AF_UNIX): client e server devono risiedere sulla stessa macchina
+• AF_INET: client e server comunicano in rete con protocollo IPV4
+• AF_INET6: client e server comunicano in rete con protocollo IPV6
+
+• Type -semantica del collegamento
+• SOCK_STREAM: flusso bidirezionale di byte affidabile basato su connessione (socket TCP).
+Supporta notifiche asincrone (Out of Band)
+• SOCK_DGRAM: Supporta comunicazioni datagram, senza connessione (socket UDP) e con
+sequenze inaffidabili di messaggi
+• SOCK_RAW: per l’accesso diretto (raw socket) alle comunicazioni di rete (protocolli ed
+interfacce)
+
+• Protocol - protocollo usato
+
+• Per noi ne esiste solo uno, UDP per SOCK_DGRAM, TCP per SOCK_STREAM
+• Possiamo impostarlo a 0
+zuliani@di.uniroma1.it
+
+9
+
+Anatomia Server TCP - Psrv
+1. Psrv definisce la socket invocando socket()
+• Crea una unnamed socket, ovvero una struttura dati che
+rappresenta la socket, ma senza nome (indirizzo).
+
+2. Psrv associa un nome alla socket invocando bind()
+• unnamed socket -> named socket
+
+3. Psrv definisce la lunghezza della coda di ingresso – listen
+• ovvero il numero massimo gestibile di connessioni pending
+
+4. Psrv si mette in ascolto sulla socket in attesa di una
+richiesta di connessione del client - accept()
+• accept() ritorna un fd usato per comunicare con il client
+
+5. Psrv crea figlio che userà fd per comunicare con il client
+6. Psrv si rimette in ascolto sulla socket con accept() per una
+nuova connessione
+zuliani@di.uniroma1.it
+
+10
+
+Anatomia Client TCP - Pcli
+1. Pcli definisce il socket invocando socket()
+• Crea una unnamed socket (csd), ovvero una struttura dati che
+rappresenta la socket, ma senza nome (indirizzo).
+
+2. Pcli imposta una struttura dati sin di tipo struct
+sockaddr_in in modo da scriverci le informazioni del
+server al quale si vuole connettere.
+3. Pcli si connette al server invocando la syscall connect()
+alla quale passa il socket (csd) e l’indirizzo del server al
+quale connettersi.
+• La connect ritorna un descriptor del server (ssd) (o -1 se errore)
+
+4. Pcli utilizza ssd per leggere (read()) e scrivere
+(write()) da/su server
+5. Finita la necessità di comunicare con il server, Pcli chiude
+11
+la connessione invocando close(ssd)
+
+Interazione
+Client-Server
+
+zuliani@di.uniroma1.it
+
+12
+
+Struttura codice Server
+int sd = socket(AF_INET, SOCK_STREAM, 0);
+bind(sd,…);
+listen(sd,MAX_QUEUED);
+while (1) {
+int client_sd=accept(sd,…);
+if (client_sd == -1){
+
+perror(“Errore accettando connessione dal client”);
+continue;
+}
+if (fork() == 0) { /*eseguito dal figlio */
+
+/* read/write su client_sd */
+close(client_sd);
+exit(0);
+}
+}
+zuliani@di.uniroma1.it
+
+13
+
+Struttura codice Client
+main (){
+int cfd = socket(AF_INET, SOCK_STREAM,0);
+/* set socaddr_in structure */
+if (connect(cfd,….)!=0) {
+perror(“connessione non riuscita”);
+}
+/* read(cfd,…) e write(cfd,…) da/verso server */
+close(cfd);
+}
+
+zuliani@di.uniroma1.it
+
+14
+
+int socket(int domain, int type,
+int protocol);
+#include <sys/types.h>
+#include <sys/socket.h>
+int sd;
+
+• Ritorna -1 in caso di errore
+• La scrittura/lettura su un socket
+chiuso genera un errore SIGPIPE
+
+•
+
+zuliani@di.uniroma1.it
+
+sd=socket(AF_UNIX, SOCK_STREAM,0);
+if (sd == -1) {
+perror(“Creando Socket”);
+exit(-1);
+}
+
+15
+
+int bind(int sockfd, const struct sockaddr *addr,
+socklen_t addrlen);
+• sockfd: id unnamed socket
+
+• addr: struttura di tipo sockaddr che contiene l’indirizzo IP/nome
+della socket
+• struct socaddr_in per AF_INET AF_INET6
+• struct socaddr_un per AF_LOCAL
+
+• Solo AF_INET sockets possono fare binding su IP_address:porta
+• addrlen: dimensione struttura sockaddr
+
+zuliani@di.uniroma1.it
+
+16
+
+struct sockaddr_in
+struct sockaddr_in {
+sa_family_t sin_family;
+/* address family: AF_INET */
+in_port_t sin_port;
+/* port in network byte order*/
+struct in_addr sin_addr;
+/* internet address */
+};
+/* Internet address. */
+struct in_addr {
+uint32_t s_addr; /* address in network byte order */
+};
+
+• sin_port e sin_addr sono binari in formato network.
+• I numeri di porta del protocollo e gli indirizzi internet vanno quindi tradotti in
+formato network.
+• È possibile assegnare un valore a sin_addr con le seguenti macro:
+• INADDR_LOOPBACK (127.0.0.1)
+• INADDR_ANY (0.0.0.0)
+zuliani@di.uniroma1.it
+
+17
+
+Funzioni per convertire indirizzi
+• uint32_t htonl(uint32_t hostlong);
+• converte un unsigned int in formato network
+
+• int inet_aton(const char *cp, struct in_addr
+*inp);
+• converte un indirizzo cp=“X.Y.Z.W” in formato network (struct in_addr)
+
+• struct hostent *gethostbyname(const char *name)
+• dato un nome (mio.dominio.toplevel) o un indirizzo
+X.Y.Z.W ritorna una struttura hostent che contiene l’indirizzo in formato
+network
+
+zuliani@di.uniroma1.it
+
+18
+
+int listen(int sockfd, int
+backlog);
+• Marca la socket sockfd come passive, ovvero pronta a ricevere
+richieste mediante accept()
+
+• backlog indica la lunghezza della coda di attesa
+• Restituisce 0 in caso di successo e -1 in caso di errore
+
+zuliani@di.uniroma1.it
+
+19
+
+int accept(int sockfd,
+struct sockaddr *addr, socklen_t *addrlen);
+• Usata per socket con connessione (non per SOCKET_DGRAM)
+• Estrae la prima richiesta di connessione nella coda delle richieste
+in attesa della socket sockfd
+• Crea una nuova socket con connessione e ritorna un nuovo file
+descriptor
+• nuova socket non è in ascolto
+
+• La socket sockfd continua il suo lavoro
+
+zuliani@di.uniroma1.it
+
+20
+
+int connect(int sockfd,
+const struct sockaddr *addr,
+socklen_t addrlen);
+• Invocata da un client per associare un indirizzo addr ad un
+unnamed socket sockfd
+• addrlen è la dimensione di addr (ovvero sockaddr)
+• Se va a buon fine ritorna 0 e quindi sockfd può essere utilizzato
+come file descriptor per leggere e scrivere su server.
+
+zuliani@di.uniroma1.it
+
+21
+
+Esempi ed esercizi
+• Vedi esempi
+
+Debian/Ubuntu: per trovare il vostro indirizzo
+IP eseguite ip addr da terminale
+
+• echo_server.c
+• client.c server.c
+• client2.c server2.c
+• Esercizio: Modificare client.c e server.c in modo che la
+porta della connessione sia passata come parametro.
+• Esercizio: Modificare il codice server in modo che, per ogni accept
+che va a buon fine, venga creato un processo che soddisfi la richiesta
+(mandando l'ora)
+zuliani@di.uniroma1.it
+
+22
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+23
+
+Threads (III):
+Una race condition
+Lezione 16
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Un esempio «insidioso» di race condition con flussi di esecuzione
+(threads) concorrenti
+
+zuliani@di.uniroma1.it
+
+2
+
+Flussi di esecuzione concorrente
+• La fonte di maggior complicazione nei sistemi operativi è costituita
+dall’esistenza di flussi di esecuzione concorrenti:
+• In una applicazione multithread, ciascun thread è un flusso di esecuzione “in
+competizione” con quelli degli altri thread
+• In un sistema multiprogrammato con prelazione, ciascun processo può essere
+interrotto da un altro processo
+• In un sistema multiprocessore, diversi processi o gestori di interruzione sono in
+esecuzione contemporaneamente
+
+• La coerenza delle strutture di dati private di ciascun flusso di esecuzione è
+garantita dal meccanismo di cambio di flusso (contesto)
+• La coerenza delle strutture di dati condivise tra i vari flussi di esecuzione
+concorrenti non è garantita da tale meccanismo
+zuliani@di.uniroma1.it
+
+3
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di main()
+0
+i
+
+zuliani@di.uniroma1.it
+
+4
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+?
+p
+zuliani@di.uniroma1.it
+
+5
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+6
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+7
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+8
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+9
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+
+Il flusso di job() «vede» 1 invece di 0!
+zuliani@di.uniroma1.it
+
+p
+10
+
+Cosa fare?
+• Evitare soluzioni «complicate»
+• Preferire soluzioni concettualmente semplici (ed eventualmente
+inefficienti) rispetto a soluzioni «efficienti» ma di cui non si è certi
+della correttezza
+• Nel nostro caso, meglio inizializzare la memoria condivisa nella parte
+seriale del codice
+
+zuliani@di.uniroma1.it
+
+11
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+12
+
+Threads (II)
+Lezione 16
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Richiami su:
+• esecuzione concorrente;
+• race condition;
+• regione critica;
+• semafori
+
+• Meccanismi di sincronizzazione dei thread in linux (POSIX)
+• Mutex (semaforo binario)
+• Barrier (barriera)
+• Condition (condizione)
+
+zuliani@di.uniroma1.it
+
+2
+
+Richiami
+esecuzione concorrente; race condition; regione critica; semafori
+
+zuliani@di.uniroma1.it
+
+3
+
+Flussi di esecuzione concorrente
+• La fonte di maggior complicazione nei sistemi operativi è costituita
+dall’esistenza di flussi di esecuzione concorrenti:
+• In una applicazione multithread, ciascun thread è un flusso di esecuzione “in
+competizione” con quelli degli altri thread
+• In un sistema multiprogrammato con prelazione, ciascun processo può essere
+interrotto da un altro processo
+• In un sistema multiprocessore, diversi processi o gestori di interruzione sono
+in esecuzione contemporaneamente
+
+• La coerenza delle strutture di dati private di ciascun flusso di
+esecuzione è garantita dal meccanismo di cambio di flusso (contesto)
+• La coerenza delle strutture di dati condivise tra i vari flussi di
+esecuzione concorrenti non è garantita da tale meccanismo
+zuliani@di.uniroma1.it
+
+4
+
+Race condition
+• Se due o più flussi di esecuzione hanno una struttura dati condivisa, la
+concorrenza dei flussi può determinare uno stato della struttura non
+coerente con la logica di ciascuno dei flussi
+• Race condition
+• Lo stato della memoria condivisa tra due o più flussi di esecuzione concorrenti
+dipende dall’ordine esatto (temporizzazione) degli accessi alla memoria stessa
+
+• Le race conditions sono tra gli errori del software più insidiosi e difficili da
+determinare:
+• non sono per loro natura deterministici
+• possono non apparire mai sul sistema di sviluppo
+• possono non essere facilmente replicabili
+• sono di difficile comprensione
+zuliani@di.uniroma1.it
+
+5
+
+Esempio race condition
+• Flusso #1 e Flusso #2 condividono una
+variabile counter
+• L’incremento e decremento di counter
+non sono operazioni atomiche (indivisibili)!
+• Ciascuna consiste nel:
+• Trasferimento del valore di counter in un
+registro (load)
+• Operazione di incremento o decremento sul
+registro
+• Trasferimento del valore del registro in
+counter (store)
+zuliani@di.uniroma1.it
+
+6
+
+Esempio race condition (cont.)
+• t=1 counter = 2
+• t=6 counter = 2 OK
+
+• t=1 counter = 2
+• t=6 counter = 3 KO
+
+zuliani@di.uniroma1.it
+
+7
+
+Regione critica
+• Una sequenza di istruzioni di un flusso di esecuzione che accede ad
+una struttura di dati condivisa e che quindi non deve essere eseguita
+in modo concorrente ad un’altra regione critica
+• Per realizzare una regione critica, ovvero per avere l’accesso esclusivo
+ad una risorse condivisa si può usare un semaforo
+
+zuliani@di.uniroma1.it
+
+8
+
+Semaforo
+• Inventato da E. W. Dijkstra negli anni ‘60
+• Basato su una variabile intera contatore
+• inizializzata con valore n > 0
+• Accessibile tramite due primitive atomiche:
+• Wait: attende che il contatore sia positivo, poi lo decrementa
+• Signal: incrementa il contatore
+
+• Semaforo contatore
+• n > 1 può essere acquisito da n flussi di esecuzione in modo concorrente
+
+• Semaforo binario (Mutex - Mutual exclusion)
+• n = 1 può essere acquisito da un solo flusso alla volta
+zuliani@di.uniroma1.it
+
+9
+
+Mutex POSIX
+
+zuliani@di.uniroma1.it
+
+10
+
+POSIX Mutex (MUTual EXclusion device)
+• Utile per proteggere strutture dati condivise e realizzare regioni
+critiche
+• Li vediamo nell’ambito thread
+
+• int pthread_mutex_init(pthread_mutex_t *mutex, const
+pthread_mutexattr_t *mutexattr);
+• int pthread_mutex_lock(pthread_mutex_t *mutex));
+• int pthread_mutex_trylock(pthread_mutex_t *mutex);
+• int pthread_mutex_unlock(pthread_mutex_t *mutex);
+• int pthread_mutex_destroy(pthread_mutex_t *mutex);
+
+• man pthread_mutex_*
+• se non installata, su Debian sudo apt install glibc-doc
+zuliani@di.uniroma1.it
+
+11
+
+int pthread_mutex_init(pthread_mutex_t *mutex,
+const pthread_mutexattr_t *mutexattr);
+• Inizializza un mutex e imposta gli attributi a mutexattr
+• Gli attributi determinano il comportamento del semaforo quando il
+thread invoca un lock/unlock più volte consecutivamente
+• Se mutexattr=NULL viene impostato il valore di default (fast)
+altrimenti può essere specificato recursive o error checking
+• fast
+
+• un lock blocca il thread finché il lock precedente non è rilasciato (può creare stallo);
+• unlock rilascia il semaforo e ritorna subito
+
+• recursive
+
+• permette allo stesso thread di mettere più lock (un contatore tiene conto del numero di
+lock messi);
+• unlock decrementa il contatore; rilascia il semaforo quando il contatore è 0
+• error checking
+• genera un errore in caso il thread cerchi di mettere un lock su di un mutex sul quale già
+detiene un lock;
+• unlock ritorna errore se il thread non aveva fatto una lock precedentemente
+zuliani@di.uniroma1.it
+
+12
+
+Esempio
+
+S,E
+
+• produttore - consumatore su buffer circolare condiviso
+• un processo (thread) produttore mette un carattere in un buffer
+circolare condiviso
+• uno o più processi (thread) consumatori estraggono il contenuto del
+buffer
+• vedi prodcons_thread.c
+• Esercizio: modificare il programma prodcons_thread.c in modo
+che nel buffer venga anche scritto l’identificatore del thread che ha
+scritto il carattere nel buffer. Aggiungere un altro thread produttore.
+zuliani@di.uniroma1.it
+
+13
+
+Sincronizzazione thread: barriera
+
+zuliani@di.uniroma1.it
+
+14
+
+Barriera
+• Metodo di sincronizzazione tra processi o thread
+• Un insieme di thread continua il proprio flusso di esecuzione solo se
+tutti hanno raggiunto la barriera
+int pthread_barrier_init(pthread_barrier_t * restrict
+barrier, const pthread_barrierattr_t * restrict attr,
+unsigned int count);
+int pthread_barrier_destroy(pthread_barrier_t *barrier);
+int pthread_barrier_wait(pthread_barrier_t *barrier);
+
+• man pthread_barrier_*
+• [Debian/Ubuntu sudo apt install manpages-posix
+manpages-posix-dev ]
+zuliani@di.uniroma1.it
+
+15
+
+int pthread_barrier_init(pthread_barrier_t * restrict
+barrier, const pthread_barrierattr_t * restrict attr,
+unsigned int count);
+
+• Crea una nuova barriera con attributi attr e per count thread
+(ovvero count threads parteciperanno alla barriera)
+• Se attr = NULL viene impostato l’attributo di default
+• noi useremo il default
+
+• pthread_barrier_wait - Se la chiamata avviene con successo
+restituisce
+• PTHREAD_BARRIER_SERIAL_THREAD ad un thread in attesa sulla barrier
+selezionato casualmente
+• 0 a tutti gli altri thread in attesa sulla barriera
+
+• vediamo un esempio di uso delle barriere thread_barrier.c
+zuliani@di.uniroma1.it
+
+16
+
+Conditions
+
+zuliani@di.uniroma1.it
+
+17
+
+Condition
+• Permette ad un thread di sospendere la sua esecuzione finché un
+predicato su di un dato condiviso non è verificato
+
+• int pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t
+*cond_attr);
+• int pthread_cond_signal(pthread_cond_t *cond);
+• int pthread_cond_broadcast(pthread_cond_t *cond);
+• int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t
+*mutex);
+• int pthread_cond_timedwait(pthread_cond_t *cond,
+pthread_mutex_t *mutex, const struct timespec *abstime);
+• int pthread_cond_destroy(pthread_cond_t *cond);
+
+• Una variabile condition deve essere sempre associata ad un mutex
+per evitare una race condition dove un thread è in attesa di una
+condizione ed un altro thread invia un segnale alla condizione
+(sblocca la condizione) prima che il primo thread si metta in attesa
+zuliani@di.uniroma1.it
+
+18
+
+Condition (cont.)
+• int pthread_cond_signal(pthread_cond_t *cond);
+• risveglia uno dei thread in attesa sulla condizione
+
+• int pthread_cond_broadcast(pthread_cond_t *cond);
+• risveglia tutti i thread in attesa sulla condizione
+
+• int pthread_cond_wait(pthread_cond_t *cond,
+pthread_mutex_t *mutex);
+
+• Sblocca il mutex associato alla condizione e attende che un altro thread
+esegua un pthread_cond_signal sulla condizione
+• Il mutex va prima bloccato (lock) dal thread che invoca la wait
+• Prima di terminare, wait rimette il lock sul mutex
+
+• Vedere l’esempio prodcons_cond.c
+zuliani@di.uniroma1.it
+
+lock mutex
+wait cond (implicit unlock
+/ lock )
+/*sezione critica*/
+unlock mutex
+19
+
+Esercizi
+• Nella lezione precedente erano stati assegnati 6 esercizi. Considerate
+ora gli Esercizi ES5 e ES6 alla luce della sincronizzazione tra thread ed
+in particolare all'uso dei mutex e delle condition.
+• Quindi svolgete i seguenti esercizi
+• ES1: riscrivere l'esercizio ES5 usando un pthread_mutex
+• ES2: riscrivere l'esercizio ES6 usando un pthread_mutex
+• ES4: riscrivere l'esercizio ES6 usando un pthread_cond
+
+zuliani@di.uniroma1.it
+
+20
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+21
+
+Threads (I)
+Lezione 16
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Concetto di thread e differenza con i processi
+• Modelli di applicazioni multi-thread
+• Le librerie
+• La libreria pthread (POSIX thread)
+• Esempi
+• Esercizi
+
+• Implementazione
+
+zuliani@di.uniroma1.it
+
+2
+
+Applicazioni multithread
+• In una applicazione tradizionale, il programmatore definisce un unico
+flusso di esecuzione delle istruzioni
+• La CPU esegue istruzioni macchina in sequenza il flusso di esecuzione “segue” la
+logica del programma (cicli, funzioni, chiamate di sistema, gestori di segnali. . . )
+• Quando il flusso di esecuzione arriva ad eseguire una exit() l’applicazione termina
+
+• Le applicazioni multithread consentono al programmatore di definire
+diversi flussi (o «fili», «trame» (come in un tessuto)) di esecuzione
+• Ciascun flusso di esecuzione condivide le strutture di dati principali dell’applicazione
+• Ciascun flusso di esecuzione procede in modo concorrente ed indipendente dagli
+altri flussi
+• L’applicazione finisce solo quando tutti i flussi di esecuzione vengono terminati
+zuliani@di.uniroma1.it
+
+3
+
+Processi vs. Threads
+
+zuliani@di.uniroma1.it
+
+4
+
+Motivazioni: Elevato parallelismo interno dei
+calcolatori elettronici
+• DMA (Direct Memory Access)
+
+• trasferimento dati tra memoria primaria e periferiche di
+I/O senza intervento della CPU
+
+• Hyperthreading
+
+• supporto a diversi flussi di esecuzione, ciascuno con un
+proprio insieme di registri, che si alternano sulle unità
+funzionali della CPU
+
+• Multicore
+
+• diversi core di calcolo integrati sullo stesso chip e che
+condividono alcune risorse hardware quali cache di 2°
+livello, MMU, . . .
+
+È difficile scrivere
+applicazioni
+tradizionali (unico
+flusso) che sfruttino a
+fondo il parallelismo
+interno del calcolatore
+
+• Multiprocessori
+
+• diverse CPU integrate sulla stessa scheda madre
+zuliani@di.uniroma1.it
+
+5
+
+Esempio di applicazione multithread
+• Un browser web potrebbe essere costituito dai
+seguenti thread
+• Thread principale di controllo dell’applicazione
+• Thread per l’interazione con l’utente
+• Thread per la visualizzazione (rendering) delle pagine in
+formato HTML
+• Thread per la gestione dei trasferimenti di pagine e file
+dalla rete
+• Thread per l’esecuzione dei frammenti di script integrati
+nelle pagine Web
+• Thread per l’esecuzione dei programmi Java, Flash, ecc.
+zuliani@di.uniroma1.it
+
+Ciascun thread
+compie il proprio
+lavoro eseguendo
+un flusso di
+istruzioni
+indipendente e
+cooperando con gli
+altri thread
+
+6
+
+Vantaggi del multithreading
+• Riduzione del tempo di risposta
+
+• anche se una parte dell’applicazione è bloccata in attesa di eventi esterni, un altro
+thread può essere eseguito per interagire con l’utente o gestire altri eventi
+
+• Migliore condivisione delle risorse
+
+• tutti i thread di una applicazione condividono le risorse (strutture di dati in memoria,
+file aperti), e la comunicazione tra i thread è immediata
+
+• Maggiore efficienza
+
+• rispetto ad una applicazione costituita da più processi cooperanti,
+l’applicazione multithread è più efficiente, perché il SO gestisce i thread più
+rapidamente
+• In Linux, creare un thread richiede 1/10 del tempo richiesto per la creazione
+di un processo
+
+• Maggiore scalabilità
+
+• i thread possono sfruttare in modo implicito il parallelismo interno del
+calcolatore
+zuliani@di.uniroma1.it
+
+7
+
+Processi e threads
+• Un processo per una applicazione
+monothread è costituito da:
+
+• Codice (istruzioni macchina in memoria)
+• Strutture di dati (variabili globali in memoria,
+heap)
+• File aperti
+• Contenuto dei registri della CPU (contesto)
+• Posizione e contenuto dello stack UM
+
+• In una applicazione multithread
+alcune risorse sono comuni e
+condivise tra tutti i thread:
+• Codice e Strutture di dati
+• File aperti
+
+• Altre risorse sono private per ciascun
+thread:
+• Contenuto dei registri della CPU (contesto)
+• Posizione e contenuto dello stack
+
+zuliani@di.uniroma1.it
+
+8
+
+Processi e threads (cont.)
+Processi
+
+Thread
+
+Istanze di un programma in esecuzione
+(heavyweight)
+
+Componente di un processo e più piccola unità di
+esecuzione (lightweight)
+
+Cambio di contesto (context switching) richiede
+interazione con SO
+
+Context Switch non richiede interazione con SO
+
+Ogni processo ha il suo spazio di memoria
+
+Usano la memoria del processo a cui
+appartengono
+
+Richiedono più risorse di sistema
+
+Richiedono meno risorse di sistema
+
+Difficili da creare
+
+Facili da creare
+
+Comunicazione tra processi lenta in quanto ogni
+processo ha un differente indirizzo di memoria
+
+Comunicazione tra thread è veloce in quanto i
+thread condividono lo stesso indirizzo (e area) di
+memoria del processo a cui appartengono
+
+Ogni processo esegue indipendentemente
+(isolato)
+
+Ogni thread può leggere, scrivere, modificare
+dati di altri thread
+
+zuliani@di.uniroma1.it
+
+9
+
+Implementazione di applicazioni multithread
+• Esistono principalmente due componenti in un
+implementazione delle applicazioni multithread
+• Implementazione a livello utente
+• Implementazione a livello kernel
+
+• In sostanza tutte le implementazioni sono caratterizzate
+dalla relazione tra:
+• Thread utente
+• il flusso di esecuzione dell’applicazione
+
+• Thread kernel
+
+La definizione di
+thread utente o
+thread kernel non
+è basata su una
+diversa modalità
+d’esecuzione
+(User Mode o
+Kernel Mode)
+
+• l’astrazione (strutture di dati, servizi) definita all’interno del nucleo del
+SO per gestire un flusso di esecuzione
+zuliani@di.uniroma1.it
+
+10
+
+Modello “da molti a 1”
+• Un’applicazione multithread è costituita da un singolo processo
+• A diversi thread utente corrisponde un singolo thread kernel
+• Un singolo processo tradizionale
+
+• Il kernel non è coinvolto nella gestione dei flussi dell’applicazione
+• L’applicazione (eventualmente usando una libreria di sistema) gestisce
+autonomamente i thread utente:
+• Organizza i vari flussi di esecuzione
+• Salva e ripristina gli stack UM e i contesti
+
+• Se un thread invoca una chiamata di sistema bloccante, il processo (e
+quindi tutti i thread utente) vengono bloccati
+• Impossibile sfruttare in modo implicito il parallelismo interno del
+calcolatore
+• Implementazione detta “a livello utente” o green threads
+zuliani@di.uniroma1.it
+
+11
+
+Modello “da 1 a 1”
+• Ciascun thread utente della applicazione corrisponde ad un singolo
+thread kernel
+• Il kernel si occupa della gestione e schedulazione dei thread kernel
+• Perciò gestisce anche i thread utente
+
+• L’applicazione utilizza le API definite in una libreria di sistema:
+• Crea e distrugge i thread utente
+• Gestisce comunicazione e sincronizzazione
+
+• La libreria implementa i servizi richiesti dall’applicazione invocando
+opportune chiamate di sistema
+• Ciascun thread utente può invocare chiamate di sistema bloccanti
+senza bloccare gli altri thread
+• L’applicazione sfrutta in modo implicito il parallelismo interno del
+calculatore
+• Implementazione detta “a livello kernel” o native threads
+zuliani@di.uniroma1.it
+
+12
+
+Implementazione dei threads
+
+zuliani@di.uniroma1.it
+
+13
+
+User-level vs. Kernel-level threads
+User-level
+
+Kernel-level
+
+• SO ignaro dei threads
+• Facile implementazione
+• Cambio contesto veloce;
+supporto HW non necessario
+• Una chiamata bloccante di un
+thread blocca l’intero processo
+• Esempi: Posix & Java threads
+
+• SO consapevole dei threads
+• Implementazione complicata
+• Cambio contesto consuma
+tempo e risorse, e richiede
+supporto
+• Una chiamata bloccante di un
+thread NON blocca l’intero
+processo
+• Esempi: Windows, Solaris
+
+zuliani@di.uniroma1.it
+
+14
+
+Modello da molti a molti
+• nu thread utente dell’applicazione corrispondono a nk thread kernel (nk ≤ nu)
+• Il kernel del SO si occupa della gestione e schedulazione dei thread kernel
+• Non gestisce direttamente i thread utente
+
+• L’applicazione utilizza le API definite in una libreria di sistema:
+• Definisce il numero nk di thread kernel
+• Crea e distrugge i thread utente
+• Mappa i thread utente sui thread kernel
+
+• La libreria di sistema:
+• Usa chiamate di sistema per gestire i thread kernel
+• Gestisce la schedulazione e lo stack UM dei thread utente mappati sullo stesso thread
+kernel
+• Gestisce comunicazione e sincronizzazione
+zuliani@di.uniroma1.it
+
+15
+
+Esempi di implementazione
+• Esempi di implementazioni con modello “da molti a uno”
+• La libreria green threads disponibile in Sun (Oracle) Solaris
+• La libreria GNU Pth (GNU Portable Threads)
+• Le librerie che implementano i thread a livello utente possono essere utilizzate con
+qualunque sistema operativo
+
+• Tutti i maggiori SO oggi supportano i thread nativi, e dunque i modelli
+“da uno a uno” e “da molti a molti”
+• Linux, Windows, MacOS X tendono ad adottare il modello “da uno a uno”
+• IRIX, HP-UX, Tru64 UNIX adottano il modello “da molti a molti”
+
+• In ogni caso la scelta del modello “da uno a uno” piuttosto che “da
+molti a molti” dipende dalla libreria di thread utilizzata, e non dal
+sistema operativo
+zuliani@di.uniroma1.it
+
+16
+
+Librerie dei thread
+• Generalmente il programmatore utilizza una libreria di sistema per
+realizzare una applicazione multithread
+• Le API offerte dalla libreria non sono direttamente correlate con la
+tipologia di thread utilizzata
+
+• Possono esistere diverse versioni di una libreria con identiche API ma thread a livello utente
+oppure kernel
+• Esempio: la libreria pthreads (POSIX threads)
+
+• Alcune librerie e relative API sono specifiche per un determinato
+sistema operativo e tipologia di thread
+• Esempio: la libreria per i thread delle API Win32
+
+• Alcune librerie di thread e relative API sono specifiche di un
+linguaggio ad alto livello
+• L’uso della libreria è implicito e automatico
+• La libreria utilizza una libreria di thread di livello più basso
+• Esempio: la libreria di thread del linguaggio Java
+zuliani@di.uniroma1.it
+
+17
+
+Libreria Pthreads
+• La libreria pthreads è definita dallo standard POSIX (IEEE 1003.1c)
+• Lo standard definisce le API, ma non stabilisce quale debba essere la
+loro implementazione in uno specifico SO
+• In Linux sono coesistite tre diverse implementazioni:
+• LinuxThreads: prima implementazione, basata sul modello “da uno a uno”,
+non più supportata
+• NGPT (Next Generation POSIX Threads): sviluppata da IBM, sul modello “da
+molti a molti”, ora non più supportata
+• NPTL (Native POSIX Threads Library): ultima implementazione, più efficiente,
+più aderente allo standard, sul modello “da uno a uno”
+
+• Oggi in Linux si utilizza esclusivamente NPTL
+zuliani@di.uniroma1.it
+
+18
+
+Implementazione
+
+zuliani@di.uniroma1.it
+
+19
+
+Creazione di un nuovo thread in pthreads
+• La funzione di libreria pthread_create() crea un nuovo thread:
+• int pthread_create(ptid, pattr, start, arg)
+
+• ptid: puntatore a variabile di tipo pthread_t che conterrà
+l’identificatore del nuovo thread (TID)
+• pattr: puntatore ad una variabile contenente attributi (flag) per la
+creazione del thread
+• start: funzione inizialmente eseguita dal thread, con prototipo:
+void *start(void *);
+• arg: puntatore passato come argomento a start()
+zuliani@di.uniroma1.it
+
+20
+
+Terminazione di un nuovo thread in pthreads
+• La funzione di libreria pthread_exit() termina l’esecuzione del
+thread che la invoca:
+• void pthread_exit(void *value_ptr);
+
+• Il valore passato come argomento può essere passato ad altri thread
+dello stesso processo (join)
+• La funzione viene implicitamente invocata quando la funzione iniziale
+start del thread termina
+• Se viene eseguita dall’ultimo thread di un processo, il processo stesso
+termina con una exit(0)
+zuliani@di.uniroma1.it
+
+21
+
+Attesa della terminazione di un thread in
+pthreads
+• La funzione di libreria pthread_join() attende la conclusione di
+un thread:
+• int pthread_join(pthread_t tid, void *pret);
+
+• tid è l’identificatore del thread di cui si vuole attendere la
+terminazione
+• pret è un puntatore ad una variabile che riceverà il valore passato
+dal thread terminato in pthread_exit()
+• Non esiste modo di indicare che si vuole attendere la terminazione di
+un thread qualunque
+zuliani@di.uniroma1.it
+
+22
+
+Esempio 1
+• file pthreadHW.c
+• compilare con gcc indicando
+l’opzione -pthread
+
+zuliani@di.uniroma1.it
+
+23
+
+Terminazione di un processo multithread
+• In Unix un processo viene terminato con exit():
+• void exit(int status);
+
+• In Linux le cose sono più complicate:
+• Premessa: in Linux e Unix le chiamate di sistema sono ‘confezionate’ (o
+esposte) da una funzione C cosidetta wrapper. Di solito (ma non sempre!) la
+wrapper ha lo stesso nome della chiamata di sistema.
+• La chiamata di sistema _exit termina un singolo thread
+• La chiamata di sistema exit_group termina tutti i thread di un processo
+• La funzione wrapper _exit() esegue la chiamata di sistema exit_group,
+non _exit [Per invocare la chiamata di sistema _exit si deve usare la
+chiamata di sistema syscall – vedere man 2 syscall.]
+zuliani@di.uniroma1.it
+
+24
+
+Terminazione di un processo multithread
+• (cont.) In Linux le cose sono più complicate:
+• La funzione di libreria exit() invoca, alla fine, la wrapper _exit()
+• Eseguire return in main() è equivalente ad invocare la funzione di libreria
+exit()
+• La funzione wrapper _Exit() (standard C99) è equivalente alla funzione
+wrapper _exit()
+• La funzione di libreria pthread_exit()invoca direttamente la chiamata di
+sistema _exit
+
+zuliani@di.uniroma1.it
+
+25
+
+Esempio 2: pthread.c
+• Oltre all’uso di pthread_create/_join vediamo l’uso di
+• int pthread_attr_init(pthread_attr_t *attr);
+• int pthread_attr_destroy(pthread_attr_t *attr);
+• int pthread_attr_setstacksize(pthread_attr_t *attr,
+size_t stacksize);
+
+• pthread_attr_t è un tipo di dato (struttura) che contiene gli
+attributi del thread
+• https://pubs.opengroup.org/onlinepubs/7908799/xsh/systypes.h.html
+• https://pubs.opengroup.org/onlinepubs/7908799/xsh/pthread.h.html
+
+zuliani@di.uniroma1.it
+
+26
+
+Principali Attributi Pthread in
+pthread_attr_t
+• scope PTHREAD_SCOPE_PROCESS
+• New thread is unbound; it competes for resources with all the other threads in the process and in the system.
+
+• detachstate PTHREAD_CREATE_JOINABLE
+• Exit status and thread are preserved after the thread terminates.
+
+• stackaddr NULL
+• New thread has system-allocated stack address.
+
+• stacksize 1 megabyte
+• New thread has system-defined stack size.
+
+• priority
+• New thread inherits parent thread priority.
+
+• inheritsched PTHREAD_INHERIT_SCHED
+• New thread inherits parent thread scheduling priority.
+
+• schedpolicy SCHED_OTHER
+• New thread uses Solaris-defined fixed priority scheduling; threads run until preempted by a higher-priority
+thread or until they block or yield.
+zuliani@di.uniroma1.it
+
+27
+
+Per leggere e modificare gli attributi di un
+pthread
+• Famiglia di funzioni pthread_attr_*, ad es.:
+• pthread_getattr_np(3)
+• pthread_attr_setdetachstate(3)
+• pthread_attr_setinheritsched(3)
+• pthread_attr_setschedparam(3) (priority)
+• pthread_attr_setschedpolicy(3)
+• pthread_attr_setscope(3)
+• pthread_attr_setstack(3)
+• pthread_attr_setstackaddr(3)
+• pthread_attr_setstacksize(3)
+zuliani@di.uniroma1.it
+
+Esercizio
+nel file pthreadAttr.c c'è un esempio di
+uso delle funzioni pthread_attr_*.
+Eseguire il programma, comprenderne
+il funzionamento e l’uso delle varie
+funzioni di libreria usate. Basatevi
+ovviamente sul man (da cui tra l’altro il
+programma è stato preso)
+
+28
+
+Esercizi
+• Es1: Scrivere un programma C che crei un “Thread” ed attende la terminazione dello stesso. Il thread
+scriverà a video in 20 secondi i numeri da 0 a 19.
+• Es2: Scrivere un programma C che crei 5 “Thread” ciascuno dei quali stampi a video il messaggio “Hello
+Word sono il Thread #” ed attenda la terminazione dei 5 thread.
+• Es3: Scrivere un programma C che crei 5 “Thread” a cui vengono passati tramite una struttura due
+parametri: il numero del thread ed un messaggio.
+• Es4: Scrivere un programma C che accetta un numero intero < n> da riga di comando, crea un Thread che
+sommerà ad una variabile globale intera di valore m il valore di n ed infine ne stampa il risultato a video.
+• Es5: Scrivere un programma C che crei un Thread il quale insieme al programma main incrementa di venti
+volte una variabile globale (myglobal). Il thread chiama una funzione “incrementa”. Supporremo che
+l’accesso alla variabile globale non venga regolamentato da alcun meccanismo di gestione della concorrenza.
+
+• Es6: Scrivere un programma C che crea due Thread “somma1” e “somma2”, entrambi accedono alle variabili
+test.a e test.b di una struttura dati test condivisa incrementandole di 1 per 10 volte, aspettano 2 secondi
+prima di stampare a video i valori delle due variabili. Supporremo che tale accesso non venga regolamentato
+da alcun meccanismo di gestione della concorrenza.
+
+zuliani@di.uniroma1.it
+
+29
+
+Implementazione dei thread in Linux
+• L’implementazione dei thread in Linux è basata sul concetto di
+processo leggero o LWP (Light Weight Process)
+• Un processo leggero è un processo che condivide alcune risorse
+selezionate con il proprio genitore
+• Per creare processi leggeri si utilizza l’API clone() con diversi
+possibili flag CLONE_XXX, ad esempio
+•
+•
+•
+•
+•
+
+CLONE_FILES descrittori di file
+CLONE_FS file system (ad es., directory corrente)
+CLONE_SIGHAND gestori dei segnali
+CLONE_THREAD stesso “processo” (gruppo di thread)
+CLONE_VM spazio di memoria
+
+• fork() ≡ clone() senza alcuno degli attributi precedenti
+• pthread_create() ≡ clone() con tutti gli attributi
+zuliani@di.uniroma1.it
+
+30
+
+clone (3)- funzione di libreria
+• La funzione di libreria clone() è simile alla funzione pthread_create():
+• int clone(start, stack, flags, arg, ...);
+
+• start è la funzione inizialmente eseguita dal processo leggero
+• stack è l’indirizzo della cima dello stack UM del nuovo processo
+leggero
+• flags sono i flag CLONE_XXX
+• arg è l’argomento passato a start()
+• La funzione di libreria clone() si basa su una chiamata di sistema
+clone con semantica differente
+zuliani@di.uniroma1.it
+
+31
+
+clone (2) - chiamata di sistema
+• La chiamata di sistema clone è simile alla fork():
+• int clone(flags, stack);
+
+• flags sono i flag CLONE_XXX
+• stack è l’indirizzo della cima dello stack UM del nuovo processo
+leggero se è NULL, il figlio utilizza una copia dello stack del padre
+• L’esecuzione del figlio inizia con l’istruzione seguente l’invocazione di
+clone
+
+zuliani@di.uniroma1.it
+
+32
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+33
+
+Il Linguaggio Rust:
+Breve Introduzione
+Lezione 17
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Errori di accesso alla memoria
+• Breve storia di Rust
+• Principali caratteristiche di Rust
+
+zuliani@di.uniroma1.it
+
+2
+
+Problema: Accesso corretto alla memoria
+• Accessi ‘illegali’ alla memoria:
+• buffer overflows
+• use-after-free
+• de/referenziare puntatori nulli
+• accedere oltre la fine di un array
+• etc.
+• 2019: circa il 70% delle vulnerabilità nel codice Microsoft è causato
+da accessi illegali alla memoria1
+• 2024/25: il governo USA scoraggia l’uso del C/C++2,3
+1 https://www.microsoft.com/en-us/msrc/blog/2019/07/a-proactive-approach-to-more-secure-code
+2 https://bidenwhitehouse.archives.gov/wp-content/uploads/2024/02/Final-ONCD-Technical-Report.pdf
+3 https://media.defense.gov/2025/Jun/23/2003742198/-1/-1/0/CSI_MEMORY_SAFE_LANGUAGES_REDUCING_VULNERABILITIES_IN_MODERN_SOFTWARE_DEVELOPMENT.PDF
+
+zuliani@di.uniroma1.it
+
+3
+
+La promessa di Rust
+• Accessi illegali alla memoria: esempio di comportamento non-definito
+• Dal man di free(): “Any use of a pointer that refers to freed space
+results in undefined behavior.”
+• Rust promette che
+• Se il vostro codice compila senza errori, allora è privo di
+
+comportamenti non-definiti
+
+zuliani@di.uniroma1.it
+
+4
+
+Sicurezza della memoria in Rust
+• Il compilatore Rust opera sul codice molti più controlli del C!
+• Rust è un linguaggio fortemente e staticamente tipizzato
+• Le garanzie di sicurezza di Rust sono basate su:
+• un sistema di tipi basati sulla proprietà di un «oggetto» (ownership type
+system)
+• un controllo di tipo (type checking) che assicura l’assenza di accessi illegali alla
+memoria
+
+• Il controllo di tipo operato dal compilatore è una sofisticata analisi
+statica del codice
+• NON c'è alcuna raccolta dei rifiuti (di memoria), o garbage collection!
+zuliani@di.uniroma1.it
+
+5
+
+Breve storia di Rust
+• Sviluppo iniziato da Graydon Hoare (Mozilla) nel 2006
+
+• Linguaggio per la programmazione di sistema: come il C, ma più sicuro!
+• Rust 1.0 rilasciato nel maggio 2015 (versione attuale: 1.95, aprile 2026)
+• Il compilatore Rust inizialmente scritto in OCaml, poi in Rust stesso
+(usando LLVM)
+• Tutto il progetto Rust è codice aperto (open source)
+
+zuliani@di.uniroma1.it
+
+6
+
+Breve storia di Rust
+• Rust è usato:
+• in Mozilla Firefox
+• in alcuni librerie critiche di Windows
+• nel kernel di Linux (driver, etc.); usabile al pari del C per
+lo sviluppo del kernel!
+• ...
+
+• Per installazione e documentazione:
+https://rust-lang.org/
+zuliani@di.uniroma1.it
+
+7
+
+Principali caratteristiche di Rust
+• Rust «mescola» diversi stili di programmazione:
+• Funzionale
+• Imperativa
+• Orientata agli oggetti
+• La sintassi di Rust è di tipo imperativo, simile a C/C++
+• Un ambiente di sviluppo completo:
+• cargo (gestore della compilazione, dipendenze, etc.)
+• rustc (il compilatore vero e proprio)
+• rustdoc (sistema per la documentazione automatica)
+zuliani@di.uniroma1.it
+
+8
+
+Esempio di programma Rust
+• Vediamo un semplice programma Rust che calcola il MCD (massimo
+comun divisore) di una lista di numeri interi
+• I numeri sono passati sulla linea di comando
+
+zuliani@di.uniroma1.it
+
+9
+
+Una funzione per il MCD di due interi
+Una volta inizializzate, le ‘variabili’
+NON possono essere modificate! Per
+farlo, dobbiamo aggiungere la
+clausola mut (mutable).
+Tipo del valore di ritorno
+(intero senza segno 64bit).
+Una asserzione. Se non è
+soddisfatta, il programma
+termina con un messaggio di
+errore. (E’ una macro.)
+Una variabile locale. (E’
+immutabile e il tipo è inferito
+da Rust!)
+
+zuliani@di.uniroma1.it
+
+Valore di ritorno della
+funzione.
+10
+
+Unit test
+• In Rust è possibile scrivere unit test direttamente nel codice
+• Le unit test si eseguono con cargo test
+E’ un attributo. Indica che test_gcd è
+una funzione di test: non viene
+normalmente compilata. E’ compilata ed
+eseguita quando si invoca cargo test.
+
+Asserzione. Le due espressioni
+passate come parametro devono
+ritornare valori uguali.
+
+zuliani@di.uniroma1.it
+
+11
+
+La funzione main() del programma (I)
+Dichiarazioni di visibilità.
+FromStr è un trait (insieme
+di metodi che un tipo può
+implementare).
+Un vettore (prolungabile).
+Ciclo per trattare la linea di
+comando; env::args()ritorna
+un iteratore.
+
+Converte una stringa in u64 e lo
+carica nel vettore. Gestione degli
+errori nella conversione. (Rust non
+ha le eccezioni.)
+
+d conterrà il MCD (all’inizio è il prim
+elemento del vettore).
+
+zuliani@di.uniroma1.it
+
+12
+
+La funzione main() del programma (II)
+
+Idea principale: calcola
+l’MCD finale iterando su
+coppie di numeri
+(partendo dal secondo)
+Come nel C, & ritorna l’indirizzo di una variabile
+
+ATTENZIONE: m prende solo in prestito (borrow) l’indirizzo (o riferimento) degli
+elementi del vettore. La proprietà (ownership) del vettore rimane a numbers!
+Come nel C, *m ritorna il valore puntato da m
+
+zuliani@di.uniroma1.it
+
+13
+
+Tipi di proprietà
+• Rust gestisce la memoria con un sistema di controlli (detto di
+proprietà) a tempo di compilazione
+• Idea fondamentale:
+• Durante l’esecuzione di un programma, ad ogni istante di tempo le allocazioni
+heap sono di proprietà di una sola variabile
+
+• La memoria è liberata quando il proprietario non è più visibile, a meno che il
+proprietario non assegni la proprietà ad un’altra variabile
+
+zuliani@di.uniroma1.it
+
+14
+
+Tipi di proprietà
+Un semplice array nell’heap:
+il proprietario è c.
+La proprietà dell’array passa a d!
+
+zuliani@di.uniroma1.it
+
+15
+
+Un esempio di prevenzione di errori
+Parametro passato per riferimento: la
+proprietà dell’argomento passa ad arg!
+Argomento deallocato al termine della
+funzione!
+
+zuliani@di.uniroma1.it
+
+16
+
+Un esempio di prevenzione di errori
+Parametro passato per riferimento: la
+proprietà dell’argomento passa ad arg!
+Argomento deallocato al termine della
+funzione!
+
+Rust rigetta il
+codice di cui
+sopra.
+
+zuliani@di.uniroma1.it
+
+17
+
+Prestare memoria
+• Rust consente l’accesso a memoria heap senza averne la proprietà
+attraverso il meccanismo dei riferimenti
+• Permettono di prendere in prestito memoria di proprietà di un’altra
+variabile
+• Due tipi:
+• immodificabile (creato con &)
+• modificabile (creato con &mut)
+
+zuliani@di.uniroma1.it
+
+18
+
+Riferimenti
+Riferimento modificabile
+Riferimento non modificabile
+
+lo non è più valido
+zuliani@di.uniroma1.it
+
+19
+
+Prestare memoria
+• I riferimenti operano con un
+sistema di permessi:
+• Lettura (R)
+• Scrittura (W)
+• Proprietà (O)
+
+zuliani@di.uniroma1.it
+
+20
+
+Prestare memoria
+• Il controllo dei prestiti (borrow checker)
+di Rust assicura che le operazioni
+abbiano i permessi necessari
+• Ad esempio:
+• Calcolare la lunghezza di un vettore
+richiede R
+
+• Concatenare una stringa con un’altra
+richiede W
+
+• Deallocare un vettore richiede O
+zuliani@di.uniroma1.it
+
+21
+
+Prestare memoria
+• Il controllo dei prestiti (borrow checker)
+di Rust assicura che le operazioni
+abbiano i permessi necessari
+• Ad esempio:
+• Calcolare la lunghezza di un vettore
+richiede R
+
+• Concatenare una stringa con un’altra
+richiede W
+
+• Deallocare un vettore richiede O
+zuliani@di.uniroma1.it
+
+22
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+23
+
+

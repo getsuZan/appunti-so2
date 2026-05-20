@@ -1,0 +1,430 @@
+Introduzione al C
+Lezione 9
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Leggere la linea di comando
+• Allocazione dinamica della memoria
+• Strutture
+• Input/Output da file
+
+zuliani@di.uniroma1.it
+
+2
+
+Leggere la linea di comando
+
+zuliani@di.uniroma1.it
+
+3
+
+Linea di comando
+• main ha due parametri, convenzionalmente chiamati argc e argv
+int argc
+// il numero di ‘parole’
+char *argv[]
+// le ‘parole’ digitate
+Ad esempio, digitando:
+$: cat file.txt
+Avremo che:
+argc = 2
+argv[0] = ”cat”
+argv[1] = ”file.txt”
+zuliani@di.uniroma1.it
+
+4
+
+Linea di comando: Esercizio
+Completare il seguente codice in modo tale che il programma stampi tutta le
+parole della sua linea di comando.
+int main(int argc, char *argv[]) {
+while (??? >= 0)
+printf("argv[%d] = %s\n", ???, argv[???]);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+5
+
+Linea di comando: Soluzione
+int main(int argc, char *argv[]) {
+while (--argc >= 0)
+printf("argv[%d] = %s\n", argc, argv[argc]);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+6
+
+Allocazione dinamica della
+memoria
+
+zuliani@di.uniroma1.it
+
+7
+
+I puntatori
+• Abbiamo finora visto cose tipo:
+• char *strncpy(char *dest, const char *src, size_t
+n);
+• scanf(``...´´, &varname);
+
+• Hanno a che fare con i puntatori, ossia variabili che contengono
+l’indirizzo di un’altra variabile (i.e., una locazione di memoria)
+• <tipo> *var_name;
+• Ad es:
+• char *dest;
+• int *intPointer;
+
+// puntatore ad un carattere
+// puntatore ad un intero
+zuliani@di.uniroma1.it
+
+8
+
+Valori associati ad una variabile puntatore
+• int *integer_ptr;
+• Valore diretto
+• Indirizzo di un’altra cella di memoria (ad es: 0x4d56)
+• Vi si accede mediante il nome della variabile (ad es:
+integer_ptr)
+
+• Valore indiretto
+
+Integer_ptr 0x4d56
+
+• Valore contenuto dalle cella di memoria in cui indirizzo è il
+valore diretto
+• Vi si accede mediante, ad es:, *integer_ptr
+
+0x4d56
+
+• Ad es:
+• Valore diretto = 0x4d56
+• Valore indiretto = 4
+zuliani@di.uniroma1.it
+
+9
+
+Operatori & e *
+int num=5;
+int *numPtr;
+• numPtr = &num;
+• assegna a numPtr l’indirizzo di num
+
+• *numPtr = 10;
+• assegna alla locazione di memoria puntata da numPtr il valore 10
+
+• Vedi il file pointer.c
+zuliani@di.uniroma1.it
+
+10
+
+Aritmetica dei puntatori
+• Un puntatore contiene un numero intero: è l’indirizzo di una cella
+di memoria.
+• Possiamo quindi applicare alcune operazioni aritmetiche, ad es.:
+int *ptr;
+ptr = ptr + 1;
+ptr = ptr + n;
+
+//ptr viene incrementato di 4 bytes
+(sizeof(int)) (locazioni di memoria)
+//ptr viene incrementato di 4n bytes
+(locazioni di memoria)
+
+Vedi aritmeticaPtr.c
+zuliani@di.uniroma1.it
+
+11
+
+Vettori (array) e puntatori
+int vect[10];
+int *ptr = NULL; //puntatore ‘nullo’
+ptr = &vect[0]; //puntatore al primo elemento
+ptr = vect;
+//puntatore al vettore
+
+Puntatore al primo elemento e variabile vettore/array sono la stessa
+cosa!!
+Vedi arrayPtr.c
+zuliani@di.uniroma1.it
+
+12
+
+Allocazione
+dinamica
+• Vettori e altre variabili
+sono allocate nello stack a
+tempo di compilazione
+• La memoria richiesta a
+tempo di esecuzione viene
+allocata nello heap
+zuliani@di.uniroma1.it
+
+13
+
+Allocazione dinamica
+• La memoria richiesta a tempo di esecuzione viene allocata nello heap
+• Vediamo come allocare memoria a tempo di esecuzione
+void *calloc(size_t nmemb, size_t size);
+void *malloc(size_t size);
+void free(void *ptr);
+Vedi heapAlloc.c
+zuliani@di.uniroma1.it
+
+14
+
+Allocazione dinamica
+1. Si richiede memoria dinamica tramite calloc o malloc
+2. Dopo l’uso rilasciare la memoria con free
+• Il programmatore C deve farsi carico del garbage collection (‘raccolta
+della spazzatura’, i.e., liberare memoria dinamica non più in uso)
+• Il parametro di free deve essere un puntatore ritornato da
+calloc/malloc, altrimenti il comportamento di free è indefinito
+• Chiamare free più di una volta con lo stesso puntatore è un uso
+indefinito
+zuliani@di.uniroma1.it
+
+15
+
+Esercizio 5
+Leggete ATTENTAMENTE il man per le differenze tra
+calloc e malloc
+
+• Implementare l’esempio heapAlloc.c usando malloc
+
+zuliani@di.uniroma1.it
+
+16
+
+Esercizio 6 (a casa)
+• Progettare ed implementare un programma che
+• Allochi dinamicamente 2 blocchi di memoria, chiamiamoli m1 e m2. I due
+blocchi hanno dimensione arbitraria (ad esempio letta come argomento di
+main)
+• Inizializzi il blocco m1 con dei dati, ad esempio leggendoli da un file di input
+(passato da stdin)
+• Copi il blocco di memoria m1 in m2 (usare memcpy())
+• Devono essere fatti gli opportuni controlli sulle dimensioni dei 2 blocchi di memoria, ad
+esempio se m2 è più piccolo copiare solo parzialmente m1.
+
+• Produca come output il contenuto di m2 (ridirezionare stdout su di un file
+di testo)
+zuliani@di.uniroma1.it
+
+17
+
+Strutture
+
+zuliani@di.uniroma1.it
+
+18
+
+Strutture (structures)
+• Definizione di nuovi tipi di dato che combinano tipi di dato
+eterogenei
+• Possiamo vederla come un contenitore di una collezione di variabili di vari tipi
+• Permette di trattare tale collezione come un tipo di dato da noi definito
+
+• Devono essere definite prima di essere usate (ovvio!!!)
+• Tre modi per definirle
+• Variabile struttura (variable)
+• Struttura etichettata (tagged)
+• Definizione di tipo struttura (type-defined)
+
+zuliani@di.uniroma1.it
+
+19
+
+Variabile struttura
+struct { // x,y: nomi dei membri della strutura
+double x; // coordinata x
+double y; // coordinata y
+} point2D; // point2D: nome variabile
+• Poco portabile, tutte le variabili struttura vanno definite qui:
+struct {
+...
+} pA, pB, pC; // point2D: nome variabile
+zuliani@di.uniroma1.it
+
+20
+
+Tagged structure
+struct point3D {
+// point3D: tag
+// x,y,z: nomi dei membri della strutura
+double x; // coordinata x
+double y; // coordinata y
+double z; // coordinata z
+};
+struct point3D pointA, pointB, pointC;
+
+• Soluzione più portabile, potrei mettere la definizione di struct
+point3D in un header file e riutilizzarla
+zuliani@di.uniroma1.it
+
+21
+
+Type-defined structure
+typedef struct {
+char ID[17]; //ad es: codice fiscale
+long int income;
+float taxRate;
+} taxpayer_t; //nome del nuovo tipo di dato
+taxpayer_t person1, person2;
+taxpayer_t persons[100];
+zuliani@di.uniroma1.it
+
+22
+
+Inizializzazione strutture
+struct point3D pointA={1.1, 1.2, 3.5},
+pointB={0.3, 4.5};
+• Inizializzare meno campi è legale
+
+zuliani@di.uniroma1.it
+
+23
+
+Allocazione dinamica di strutture
+• Vedi taxPayersAlloc.c
+
+zuliani@di.uniroma1.it
+
+24
+
+Vediamo taxPayers.c
+• Esercizio 1. in taxPayers.c modificare la funzione newTP in
+modo che prenda come parametro di input anche la data di nascita
+come tipo di dato birthdate_t (fatelo subito 10min)
+• Esercizio 2. in taxPayers.c modificare main in modo che i dati del
+contribuente siano inseriti da linea di comando (uso di argc e argv)
+• Esercizio 3. in taxPayers.c modificare il codice in modo che i dati
+del contribuente siano letti da file di testo (uso ridirezione stdin)
+
+zuliani@di.uniroma1.it
+
+25
+
+Passaggio delle strutture come parametri a
+funzione
+• Per valore
+• Vantaggio: più semplice/intuitivo
+• Svantaggio: dati vengono copiati nello stack
+
+• Per riferimento (puntatore)
+• Vantaggio: i parametri non vengono memorizzati nello stack andando così ad
+ottimizzarne l’uso essendo una risorsa limitata
+
+• Vedi taxPayersParams.c
+
+zuliani@di.uniroma1.it
+
+26
+
+File Input/Output
+
+zuliani@di.uniroma1.it
+
+27
+
+Tipi di file
+• Testo
+• Binari
+• Buffer
+• Area di memorizzazione temporanea che mantiene i dati non ancora trasferiti
+dal disco alla memoria o viceversa
+
+zuliani@di.uniroma1.it
+
+28
+
+File di testo
+• Tutte le funzioni per la loro gestione sono in stdio.h
+• Ogni linea (riga) finisce con \n
+• Il file finisce con EOF (definito in stdio.h)
+
+zuliani@di.uniroma1.it
+
+29
+
+Passi per usare i file
+
+vedi file.c
+
+1. Dichiarare un file pointer
+2. Aprire il file
+• Viene creata una struttura dati con le info necessarie per gestire il file
+• Viene allocato l’area di buffer
+• Collega il file pointer con la struttura
+
+3. Usare le funzioni di I/O
+• Processo (progr. in esec.) → buffer → disco (e viceversa)
+
+4. Chiudere il file
+• Scrive il contenuto buffer nel file (se necessario)
+• Libera la memoria associata al file pointer
+zuliani@di.uniroma1.it
+
+30
+
+Input/output
+• int fscanf(FILE *stream, const char *format, ...);
+• int fprintf(FILE *stream, const char *format, ...);
+• char *fgets(char *s, int size, FILE *stream);
+• legge size caratteri o fino a \n
+• int fputs(const char *s, FILE *stream);
+• int feof(FILE *stream);
+• restituisce un valore diverso da 0 quando ha trovato EOF
+
+zuliani@di.uniroma1.it
+
+31
+
+fscanf/fprintf
+• vedi filefsfpf.c
+• Richiedono la conoscenza della struttura del file
+
+zuliani@di.uniroma1.it
+
+32
+
+fgets
+• Vedi filefgets.c
+• Esercizio 4
+• Modificare filefgets.c in modo che il programma legga tutto il
+contenuto del file, fino alla fine
+• Suggerimento: leggete il man di fgets (specialmente la parte sul valore di
+ritorno)!
+
+zuliani@di.uniroma1.it
+
+33
+
+fputs
+• Vedi filefputs.c
+• Esercizio 5
+• scrivere un programma che legge un intero file e lo riscrive in altro file
+
+• Esercizio 6
+• considerate l’esercizio 3. Modificate il programma in modo che i dati del tax
+payer vengano letti da un file di testo usando sia fscanf sia fgets
+
+zuliani@di.uniroma1.it
+
+34
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+35
+
+

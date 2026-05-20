@@ -1,0 +1,717 @@
+Introduzione al C
+Lezione 6
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Perché i cicli (iterazione o loop)
+• I cicli while, for, do-while
+• Blocchi
+• Condizionale
+• Array
+
+zuliani@di.uniroma1.it
+
+2
+
+Quando usare i loop
+• Ciclo, Loop, Iterazione, Iteration statement
+• Quando dobbiamo eseguire ripetutamente un blocco di codice
+• Blocco di codice = corpo del ciclo (body of loop)
+
+• Il blocco di codice può contenere istruzioni il cui risultato è
+dipendente o indipendente dalla specifica iterazione in cui vengono
+eseguiti
+loop statement {
+body of loop
+}
+zuliani@di.uniroma1.it
+
+3
+
+Tre tipi di costrutti iterativi
+• while statement
+• Più flessibile
+• Nessun tipo di restrizione
+
+• for statement
+• Ciclo ripetuto un numero finito di volte
+
+• do-while statements
+• Esegue il corpo almeno una volta
+
+zuliani@di.uniroma1.it
+
+4
+
+Ciclo while
+• Condition valutata prima di entrare
+nel loop
+• Se condition è vera, allora viene
+eseguito il corpo una volta e poi
+viene ri-valutata la condizione
+
+• Nel corpo deve accadere qualcosa che
+possa «cambiare» la condizione
+• Un evento esterno deve «cambiare» la
+condizione
+• Altrimenti ciclo infinito (che potrebbe
+anche essere una scelta!)
+
+• Il ciclo termina quando condition è
+falsa (oppure quando si usa un break
+– vedi dopo)
+zuliani@di.uniroma1.it
+
+5
+
+Ciclo while
+while (expression)
+basic block
+
+• expression è la condizione da testare.
+Deve risolversi in true o false
+• Basic block
+• racchiuso tra {} se contiene più di un istruzione
+
+zuliani@di.uniroma1.it
+
+i=0;
+while (i<7)
+i++;
+i=0;
+while (i<7){
+i++;
+y=y*i;
+}
+6
+
+Loop Control Variable (LCV) - variabile di
+controllo del ciclo
+• Ci deve essere almeno una variabile il cui valore controlla la
+ripetizione del ciclo
+• Altrimenti condition è sempre vera (ciclo infinito) o sempre falsa (corpo non
+eseguito, si passa al comando successivo)
+
+• Per un esecuzione corretta del while le LCV devono
+• Essere dichiarate e inizializzate prima del ciclo
+• Lette nella condizione del ciclo (altrimenti non sono LCV!!!)
+• Aggiornate nel corpo del ciclo in modo che prima o poi la condizione diventi
+falsa
+• Altrimenti loop infinito (in alcuni casi può essere una scelta voluta)
+
+zuliani@di.uniroma1.it
+
+7
+
+Ciclo controllato da variabile contatore
+• Il corpo viene eseguito
+un numero definito di
+volte, noto a priori
+• Requisiti
+• LCV inizializzata ad un
+valore iniziale
+• Condizione testa il valore
+finale di LCV
+• Incremento/decremento
+costante di LCV
+zuliani@di.uniroma1.it
+
+8
+
+Errori comuni
+• Analizzate questo codice (magari copiatelo ed eseguitelo)
+• Cosa c'è di sbagliato? Perché il programma rimane bloccato dopo che
+avete inserito un numero?
+
+zuliani@di.uniroma1.it
+
+9
+
+Ciclo for
+• Noto a priori il numero di iterazioni
+• tale comportamento può essere sovvertito
+
+• Inizializzazione LCV, test condizione su LCV e
+incremento/decremento LCV sono definite
+nello statement
+for (initialization; test; increment)
+basic block
+Ad es: for (i=1; i<5; i++)
+
+zuliani@di.uniroma1.it
+
+10
+
+Ciclo for: esempi
+• for
+
+• while
+
+zuliani@di.uniroma1.it
+
+11
+
+Ciclo for: esempi
+• Esercizio 2: Quante volte viene eseguito il ciclo seguente?
+int count;
+for (count = 0; count < 3; count++) {
+printf(“Gnam %d – “, count+1);
+printf(“Yum!\n”);
+}
+
+zuliani@di.uniroma1.it
+
+12
+
+Ciclo do-while
+• Simile al while, ma la condizione è
+testata alla fine
+• Il corpo è eseguito almeno una volta
+do {
+statements
+} while ( condition );
+
+zuliani@di.uniroma1.it
+
+13
+
+Ciclo do-while (cont.)
+• Esempio 1 - conta interi da
+1 a 10
+
+• Esempio 2 - controlla che
+l’input sia corretto e non
+termina fino a che non si
+inserisce un valore corretto
+
+zuliani@di.uniroma1.it
+
+14
+
+• Esercizio 3. Provare ad implementare l’esempio 2 (slide precedente)
+con il while loop
+• Esercizio 4. Scrivere un programma che riceva come input (del
+comando) un valore n che indica il numero di dati che debbono
+essere letti da stdin. Per ogni dato letto da stdin verifica e impone che
+esso sia maggiore di 0 e minore di 10. Dopo aver letto gli n dati di
+input ne calcola e stampa il valore della somma ed il valore medio.
+Implementare la soluzione con 3 diverse combinazioni di cicli:
+• Solo while
+• While + do-while
+• For + while o do-while
+NOTA: realizzare i programmi con il minor numero di righe di codice.
+zuliani@di.uniroma1.it
+
+15
+
+break
+• Si usa per uscire da un ciclo
+• for, while, do-while
+
+• Si usa per uscire da uno switch (lo vedremo
+più in là)
+• Quando viene eseguito break il ciclo
+termina indipendentemente dal valore della
+condizione
+
+zuliani@di.uniroma1.it
+
+16
+
+continue
+• Il controllo passa all’iterazione successiva
+
+zuliani@di.uniroma1.it
+
+17
+
+Blocchi
+
+zuliani@di.uniroma1.it
+
+18
+
+Blocchi
+• blocco = porzione di codice racchiusa da {}
+• Le variabili definite in un blocco sono locali al blocco:
+• Vengono allocate e sono accessibili solo quando il blocco è eseguito
+• Non sono più accessibili dopo che il blocco è stato eseguito
+• Nel blocco, «oscurano» eventuali variabili con lo stesso nome definite al di
+fuori del blocco
+
+zuliani@di.uniroma1.it
+
+19
+
+Blocchi
+int main() {
+{
+int i = 0;
+printf("i = %d\n", ++i);
+}
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Alloca la variabile i
+
+Cosa stampa?
+i = 1
+i viene deallocata
+
+20
+
+Blocchi
+int main() {
+{
+int i = 0;
+printf("i = %d\n", ++i);
+}
+printf("i = %d\n", ++i);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Questo programma è errato
+sintatticamente e il compilatore
+ve lo dice: provate!
+
+In questo punto non c'è alcuna
+variabile i ‘visibile’ al codice.
+
+21
+
+Blocchi: «Oscuramento» di variabili omonime
+int main() {
+int i = -1;
+{
+int i = 0;
+printf("i = %d\n", i++);
+}
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+Cosa stampa?
+i = 0
+Cosa stampa?
+i = -1
+
+22
+
+Blocchi e ciclo for
+int i = 0;
+…
+for (i = 1; i < 100; i++)
+{
+…
+
+}
+
+int i = 0;
+…
+{
+…
+for (i = 1; i < 100; i++)
+{
+…
+
+}
+In entrambi i casi c'è una variabile i
+‘visibile’ al codice.
+
+}
+
+zuliani@di.uniroma1.it
+
+23
+
+Blocchi e ciclo for
+int i = 0;
+…
+for (int i = 1; i < 100; i++)
+{
+
+Alloca la variabile i in
+nuovo blocco!
+
+…
+
+}
+
+zuliani@di.uniroma1.it
+
+24
+
+Blocchi e ciclo for
+int main() {
+int i = -1;
+for (int i = 1; i < 3; i++)
+printf("i = %d\n", i);
+printf("i = %d\n", i);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Cosa stampa?
+i = 1
+i = 2
+Cosa stampa?
+i = -1
+
+25
+
+Blocchi e ciclo for
+Esercizio:
+Trasformate, preservandone la semantica, il codice seguente inserendo
+la dichiarazione int i = 1 del ciclo for in un nuovo blocco
+int main() {
+int i = -1;
+for (int i = 1; i < 3; i++)
+printf("i = %d\n", i);
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+26
+
+Blocchi e ciclo for
+Soluzione:
+int main() {
+int i = -1;
+{
+int i;
+for (i = 1; i < 3; i++)
+printf("i = %d\n", i);
+}
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+27
+
+Condizionale
+
+zuliani@di.uniroma1.it
+
+28
+
+Condizionale
+if (espressione_booleana) {
+// ramo espressione_booleana VERA
+} else {
+// ramo espressione_booleana FALSA
+// il ramo else è opzionale
+}
+
+zuliani@di.uniroma1.it
+
+29
+
+Condizionale (annidato)
+if (espressione_booleana_1) {
+// un codice
+} else if (espressione_booleana_2) {
+// un altro codice
+} else if (espressione_booleana_3) {
+// ancora codice
+} else { // bla bla
+}
+zuliani@di.uniroma1.it
+
+30
+
+Array
+
+zuliani@di.uniroma1.it
+
+31
+
+Array
+• Un tipo di dato ‘strutturato’
+• Letteralmente ‘schiera’ di variabili
+• Dello stesso tipo
+• Occupano una regione contigua di memoria
+• La dimensione rimane inalterata nel corso dell’esecuzione del codice
+
+• Usabili singolarmente o come una singola entità
+• Essenzialmente una lista finita indicizzata da un numero intero >= 0
+
+zuliani@di.uniroma1.it
+
+32
+
+Array: Dichiarazione
+• La memoria per gli array viene interamente allocata quando il programma
+è caricato in memoria (sono variabili statiche)
+unsigned int data[3];
+char alfabeto[21];
+double temp_max[365];
+
+// una data gg/mm/aaaa
+// l’alfabeto italiano
+// temperatura max di
+ogni giorno dell’anno
+
+zuliani@di.uniroma1.it
+
+33
+
+Array: Dichiarazione
+• Usate costanti o il preprocessore per dichiarazioni più chiare e
+maneggevoli
+const unsigned int GIORNI=365;
+double temp_max[GIORNI];
+oppure, (quasi) equivalentemente:
+#define GIORNI 365
+double temp_max[GIORNI];
+zuliani@di.uniroma1.it
+
+Direttiva del preprocessore: è
+una manipolazione puramente
+sintattica del codice
+
+34
+
+Array: Dichiarazione
+double temp_max[365];
+temp_max[0] = -4.5;
+
+dati
+
+-4.5
+0
+
+indici
+
+?
+1
+
+?
+2
+
+?
+3
+
+temp_max[]
+
+…
+
+?
+362
+
+?
+363
+
+?
+364
+
+Questa è un’astrazione utile al programmatore: in C, la variabile
+temp_max è un puntatore al primo elemento dell’array!
+zuliani@di.uniroma1.it
+
+35
+
+Array: Dichiarazione
+• Autoinizializzazione di array:
+double
+
+tmax_week[7]={-2.3, 0.97};
+-2.3 -0.97
+
+0.0
+
+0.0
+
+0.0
+
+0.0
+
+0.0
+
+0
+
+2
+
+3
+
+4
+
+5
+
+6
+
+1
+
+// inizializza tutto a 0
+double tmax_week[7]={};
+
+zuliani@di.uniroma1.it
+
+36
+
+Array: Dichiarazione
+• Array multi-dimensionali:
+#define MESI 12
+#define GIORNI_M 31
+double temp_max[MESI][GIORNI_M]; //372 elementi
+• L’accesso è via due indici: ‘righe’ e ‘colonne’, come per una matrice
+• Si possono definire array a tre dimensioni e oltre
+zuliani@di.uniroma1.it
+
+37
+
+Array: Uso
+Un’espressione che
+ritorna un intero
+
+double temp_max[365];
+int i = 0;
+temp_max[i] = -4.5;
+Cosa stampa?
+temp_max[1] = -3.8
+temp_max[++i] = -3.8;
+printf("temp_max[%d] = %lf\n", i, temp_max[i]);
+-4.5
+
+-3.8
+
+?
+
+?
+
+0
+
+1
+
+2
+
+3
+
+…
+
+zuliani@di.uniroma1.it
+
+?
+
+?
+
+?
+
+362
+
+363
+
+364
+
+38
+
+Array: Uso della memoria
+double temp_max[365];
+Cosa stampa?
+2920 bytes
+temp_max[0] = -4.5;
+temp_max[1] = -3.8;
+printf("%ld bytes\n", sizeof(temp_max));
+-4.5
+0
+
+-3.8
+1
+
+?
+2
+
+?
+3
+
+…
+
+?
+362
+
+?
+363
+
+?
+364
+
+La memoria per l’intero array è allocata all’inizio del programma e sizeof ritorna la
+dimensione di tale memoria.
+Il programmatore (voi!) deve tener traccia di quali elementi dell’array sono stati scritti.
+zuliani@di.uniroma1.it
+
+39
+
+Array: Uso
+• Gli array sono pensati per l’uso con il ciclo for
+• Esempio: inizializzazione a zero di un intero array
+#define GIORNI 365
+double temp_max[GIORNI];
+
+ATTENTI a non sovrascrivere
+memoria che non vi è stata
+allocata!! Il compilatore C
+non controlla per tali errori.
+
+for (int i = 0; i < GIORNI; i++)
+temp_max[i] = 0.0;
+zuliani@di.uniroma1.it
+
+40
+
+Array: Uso improprio
+• Cosa succede se leggo/scrivo oltre l’ultimo elemento di un array?
+1. Il programma potrebbe continuare, con/senza errori
+2. Il sistema operativo intercetta la violazione e uccide il processo
+
+• Provate!
+
+#define GIORNI 365
+double temp_max[GIORNI];
+for (int i = 0; i < GIORNI; i++)
+temp_max[i] = 0.0;
+zuliani@di.uniroma1.it
+
+1. Aumentate questo
+valore finche’ il processo
+non viene ucciso.
+2. Provate a stampare
+elementi di temp_max
+invece che scriverli.
+
+41
+
+Array: Esercizi
+• Implementare una ricerca sequenziale in un array di interi
+definito all’interno di un programma:
+1. Usate un ciclo while
+2. Usate un ciclo for
+
+• Scrivete un programma che calcoli e stampi la media aritmetica
+di un array di max 10 numeri in virgola mobile:
+1. Definite l’array all’intero del programma
+2. Leggete con scanf l’array da stdin, terminato da CTRL-d (ricordatevi
+che potete ridirezionare lo stdin)
+zuliani@di.uniroma1.it
+
+42
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+43
+
+

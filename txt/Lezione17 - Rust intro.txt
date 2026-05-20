@@ -1,0 +1,310 @@
+Il Linguaggio Rust:
+Breve Introduzione
+Lezione 17
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Errori di accesso alla memoria
+• Breve storia di Rust
+• Principali caratteristiche di Rust
+
+zuliani@di.uniroma1.it
+
+2
+
+Problema: Accesso corretto alla memoria
+• Accessi ‘illegali’ alla memoria:
+• buffer overflows
+• use-after-free
+• de/referenziare puntatori nulli
+• accedere oltre la fine di un array
+• etc.
+• 2019: circa il 70% delle vulnerabilità nel codice Microsoft è causato
+da accessi illegali alla memoria1
+• 2024/25: il governo USA scoraggia l’uso del C/C++2,3
+1 https://www.microsoft.com/en-us/msrc/blog/2019/07/a-proactive-approach-to-more-secure-code
+2 https://bidenwhitehouse.archives.gov/wp-content/uploads/2024/02/Final-ONCD-Technical-Report.pdf
+3 https://media.defense.gov/2025/Jun/23/2003742198/-1/-1/0/CSI_MEMORY_SAFE_LANGUAGES_REDUCING_VULNERABILITIES_IN_MODERN_SOFTWARE_DEVELOPMENT.PDF
+
+zuliani@di.uniroma1.it
+
+3
+
+La promessa di Rust
+• Accessi illegali alla memoria: esempio di comportamento non-definito
+• Dal man di free(): “Any use of a pointer that refers to freed space
+results in undefined behavior.”
+• Rust promette che
+• Se il vostro codice compila senza errori, allora è privo di
+
+comportamenti non-definiti
+
+zuliani@di.uniroma1.it
+
+4
+
+Sicurezza della memoria in Rust
+• Il compilatore Rust opera sul codice molti più controlli del C!
+• Rust è un linguaggio fortemente e staticamente tipizzato
+• Le garanzie di sicurezza di Rust sono basate su:
+• un sistema di tipi basati sulla proprietà di un «oggetto» (ownership type
+system)
+• un controllo di tipo (type checking) che assicura l’assenza di accessi illegali alla
+memoria
+
+• Il controllo di tipo operato dal compilatore è una sofisticata analisi
+statica del codice
+• NON c'è alcuna raccolta dei rifiuti (di memoria), o garbage collection!
+zuliani@di.uniroma1.it
+
+5
+
+Breve storia di Rust
+• Sviluppo iniziato da Graydon Hoare (Mozilla) nel 2006
+
+• Linguaggio per la programmazione di sistema: come il C, ma più sicuro!
+• Rust 1.0 rilasciato nel maggio 2015 (versione attuale: 1.95, aprile 2026)
+• Il compilatore Rust inizialmente scritto in OCaml, poi in Rust stesso
+(usando LLVM)
+• Tutto il progetto Rust è codice aperto (open source)
+
+zuliani@di.uniroma1.it
+
+6
+
+Breve storia di Rust
+• Rust è usato:
+• in Mozilla Firefox
+• in alcuni librerie critiche di Windows
+• nel kernel di Linux (driver, etc.); usabile al pari del C per
+lo sviluppo del kernel!
+• ...
+
+• Per installazione e documentazione:
+https://rust-lang.org/
+zuliani@di.uniroma1.it
+
+7
+
+Principali caratteristiche di Rust
+• Rust «mescola» diversi stili di programmazione:
+• Funzionale
+• Imperativa
+• Orientata agli oggetti
+• La sintassi di Rust è di tipo imperativo, simile a C/C++
+• Un ambiente di sviluppo completo:
+• cargo (gestore della compilazione, dipendenze, etc.)
+• rustc (il compilatore vero e proprio)
+• rustdoc (sistema per la documentazione automatica)
+zuliani@di.uniroma1.it
+
+8
+
+Esempio di programma Rust
+• Vediamo un semplice programma Rust che calcola il MCD (massimo
+comun divisore) di una lista di numeri interi
+• I numeri sono passati sulla linea di comando
+
+zuliani@di.uniroma1.it
+
+9
+
+Una funzione per il MCD di due interi
+Una volta inizializzate, le ‘variabili’
+NON possono essere modificate! Per
+farlo, dobbiamo aggiungere la
+clausola mut (mutable).
+Tipo del valore di ritorno
+(intero senza segno 64bit).
+Una asserzione. Se non è
+soddisfatta, il programma
+termina con un messaggio di
+errore. (E’ una macro.)
+Una variabile locale. (E’
+immutabile e il tipo è inferito
+da Rust!)
+
+zuliani@di.uniroma1.it
+
+Valore di ritorno della
+funzione.
+10
+
+Unit test
+• In Rust è possibile scrivere unit test direttamente nel codice
+• Le unit test si eseguono con cargo test
+E’ un attributo. Indica che test_gcd è
+una funzione di test: non viene
+normalmente compilata. E’ compilata ed
+eseguita quando si invoca cargo test.
+
+Asserzione. Le due espressioni
+passate come parametro devono
+ritornare valori uguali.
+
+zuliani@di.uniroma1.it
+
+11
+
+La funzione main() del programma (I)
+Dichiarazioni di visibilità.
+FromStr è un trait (insieme
+di metodi che un tipo può
+implementare).
+Un vettore (prolungabile).
+Ciclo per trattare la linea di
+comando; env::args()ritorna
+un iteratore.
+
+Converte una stringa in u64 e lo
+carica nel vettore. Gestione degli
+errori nella conversione. (Rust non
+ha le eccezioni.)
+
+d conterrà il MCD (all’inizio è il prim
+elemento del vettore).
+
+zuliani@di.uniroma1.it
+
+12
+
+La funzione main() del programma (II)
+
+Idea principale: calcola
+l’MCD finale iterando su
+coppie di numeri
+(partendo dal secondo)
+Come nel C, & ritorna l’indirizzo di una variabile
+
+ATTENZIONE: m prende solo in prestito (borrow) l’indirizzo (o riferimento) degli
+elementi del vettore. La proprietà (ownership) del vettore rimane a numbers!
+Come nel C, *m ritorna il valore puntato da m
+
+zuliani@di.uniroma1.it
+
+13
+
+Tipi di proprietà
+• Rust gestisce la memoria con un sistema di controlli (detto di
+proprietà) a tempo di compilazione
+• Idea fondamentale:
+• Durante l’esecuzione di un programma, ad ogni istante di tempo le allocazioni
+heap sono di proprietà di una sola variabile
+
+• La memoria è liberata quando il proprietario non è più visibile, a meno che il
+proprietario non assegni la proprietà ad un’altra variabile
+
+zuliani@di.uniroma1.it
+
+14
+
+Tipi di proprietà
+Un semplice array nell’heap:
+il proprietario è c.
+La proprietà dell’array passa a d!
+
+zuliani@di.uniroma1.it
+
+15
+
+Un esempio di prevenzione di errori
+Parametro passato per riferimento: la
+proprietà dell’argomento passa ad arg!
+Argomento deallocato al termine della
+funzione!
+
+zuliani@di.uniroma1.it
+
+16
+
+Un esempio di prevenzione di errori
+Parametro passato per riferimento: la
+proprietà dell’argomento passa ad arg!
+Argomento deallocato al termine della
+funzione!
+
+Rust rigetta il
+codice di cui
+sopra.
+
+zuliani@di.uniroma1.it
+
+17
+
+Prestare memoria
+• Rust consente l’accesso a memoria heap senza averne la proprietà
+attraverso il meccanismo dei riferimenti
+• Permettono di prendere in prestito memoria di proprietà di un’altra
+variabile
+• Due tipi:
+• immodificabile (creato con &)
+• modificabile (creato con &mut)
+
+zuliani@di.uniroma1.it
+
+18
+
+Riferimenti
+Riferimento modificabile
+Riferimento non modificabile
+
+lo non è più valido
+zuliani@di.uniroma1.it
+
+19
+
+Prestare memoria
+• I riferimenti operano con un
+sistema di permessi:
+• Lettura (R)
+• Scrittura (W)
+• Proprietà (O)
+
+zuliani@di.uniroma1.it
+
+20
+
+Prestare memoria
+• Il controllo dei prestiti (borrow checker)
+di Rust assicura che le operazioni
+abbiano i permessi necessari
+• Ad esempio:
+• Calcolare la lunghezza di un vettore
+richiede R
+
+• Concatenare una stringa con un’altra
+richiede W
+
+• Deallocare un vettore richiede O
+zuliani@di.uniroma1.it
+
+21
+
+Prestare memoria
+• Il controllo dei prestiti (borrow checker)
+di Rust assicura che le operazioni
+abbiano i permessi necessari
+• Ad esempio:
+• Calcolare la lunghezza di un vettore
+richiede R
+
+• Concatenare una stringa con un’altra
+richiede W
+
+• Deallocare un vettore richiede O
+zuliani@di.uniroma1.it
+
+22
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+23
+
+

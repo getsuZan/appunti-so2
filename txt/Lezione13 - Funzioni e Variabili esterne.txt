@@ -1,0 +1,382 @@
+Funzioni/Variabili
+Esterne e Statiche
+Lezione 13
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Variabili esterne e statiche
+• Funzioni statiche
+• Ricorsione
+• Puntatori a funzione
+• gdb (‘disinfestatore’)
+
+zuliani@di.uniroma1.it
+
+2
+
+Visibilità (scoping) delle variabili
+• In C, una variabile locale (o anche automatica) è visibile solo nel
+blocco in cui è dichiarata
+• Una variabile globale è visibile dal punto di dichiarazione fino alla fine
+del file sorgente
+int
+
+myvar;
+
+void fun1() {
+if (myvar == 4) { …}}
+void main() {
+myvar = 4;
+fun1();}
+zuliani@di.uniroma1.it
+
+3
+
+Variabili esterne
+• Dichiarazione di una variabile: affermo tipo e dimensione della var.
+• Definizione: viene allocata anche la memoria per la var.
+• Per usare una variabile che non è visibile (ad es. è definita in un altro
+file) la si dichiara con la clausola extern
+extern
+extern
+
+int
+char
+
+myvar;
+str[];
+
+zuliani@di.uniroma1.it
+
+4
+
+Variabili esterne e visibilità delle funzioni
+void func1() {
+// myvar non ancora definita, uso extern
+
+extern int myvar;
+void nestfunc1() {
+
+printf("sono nestfunc1\n");
+}
+nestfunc1();
+myvar = 1;
+}
+int myvar = 0;
+
+// definizione di myvar!
+
+void main(void) {
+printf("myvar = %d\n", myvar);
+
+Il codice stampa:
+
+func1();
+
+myvar = 0
+sono nestfunc1
+myvar = 1
+
+printf("myvar = %d\n", myvar);
+}
+zuliani@di.uniroma1.it
+
+5
+
+Esercizio
+• Aprite nestedf.c
+• Spostare la dichiarazione di myvar da func1() ad un altro file
+(chiamatelo ad esempio myv.c)
+• Ricompilate il tutto: il programma dovrebbe stampare come prima
+• Dovete compilare entrambi i file, ad es.: gcc nestedf.c myv.c
+
+zuliani@di.uniroma1.it
+
+6
+
+Variabili statiche
+• Possono essere locali o esterne
+• Locali:
+• dichiarate all’interno di una funzione
+• sono mantenute tra una chiamata e l’altra della funzione
+• Costituiscono una memoria privata della funzione
+
+zuliani@di.uniroma1.it
+
+7
+
+Le variabili static vengono
+automaticamente inizializzate (una volta)
+
+Variabili statiche
+void fun() {
+static int myvar;
+
+//inizializzata automaticamente a 0
+
+myvar++;
+printf("myvar = %d\n", myvar);
+}
+void main(void) {
+fun();
+
+Il codice stampa:
+
+fun();
+
+myvar = 1
+myvar = 2
+
+}
+
+zuliani@di.uniroma1.it
+
+8
+
+Variabili statiche esterne
+• Sono variabili statiche dichiarate al di fuori di ogni funzione (in un
+dato file sorgente)
+• Sono visibili dal punto di dichiarazione fino alla fine del file sorgente
+
+zuliani@di.uniroma1.it
+
+9
+
+Funzioni statiche
+• Non visibili al di fuori del file sorgente in cui sono dichiarate
+• La clausola static permette quindi di variare la visibilità di un
+oggetto, non solo la sua permanenza in memoria
+
+zuliani@di.uniroma1.it
+
+10
+
+Funzioni statiche
+// file fstatic.c
+
+// file fun.c
+
+void fun() {
+
+static void fun() {
+
+static int myvar;
+
+printf("sono fun() static\n");
+}
+
+myvar++;
+printf("myvar = %d\n", myvar);
+}
+
+Compiliamo ed eseguiamo:
+
+void main(void) {
+
+$> gcc fstatic.c fun.c
+$> ./a.out
+myvar = 1
+
+fun();
+}
+zuliani@di.uniroma1.it
+
+11
+
+Esercizio
+• Modificate l’esempio precedente in modo che main() chiami
+fun() del file fun.c
+
+zuliani@di.uniroma1.it
+
+12
+
+Ricorsione
+• In C è possibile scrivere funzioni ricorsive, cioè che chiamano se
+stesse
+• Svantaggi: in generale codice più lento e più consumo di memoria
+(perché?)
+• [Variabili locali/automatiche salvate nello stack.]
+
+• Vantaggi: codice più compatto e semplice da scrivere
+• Esercizio [max 5 minuti!]: scrivere una funzione ricorsiva per il
+fattoriale di un intero (provatela con numeri minori di 20…)
+zuliani@di.uniroma1.it
+
+13
+
+Puntatori a funzione
+• Il C permette puntatori a funzione, anche se una funzione NON è una
+variabile!
+• Dichiarazione:
+int (* funptr)();
+//funptr è un puntatore ad
+una funzione che ritorna
+un intero
+• Chiamata:
+int a;
+a = (* funptr)();
+zuliani@di.uniroma1.it
+
+14
+
+Puntatori a funzione
+• Possono essere usati per rendere il codice più generico
+• Vediamo:
+• funptr.c
+• qsort-generic.c
+
+zuliani@di.uniroma1.it
+
+15
+
+Puntatori a funzione: altri esempi
+• Una forma “primitiva” di programmazione ad oggetti usando variabili
+statiche e puntatori a funzione.
+• Vediamo:
+• oo.[ch] e oo-main.c
+
+zuliani@di.uniroma1.it
+
+16
+
+Esercizio
+• Aggiungere a oo.[ch] un ‘metodo’ che permetta di applicare una
+qualsiasi funzione da double a double agli elementi della struttura
+myclass. Il metodo ritorna i risultati in un array.
+• Passate la funzione come parametro (ovviamente come puntatore a funzione).
+• Il metodo deve chiamare SOLO funzioni passate come parametro (potete metterle
+tutte in un array).
+
+[Per usare le funzioni matematiche dovete includere <math.h> e
+compilare aggiungendo –lm]
+zuliani@di.uniroma1.it
+
+17
+
+gdb
+Materiale didattico per cortesia del prof. Emanuele Gabrielli
+
+zuliani@di.uniroma1.it
+
+18
+
+‘Disinfestare’
+programmi?
+
+Vera tarma/falena
+trovata in un relè del
+Mark II ad Harvard, 1947.
+
+U.S. Naval Historical Center Online Library Photograph NH 96566-KN
+zuliani@di.uniroma1.it
+
+19
+
+‘Disinfestare’ programmi?
+• Nello sviluppo di codice è spesso utile far girare e fermare un
+programma a piacimento, vedere il contenuto delle variabili, quali
+funzioni sono chiamate, etc.
+• Con gcc, c'è l’opzione –g
+
+gcc
+
+-g
+
+miosorgente.c
+
+(vedi man per tutte le opzioni di debug di gcc)
+
+zuliani@di.uniroma1.it
+
+20
+
+gdb
+• gdb è il GNU Project Debugger
+• Open source, portabile, linea di comando. Linguaggi supportati:
+• Ada
+• Assembly
+• C
+• C++
+• D
+• Fortran
+• Go
+• Objective-C
+• OpenCL
+• Modula-2
+• Pascal
+• Rust
+
+zuliani@di.uniroma1.it
+
+21
+
+gdb
+
+zuliani@di.uniroma1.it
+
+22
+
+gdb
+
+zuliani@di.uniroma1.it
+
+23
+
+gdb
+
+zuliani@di.uniroma1.it
+
+24
+
+gdb
+
+zuliani@di.uniroma1.it
+
+25
+
+gdb
+
+zuliani@di.uniroma1.it
+
+26
+
+gdb
+
+zuliani@di.uniroma1.it
+
+27
+
+gdb: punti di fermo (breakpoint)
+
+zuliani@di.uniroma1.it
+
+28
+
+gdb: punti di fermo (breakpoint)
+
+zuliani@di.uniroma1.it
+
+29
+
+gdb: rimuovere le informazioni di debug
+• strip rimuove tutte le info di debug da un file oggetto/eseguibile
+strip miosorgente.o
+
+(vedi man per tutte le opzioni di strip)
+zuliani@di.uniroma1.it
+
+30
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+31
+
+

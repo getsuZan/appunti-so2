@@ -1,0 +1,664 @@
+Le Chiamate di Sistema
+Lezione 11
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Panoramica
+• Introduzione alla programmazione di sistema
+• System call memoria
+• (richiami)
+
+• System call file I/O
+
+zuliani@di.uniroma1.it
+
+2
+
+System call gestione file I/O
+Noi abbiamo finora visto le funzioni di libreria del C.
+
+zuliani@di.uniroma1.it
+
+3
+
+Operare sui file
+• File, astrazione che descrive ogni risorsa, ad es. file su disco,
+dispositivi, socket, fifo
+• Sequenza tipica di azioni
+1. apertura file mediante open; viene creato un file descriptor
+2. operazione su file mediante syscall; e.g. write, read
+3. chiusura del file mediante close
+
+• Quando un processo termina, chiude automaticamente tutti i file
+correntemente aperti, tuttavia, è sempre consigliabile e buona regola
+di programmazione chiudere esplicitamente un file invocando la
+close
+zuliani@di.uniroma1.it
+
+4
+
+File descriptor
+• E’ il riferimento ad un file aperto: è un intero
+piccolo, generato sequenzialmente a partire
+dal valore 0. Per default, ogni processo, ha
+associato i seguenti file descriptors:
+• 0; stdin
+• 1; stdout
+• 2; stderr
+
+• Quando un file viene chiuso, il suo file
+descriptor viene liberato e può essere
+riutilizzato. È possibile aprire uno stesso file
+ed ottenere file descriptor diversi che
+puntano allo stesso file (e.g., due utenti
+aprono lo stesso file in lettura).
+zuliani@di.uniroma1.it
+
+5
+
+File flags associati ad un File descriptor
+• File status flags:
+• Associati allo stato di un file
+• Sono condivisi tra tutti i file descriptor ottenuti per duplicazione da un unico
+file descriptor.
+
+• File descriptor flags:
+• Associati al file descriptor
+• Indipendenti dal contenuto o status del file
+• Descrivono proprietà e comportamento delle operazioni effettuate sul file
+• File descriptor diversi che fanno riferimento ad uno stesso file hanno ognuno
+il proprio insieme di descriptor flags
+• Alcuni definiti solo per alcuni tipi di file speciali (es: fifo socket)
+zuliani@di.uniroma1.it
+
+6
+
+Rappresentazione dei Flag
+• Mediante maschere di bit
+• se il bit è a 1 (settato) il flag è settato
+
+• Per ogni flag è stata definita una maschera di bit o MACRO
+• ad es. O_RDONLY
+
+• I flag possono essere combinati mettendo in OR bit a bit (bitwise) le
+maschere
+• ad es.
+• MACRO1 = 01000000;
+• MACRO2 = 00010000
+• MACRO1 | MACRO2 = 01010000
+• dopo l’OR entrambi i flag sono settati
+
+zuliani@di.uniroma1.it
+
+7
+
+File status flags: 3 categorie
+• Modalità di accesso
+• read, write, read+write.
+• specificati nella open
+• non possono essere modificati una volta aperto il file
+
+• Di apertura
+• definiscono il comportamento della open e non vengono mantenuti
+
+• Modalità operative
+• definiscono il comportamento delle operazioni read e write.
+• Specificati nella open.
+• Possono essere modificati anche dopo l’apertura del file.
+zuliani@di.uniroma1.it
+
+8
+
+System call principali
+• open
+• chown
+• read
+• chmod
+• write
+• stat
+• lseek
+• select
+• close
+
+• ioctl
+• unlink
+• fnctl
+• symlink
+• rename
+• mkdir
+• rmdir
+• chdir
+
+zuliani@di.uniroma1.it
+
+9
+
+Open()
+int open(const char *pathname, int flags);
+int open(const char *pathname, int flags, mode_t mode);
+• restituisce -1 se errore altrimenti file descriptor
+• parametro flags (file status flags); equivalente
+al parametro mode della fopen
+
+$ man fopen
+
+• O_CREAT richiede di specificare i permessi di
+accesso al file (ad es. 644)
+
+• mode indica le modalità di creazione del file
+
+zuliani@di.uniroma1.it
+
+10
+
+Differenza open e fopen (APUE Ch. 5)
+• fopen returns a pointer to a FILE object.
+• This object is normally a structure that contains all the information required by
+the standard I/O library to manage the stream:
+• the file descriptor used for actual I/O,
+• a pointer to a buffer for the stream,
+• the size of the buffer,
+• a count of the number of characters currently in the buffer,
+• an error flag,
+• and the like.
+
+zuliani@di.uniroma1.it
+
+11
+
+Flags open
+• Flags modalità accesso
+• O_RDONLY, O_WRONLY, O_RDWR
+
+• Flags di apertura
+
+ci sono 8 flags ...
+rappresentabili, ad esempio,
+con una maschera a 8 bit
+
+• O_CREAT
+• O_EXCL quando specificato insieme a O_CREAT genera errore se il file esiste già
+
+• Flags modalità operativa
+• O_APPEND
+• O_SYNC scrittura sincrona, ovvero la call ritorna solamente quando la scrittura dei
+dati nel file è terminata
+• O_TRUNC se il file esiste, è un file regolare, e la modalità di accesso consente la
+scrittura, allora il file viene troncato dalla posizione 0
+zuliani@di.uniroma1.it
+
+12
+
+ssize_t read(int fd, void *buf,
+size_t count)
+• fd file descriptor
+• buf puntatore ad area di memoria in cui memorizzare i byte letti
+• count numero di byte da leggere
+• restituisce -1 se errore, altrimenti il numero di byte letti (che può
+essere < di count se si raggiunge EOF)
+• i codici di errore, restituiti in errno, sono elencati su
+• man 2 read
+
+zuliani@di.uniroma1.it
+
+13
+
+Differenza tra read e fread
+
+fopen returns a pointer to a
+FILE object. This object is
+normally a structure that
+contains all the information
+required by the standard I/O
+• size_t fread(void *ptr, size_t size, size_t
+library to manage the
+nmemb, FILE *stream)
+stream: the file descriptor
+• legge da uno stream di tipo FILE (bufferizzata)
+used for actual I/O, a pointer
+to a buffer for the stream,
+• dimensione del tipo di dato da leggere
+the size of the buffer, a count
+of the number of characters
+currently in the buffer, an
+• ssize_t read(int fd, void *buf, size_t count); error flag, and the like.
+
+• non bufferizzata
+• lavora sui byte indipendentemente dal tipo di dato in essi contenuto
+
+zuliani@di.uniroma1.it
+
+14
+
+ssize_t write(int fd, const void *buf,
+size_t count)
+• fd file descriptor
+• buf area di memoria da cui leggere i dati; dichiarata const per
+non essere modificata dalla funzione
+• count numero di byte da scrivere
+• restituisce -1 se errore o numero di byte scritti (può essere < di
+count se write interrotta, ad esempio da un segnale)
+• i codici di errore, restituiti in errno, sono elencati su
+• man 2 write
+
+zuliani@di.uniroma1.it
+
+15
+
+int close(int fd);
+• Chiude il file descriptor fd
+• Il file descriptor viene liberato e può essere quindi riutilizzato
+
+• Ritorna -1 in caso di errore e 0 in caso la chiamata termini
+correttamente
+• Nel caso venga chiuso l'ultimo file descriptor che fa riferimento ad un
+file rimosso, allora il file viene cancellato.
+• I codici di errore, restituiti in errno, sono elencati su
+• man 2 close
+
+zuliani@di.uniroma1.it
+
+16
+
+Esempio
+• file file.c della Lezione 9
+• Esercizio 1: rifare l’Esercizio 6 lezione 9 usando le syscall read e write
+(aggiungere #include <fcntl.h> al vostro codice).
+• Esercizio 2: realizzare un programma che legge da riga comando tre
+argomenti: (1) il nome di un file di input, (2) il nome di un file di
+output, (3) un numero naturale n. Si deve copiare il file di input nel
+file di output invertendo ciascun blocco di dimensione n.
+
+zuliani@di.uniroma1.it
+
+17
+
+Altre system call e funzioni di libreria
+• int dup(int oldfd);
+• int stat(const char *path, struct stat *buf);
+• int chmod(const char *path, mode_t mode)
+• int chown(const char *path, uid_t owner, gid_t group)
+• int rename(const char *oldpath, const char *newpath);
+• int mkdir(const char *pathname, mode_t mode);
+• DIR *opendir(const char *name); //Libreria
+vediamone
+• struct dirent *readdir(DIR *dirp); //Libreria
+alcune
+• int closedir(DIR *dirp); //Libreria
+• int chdir(const char *path);
+• int fcntl(int fd, int cmd, ... /* arg */ );
+• int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set
+*exceptfds, struct timeval *timeout); // la vedremo dopo
+zuliani@di.uniroma1.it
+
+18
+
+• int dup(int oldfd);
+• duplica il file descriptor oldfd e restituisce il valore del nuovo fd.
+Restituisce -1 in caso di errore
+
+• int stat(const char *path, struct stat *buf);
+• int fstat(int fd, struct stat *buf);
+• restituisce in buf le informazioni di stato del file specificato con nome file
+path o con file descriptor fd.
+• Ritorna 0 se termina correttamente; -1 altrimenti
+
+vedi la lista
+completa dei campi
+di struct stat
+con
+man 2 stat
+
+zuliani@di.uniroma1.it
+
+19
+
+stat (cont.)
+• Sono definite anche una serie di macro da utilizzare sulla struttura
+dati stat (buf) per verificare il tipo del file:
+• S_ISREG(m), S_ISDIR(m), S_ISCHR(m),
+• S_ISBLK(m), S_ISFIFO(m), S_ISLNK(m),
+• S_ISSOCK(m)
+• e maschere da usare per verificare i diritti di accesso (vedi prossima
+slide e man 2 stat oppure man 7 inode)
+
+zuliani@di.uniroma1.it
+
+20
+
+int chmod(const char *pathname, mode_t mode)
+int fchmod(int fd, mode_t mode)
+• cambia il file mode. Ritorna -1 se errore; 0 altrimenti
+• mode è un numero ottale, e.g. 0755. Si possono usare le maschere
+predefinite (vedi man 2 chmod), tipo
+• S_ISUID
+• S_ISGID
+• S_ISVTX
+• S_IRUSR
+• ...
+• S_IRGRP
+• ...
+• S_IROTH
+
+(04000)
+(02000)
+(01000)
+(00400)
+
+set-user-ID
+set-group-ID
+sticky bit
+read by owner
+
+(00040)
+
+read by group
+
+(00004)
+
+read by others
+zuliani@di.uniroma1.it
+
+Eventualmente
+in bitwise OR
+
+21
+
+• vedi esempio dupstat.c
+• Vedi dup.c, dup2.c dup3.c
+
+zuliani@di.uniroma1.it
+
+22
+
+DIR *opendir(const char *name)
+struct dirent *readdir(DIR *dirp)
+int closedir(DIR *dirp)
+• Non sono system call ma funzioni di libreria (sezione 3 del man)
+• Permettono di aprire una directory il cui stream è ritornato da opendir
+• readdir legge il contenuto della directory (prossimo elemento disponibile)
+ritornando la struttura dirent o NULL se non ci sono più elementi
+
+zuliani@di.uniroma1.it
+
+23
+
+• vedi esempio directory.c, readdir.c
+
+zuliani@di.uniroma1.it
+
+24
+
+int fcntl(int fd, int cmd, ...
+/* arg */ )
+• System call - Permette di effettuare operazioni sul file descriptor fd, ad
+esempio
+• duplicazione del fd
+• manipolazione flag file descriptor
+• manipolazione flag di stato
+• gestione lock su fd
+
+• A tali insiemi di operazioni sono associati un insieme di comandi passata
+con il parametro cmd di fcntl
+• Gli argomenti del comando cmd, se presenti, si passano come parametri
+arg della syscall e vanno messi dopo cmd
+• Il valore di ritorno di fcntl dipende dall’operazione effettuata
+• man 2 fcntl per i dettagli
+
+zuliani@di.uniroma1.it
+
+25
+
+fcntl - manipolazione flag di stato
+• F_GETFL(void)
+• restituisce, come risultato di fcntl, file access mode e file status flag
+• e.g. val=fcntl(fd, F_GETFL)
+
+• F_SETFL(int)
+• imposta i file status flag O_APPEND, O_ASYNC, O_DIRECT,
+O_NOATIME, O_NONBLOCK
+• e.g. fcntl(fd, F_SETFL, O_APPEND)
+
+• vediamo fcntl.c
+
+zuliani@di.uniroma1.it
+
+26
+
+fcntl - lock su file
+• F_SETLK, acquisisce/rilascia lock
+• F_SETLKW, acquisisce/rilascia lock,
+bloccante
+
+struct flock {
+...
+• F_GETLK, testa esistenza lock
+short l_type; /* Type of lock: F_RDLCK,
+• L’argomento è la struttura flock
+F_WRLCK, F_UNLCK */
+short l_whence; /* How to interpret l_start:
+• l_whence dice da dove parte
+SEEK_SET, SEEK_CUR, SEEK_END */
+l_start (> o < 0)
+off_t l_start; /* Starting offset for lock */
+• SEEK_SET=inizio file
+off_t l_len; /* Number of bytes to lock */
+pid_t l_pid; /* PID of process blocking our lock
+• SEEK_CUR=posizione corrente
+(set by F_GETLK and F_OFD_GETLK) */
+• SEEK_END=fine file
+...
+• l_len = 0 tutto il file viene bloccato };
+
+altrimenti vengono bloccati l_len byte
+a partire da l_start
+
+vediamo fcnlt2.c
+
+zuliani@di.uniroma1.it
+
+27
+
+fcntl - lock su file (cont’d)
+• F_SETLK
+• acquisisce lock se l_type = F_RDLCK o F_WRLCK,
+• rilascia se l_type= F_UNLCK
+• restituisce -1 se un altro processo ha il lock
+
+• F_SETLKW
+• come la F_SETLK ma se c'è un lock sul file attende (wait) che questo venga rilasciato
+
+• F_GETLK, testa esistenza lock
+• la struttura flock contiene il lock che si vuole mettere
+• se il lock può essere messo fcntl aggiorna l_type a F_UNLCK
+• deve quindi essere seguita da F_SETLK/LKW
+
+zuliani@di.uniroma1.it
+
+28
+
+fcntl - lock su file - considerazioni
+• Il lock è advisory, ovvero richiede cooperazione tra processi
+• tutti i processi fanno una F_GETLK o F_SETLK/LKW e osservano il
+risultato
+• cercare di scrivere un file sul quale un processo detiene un lock non ha
+l'effetto di bloccare la scrittura
+
+• Per avere un lock mandatory (obbligatorio) ovvero che impedisce la
+scrittura o lettura richiede che il file system supporti il mandatory
+locking
+vediamo fcnlt2.c
+
+zuliani@di.uniroma1.it
+
+29
+
+int select(int nfds, fd_set *readfds, fd_set
+*writefds, fd_set *exceptfds, struct timeval
+*timeout)
+• System call - Permette di monitorare uno o più file descriptor
+rimanendo in attesa che almeno uno di essi sia disponibile per
+effettuare l'operazione richiesta
+• L'utilizzo della select consente di sincronizzare dei processi tramite il
+monitoraggio della disponibilità di accesso ad un file
+• nfds numero del file descriptor con il valore più alto aumentato di 1 tra
+quelli da monitorare
+• readfds insieme contenente i file descriptor per cui si richiede la lettura
+• writefds insieme contenente i file descriptor per cui si richiede la scrittura
+• exceptfds insieme contenente i file descriptor da controllare per le
+eccezioni
+• timeout timeout di attesa.
+zuliani@di.uniroma1.it
+
+30
+
+select - valore di ritorno
+• La funzione ritorna il numero dei file descriptor disponibili per
+l'operazione richiesta, oppure ritorna -1 in caso di errore.
+• Il valore ritornato può essere 0 se la chiamata termina per il timeout,
+prima che uno dei descrittori diventi disponibile.
+• Al termine dell'esecuzione, la funzione aggiorna le strutture dati
+contenenti i file descriptor da monitorare, per indicare quali di questi
+è disponibile per l'operazione richiesta.
+
+zuliani@di.uniroma1.it
+
+31
+
+select - valori timeout
+• infinito la chiamata è bloccante, ovvero termina quando è disponibile
+almeno un descrittore, oppure si genera un errore
+• intervallo definito la chiamata ritorna se è disponibile almeno un
+descrittore, oppure se è scaduto il timeout, oppure se si genera un
+errore
+• zero la chiamata non è bloccante, ritorna subito dopo aver controllato
+i descrittori. Questa modalità può essere utilizzata per effettuare
+polling.
+
+zuliani@di.uniroma1.it
+
+32
+
+select - insiemi dei file descriptor
+• Sono messe a disposizioni quattro macro per la gestione degli insiemi dei
+file descriptor
+• FD_ZERO() svuota un insieme.
+• FD_SET() aggiunge un file descriptor ad un insieme
+• FD_CLR() rimuove (clear) un file descriptor da un insieme
+• FD_ISSET() testa se un file descriptor appartiene ad un insieme. Utile quando
+select ritorna
+
+• I prototipi sono:
+• void FD_ZERO(fd_set *set);
+• void FD_SET(int fd, fd_set *set);
+• void FD_CLR(int fd, fd_set *set);
+• int FD_ISSET(int fd, fd_set *set);
+zuliani@di.uniroma1.it
+
+33
+
+Esercizio
+• Progettare un programma C che:
+• legga il contenuto di una directory dir passata come parametro di ingresso.
+dir può contenere file e directory. Il programma deve visitare dir e l’albero
+delle sotto directory a partire da dir fino ad una profondità n data come
+parametro di ingresso.
+• Ogni file eseguibile deve essere copiato in una directory nominata exec
+(fuori da dir) e, dopo essere stato copiato, deve poter essere eseguibile solo
+dal proprietario.
+• I file non eseguibili, ma regolari, devono essere copiati in una directory
+nominata regular
+• [Il programma deve poter svolgere il suo compito sfruttando p processi che
+lavorano in parallelo, dove p è un parametro di ingresso. La scelta della
+politica di suddivisione del lavoro tra più processi è lasciata a voi.]
+zuliani@di.uniroma1.it
+
+34
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• Implementa il memory-mapped I/O
+• Mappa un file su disco in un area di
+memoria (buffer)
+• Lettura/scrittura dal/sul buffer
+risultano in lettura scrittura dal/sul
+disco (senza accedere al disco)
+• Uso:
+• #include <sys/mman.h>
+• Restituisce l’indirizzo di partenza della
+regione mappata (buffer) se OK,
+MAP_FAILED se errore
+
+zuliani@di.uniroma1.it
+
+35
+
+void *mmap (void *addr, size_t len, int
+prot, int flag, int fd, off_t off )
+• addr è l’indirizzo iniziale dell’area di memoria in cui vogliamo mappare il file. Se
+addr = NULL, il kernel sceglie per noi
+• fd è il file descriptor (il file va aperto prima)
+• len il numero di byte da trasferire
+• off l’offset nel file
+
+• prot indica il livello di protezione dell’area mappata
+• flag (attributi dell’area mappata)
+• MAP_SHARED le operazioni sulla memoria modificano il file (R/W)
+• MAP_PRIVATE viene create una copia private del mapped file e solo questa viene modificata
+• MAP_FIXED dice al kernel di mappare a partire da addr [NON USARE!!!!]
+zuliani@di.uniroma1.it
+
+36
+
+Sync e de-mapping
+#include <sys/mman.h>
+int msync(void *addr, size_t len, int flags);
+• Le modifiche ad una regione mappata (con MAP_SHARED, ovviamente) non vengono
+scritte immediatamente nel file – il kernel decide quando farlo
+• Con msync comunicate al kernel che volete scrivere sul file le modifiche in memoria
+• Il kernel farà sempre l’I/O in multipli della dimensione di una pagina di memoria
+
+#include <sys/mman.h>
+int munmap(void *addr, size_t len);
+• Quando il processo termina la memoria viene automaticamente de-mappata, ma ciò
+non significa che il contenuto è scritto sul file (vedi sopra)
+• Ciò non avviene se chiudo il file, quindi sempre buona regola de-mappare la
+memoria con munmap
+
+msync e munmap ritornano -1 se errore
+zuliani@di.uniroma1.it
+
+37
+
+Esempio uso mmap (pag. 529 di APUE)
+
+zuliani@di.uniroma1.it
+
+38
+
+Esercizio su mmap
+• Scrivere un programma C che:
+• legga un file di testo e produca in output un file di testo in cui ogni carattere
+minuscolo è trasformato in maiuscolo, e viceversa
+
+• Requisiti implementativi:
+• Usare mmap per mappare l’intero file in memoria
+• Manipolare il testo di output direttamente in memoria (usate il flag
+MAP_SHARED in mmap per permettere al kernel di scrivere il file)
+
+zuliani@di.uniroma1.it
+
+39
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+40
+
+

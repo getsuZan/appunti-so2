@@ -1,0 +1,4909 @@
+Primi passi - shell, utenti,
+filesystem
+Lezione 1
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• La shell
+• Il prompt
+• Il comando
+• Gli utenti
+• Il file system
+
+zuliani@di.uniroma1.it
+
+2
+
+Premessa
+• Per fare tutti gli esercizi in queste slides e in quelle che verranno è
+opportuno installare sul proprio computer una versione di Linux delle
+famiglie Debian, Fedora, etc. ad esempio
+• Ubuntu
+• Fedora
+• Rocky
+• …
+
+• Vedi pagina comune del corso (sezione Software (gratis) per il Corso)
+• https://twiki.di.uniroma1.it/twiki/view/SO/SO1213AL/SistemiOperativi12CFUModul
+o220182019
+
+zuliani@di.uniroma1.it
+
+3
+
+La shell
+• Interprete di comandi
+• Un programma che esegue altri comandi
+• Spesso chiamato terminale (terminal)
+
+• Vari tipi di shell
+• Thompson/Bourne shell: sh
+• Bourne-Again shell: bash
+• KornShell: ksh
+• Friendly Interactive shell: fish
+•…
+
+• Apriamo la bash (Bourne Again Shell)
+• LXterminal
+zuliani@di.uniroma1.it
+
+4
+
+La shell
+• Per verificare la versione della shell che state usando
+
+Casalicchio@di.uniroma1.it
+
+5
+
+La «history» della bash
+• Con i tasti «freccia su» e «freccia giù» potete scorrere la lista dei
+comandi dati
+• Una volta visualizzato il comando selezionato, questo può essere
+modificato
+• Potete ricercare un comando data una certa keyword con la
+combinazione di tasti CTRL+r
+
+zuliani@di.uniroma1.it
+
+6
+
+Il prompt
+• La bash scrive un prompt ed attende che l'utente
+scriva un “comando”
+• il prompt tipico e così costituito:
+nomeutente@nomemacchina:~cammino$
+• dove cammino è il percorso dalla cartella (directory o
+folder) home alla cartella attuale
+
+• quindi, se si è semplicemente nella home, c'è solo
+la tilde ~
+• se la cartella corrente non si trova nel sottoalbero
+radicato nella home, allora cammino è il percorso
+assoluto
+zuliani@di.uniroma1.it
+
+7
+
+Il comando
+• Ogni comando verrà nel seguito indicato come segue
+• comando [opzioni] argomenti_obbligatori
+
+• Ci dev'essere almeno un argomento (ma ce ne puo essere anche più d'uno) se
+{argomento}
+• cp [-r] [-i] [-a] [-u] {filesorgenti} file_destinazione
+
+• Ci possono essere 0, 1 o più argomenti opzionali se [opzione...]
+• ps [opzioni] [pid...]
+
+• Argomenti vanno separati da carattere indicato se
+[carattere opzione...]
+• chmod mode[, mode...] file_name
+
+zuliani@di.uniroma1.it
+
+8
+
+Il comando (cont.)
+• Opzioni tipicamente composte da
+• -carattere (vecchia versione)
+• --parola (nuova versione)
+
+• Ad esempio sono equivalenti per il comando cp
+• -i
+• --interactive
+
+-r
+--recursive
+
+• Le opzioni possono avere un argomento
+• -k1, -k 1, --key=1
+
+• Le opzioni senza argomento sono raggruppabili
+• -b -r -c sono equivalente a -brc
+
+• Esistono anche le opzioni in stile BSD, senza dash ‘-’
+• tar xfz nomefile.tgz
+zuliani@di.uniroma1.it
+
+9
+
+Esempio: il comando man
+• Sinossi del comando
+• man [sezione] comando
+
+• Provate man man
+Sezione
+
+Casalicchio@di.uniroma1.it
+
+10
+
+Esercizi
+1. Provate qualche opzione del comando man
+2. Usando il comando man scoprite la sinossi completa dei comandi
+cp, ps, ls e a cosa servono
+3. Dal man di ps cercate di capire perché
+ps –p $$ –ocmd –h
+Restituisce bash come output
+4. Trovate un’apposita invocazione di ps che ritorni solo il pid (process
+id) della shell.
+
+zuliani@di.uniroma1.it
+
+11
+
+Gli utenti
+• Durante l’installazione di Linux è necessario specificare (almeno) un utente
+(utente principale)
+• Alcune versioni creano un utente automaticamente ad es.
+• Utente osboxes
+• Password osboxes.org
+
+• root è il superutente: ha tutti i privilegi (amministratore di sistema)
+• Non tutti gli utenti possono «entrare» nel sistema (to log in)
+• root non può fare login da un terminale qualsiasi (di solito solo dalla console) ma
+un utente può acquisire i diritti di root mediante il comando su e sudo
+
+• Ogni utente appartiene almeno ad un gruppo
+• automaticamente creato con lo stesso nome dell’utente principale
+
+• Esistono molti gruppi definiti per scopi «amministrativi»
+• groups [nome_utente]
+zuliani@di.uniroma1.it
+
+12
+
+sudo
+• Nelle distribuzioni della famiglia Debian l’utente
+principale è un sudoer, appartiene al gruppo
+predefinito sudo
+• Gli utenti del gruppo sudo possono eseguire
+comandi da super utente (root) usando il
+comando sudo
+• sudo comando
+• guardare il man per la sinossi completa
+
+• sudo è un comando che prende in ingresso un
+altro comando
+zuliani@di.uniroma1.it
+
+13
+
+Creazione di altri utenti
+• adduser nuovo_utente
+• Di default l’utente creato non appartiene al gruppo sudo
+
+• Esercizio [da fare sul vostro pc]:
+• Studiare la sinossi del comando adduser
+• creare 2 nuovi utenti (utente1 e utente2)
+• con utente principale (sudoer) eseguire il comando apt-get update
+• con utente principale eseguire il comando sudo apt-get update
+
+• Per aggiungere un utente ad un gruppo
+• adduser nuovo_utente gruppo
+zuliani@di.uniroma1.it
+
+14
+
+Cambiare utente (sul vostro pc)
+• su [- | -l | --login] nome_utente
+• Tipico uso per diventare root su - | su - root | su -l root
+
+• Esercizio
+1.
+2.
+3.
+4.
+
+con utente utente1 eseguire il comando apt-get update
+con utente utente1 eseguire il comando sudo apt-get update
+rendere utente1 sudoer
+riprovare passi 1 e 2
+
+zuliani@di.uniroma1.it
+
+15
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+16
+
+Il filesystem
+Lezione 2
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Comandi per la gestione del file system, ovvero di file e directory
+
+zuliani@di.uniroma1.it
+
+2
+
+Ottimo video di
+introduzione a Unix,
+dai suoi autori!
+
+zuliani@di.uniroma1.it
+
+3
+
+Il filesystem
+• Organizzazione di un area di memoria di massa basata sul
+concetto di file (raccoglitore, schedario) e di directory/folder
+(cartella, fascicolo)
+• Directory contiene file e directory
+• Struttura gerarchica ad albero
+• Solo le directory possono avere figli
+• I file sono foglie
+
+• File regolari contengono sequenze di bit dell’area di
+memoria sulla quale c'è il filesystem
+• Esistono file non regolari, ad es. per l’accesso di basso
+livello (raw access) a periferiche o dispositivi vari
+zuliani@di.uniroma1.it
+
+Il filesystem (cont.)
+• Linux e Unix hanno un solo filesystem principale che ha come
+directory radice / (root)
+• Provate il comando cd /
+
+• Tutto (file e directory) è contenuto direttamente o indirettamente in /
+• In una stessa directory è vietato creare
+• 2 file con lo stesso nome
+• 2 directory con lo stesso nome
+• Un file ed una directory con lo stesso nome
+
+• I nomi dei file e delle directory sono case sensitive
+• Amore.txt ≠ amore.txt
+zuliani@di.uniroma1.it
+
+5
+
+Cammini
+• Ogni file o directory è raggiungibile dalla radice /
+mediante un cammino (path) assoluto
+• Sequenza di directory separate da /
+• /home/utente1/dir1/dir11/dir112/file.pdf
+
+• Eccezione di cammino assoluto (es: per l’utente userX)
+• ~/dir1/dir11/dir112/file.pdf
+• ~ equivale a /home/userX
+
+zuliani@di.uniroma1.it
+
+6
+
+La current working directory (cwd)
+• Per conoscere la directory in cui attualmente state lavorando, si usa pwd
+• Per cambiare cwd usare il comando cd [path]
+• [Path] può essere assoluto o relativo
+• cd senza path ritorna alla home
+
+• Nel path si possono usare .. (directory «genitore») e . directory attuale
+
+zuliani@di.uniroma1.it
+
+7
+
+Cose strane!!!
+• Usando il comando mkdir create le directory
+• ~/Immagini
+• ~/Immagini/faces
+• Consultate il man per la sinossi di mkdir
+• Se le directory già esistono o se la directory Immagini già esiste non c'è bisogno di crearla
+
+• Partendo da ~ quale sarà la cwd dopo il comando seguente?
+• cd Immagini/../Immagini/faces/
+• In quale cwd deve essere dato il comando seguente per far si che la cwd
+risultante sia ~/Immagini/faces?
+• cd ../.././Immagini/./faces/
+zuliani@di.uniroma1.it
+
+8
+
+Cose strane!!! (soluzioni)
+
+zuliani@di.uniroma1.it
+
+9
+
+Quale è la differenza tra cammino (path)
+assoluto e relativo?
+• Path assoluto è valido qualunque sia la cwd
+• Path relativo può non essere valido quando si cambia cwd
+
+zuliani@di.uniroma1.it
+
+10
+
+Contenuto di una directory
+• Comando ls
+• restituisce la lista dei file contenuti in una directory
+
+• Date un’occhiata al man per avere un idea delle opzioni disponibili e
+delle modalità d’uso
+• ls
+• Mostra contenuto cwd
+
+• ls nomedir
+• Mostra contenuto directory nomedir
+
+zuliani@di.uniroma1.it
+
+11
+
+Contenuto di una directory (cont.)
+• In una directory ci sono file «nascosti»
+• Tipicamente file di configurazione o file usati a
+supporto di comandi e applicazioni
+
+• ad es.
+• .bash_history contiene la lista dei
+comandi eseguiti. Provate less
+.bash_history
+• .bashrc contiene la configurazione della
+bash
+
+• ls [ -a | --all ] visualizza i file
+nascosti
+zuliani@di.uniroma1.it
+
+12
+
+Contenuto di una directory (cont.)
+• Se vogliamo ricorsivamente visualizzare il contenuto delle sotto
+directory abbiamo l’opzione [ -R | --recursive ]
+• ad esempio
+
+zuliani@di.uniroma1.it
+
+13
+
+Contenuto di una directory (cont.)
+• Si può visualizzare l’albero delle directory con il comando
+• tree [-a] [-L maxdepth] [-d] [-x] [nomedir]
+• Se non è installato, installatelo eseguendo sudo apt install tree
+
+zuliani@di.uniroma1.it
+
+14
+
+zuliani@di.uniroma1.it
+
+15
+
+zuliani@di.uniroma1.it
+
+16
+
+Creazione di directory e file
+• mkdir [-p] nomedir
+• crea directory nomedir vuota
+• se volete creare un intero path di directory? Ad esempio
+./dir11/dir12/dir13
+• provate: mkdir dir11/dir12/dir13
+• Non funziona … provate ora con l’opzione -p ?
+
+• touch nomefile
+• crea file nomefile vuoto
+• Per modificare il contenuto di un file gedit, nano, pico, vi
+• Provate gedit nomefile & oppure nano nomefile &
+• Se gedit non è installato … sapete cosa fare … (vedi installazione del commando tree)
+
+zuliani@di.uniroma1.it
+
+17
+
+Esercizio 1
+• Creare l'intero albero di directory
+/home/utente1/dir1/dir3/dir7/
+(dove utente1 siete voi)
+• Posizionarsi dentro dir7 e poi in dir1 sia usando sia non usando la
+directory parent ..; per controllare il risultato usare il comando ls
+o pwd; controllare come cambia il path riportato nel prompt
+• Creare un file vuoto in dir7 e poi aprirlo e modificarlo con gedit (o
+nano)
+
+zuliani@di.uniroma1.it
+
+18
+
+Fine della I parte
+
+zuliani@di.uniroma1.it
+
+19
+
+Il filesystem root (/) contiene elementi
+eterogenei
+• Disco interno solido o magnetico
+• Filesystem su disco esterno (e.g., usb)
+• Filesystem di rete
+• Filesystem virtuali (usati dal kernel per
+gestire risorse)
+• Filesystem in memoria principale
+• Tutto questo è possibile grazie al
+meccanismo del mounting
+zuliani@di.uniroma1.it
+
+20
+
+Mounting
+Una chiavetta USB
+
+Disco principale
+/
+
+/
+
+Documenti
+
+src
+
+CV.doc
+
+main.c
+
+Documenti
+
+media
+
+Lezioni
+
+L02-FS.pptx
+
+CV.pdf
+
+L05-Proc.pptx
+
+zuliani@di.uniroma1.it
+
+21
+
+Mounting
+
+/
+
+Documenti
+
+src
+
+CV.doc
+
+main.c
+
+CV.pdf
+
+media
+
+Documenti
+
+Lezioni
+L02-FS.pptx
+L05-Proc.pptx
+
+zuliani@di.uniroma1.it
+
+22
+
+Mounting
+• Una qualsiasi directory D dell'albero gerarchico può diventare il punto
+di mount per un altro (nuovo) filesystem F se e solo se la directory
+root di F diventa accessibile da D
+• Se D è vuota, dopo il mount conterrà F
+• Se D non è vuota, dopo il mount conterrà F ma ciò non significa che i dati che
+vi erano dentro sono persi… saranno di nuovo accessibili dopo l’unmount di F
+
+• Una qualsiasi directory dell'albero gerarchico può diventare il punto di
+mount per un altro (nuovo) filesystem
+
+zuliani@di.uniroma1.it
+
+23
+
+Partizioni e mounting
+• Un singolo disco può essere suddiviso in due o più partizioni
+• Una partizione A può contenere il sistema operativo e la partizione B
+i dati degli utenti (home directory degli utenti)
+• La partizione A verrà montata su /
+• La partizione B verrà montata su /home
+
+• Quali sono i vantaggi? (fermatevi e riflettete)
+• Se devo reinstallare il sistema operativo in A non tocco i dati e rimonto B in
+/home del nuovo filesystem
+• Se voglio installare una diversa versione di Linux in un’altra partizione C o
+altro disco D posso sempre montare B su /home del nuovo filesystem senza
+dover ricopiare i dati
+zuliani@di.uniroma1.it
+
+24
+
+Tipi di filesystem
+• Dal punto di vista dell’utente
+• Dimensione max partizione
+• Dimensione max file
+• Lunghezza max nome file
+• Se Journal filesystem o no (ricordate cosa significa? Vedi I Modulo)
+
+• Dal punto di vista del programmatore
+• Il tipo di filesystem definisce la codifica dei dati
+
+Scelta tipo fs
+
+Formattazione
+partizione
+specificando tipo
+fs scelto
+zuliani@di.uniroma1.it
+
+Montare la
+partizione
+specificando il
+tipo di fs
+
+25
+
+Tipi di filesystem (cont.)
+• Ci sono file system non Linux, ad esempio Windows:
+• NTFS, MSDOS, FAT32, FAT64
+
+• FAT (16, 32, 64bit) e NTFS possono essere montati su di un fs Linux
+• mount è il comando per montare un fs e visualizzare i fs montati
+• consultare il man, ad esempio le sezioni con le opzioni per montare
+filesystem FAT e NTFS
+
+zuliani@di.uniroma1.it
+
+26
+
+mount
+• mount visualizza fs correntemente montati
+• cat /etc/mtab visualizza fs montati
+• cat /etc/fstab visualizza fs montati all’avvio (bootstrap)
+cat permette di concatenare più
+files e stamparne il contenuto su
+standard output (stdout). Forma
+più semplice:
+cat nomefile
+
+Vedi man per altri opzioni
+zuliani@di.uniroma1.it
+
+27
+
+Fine della II parte
+
+zuliani@di.uniroma1.it
+
+28
+
+File passwd e group
+• /etc/passwd
+• /etc/group
+• Visualizzare sullo schermo il loro contenuto
+• /etc/passwd contiene tutti gli utenti
+• /etc/group contiene tutti i gruppi
+
+• Rappresentano una delle filosofie di Linux
+• Usare file di testo (con codifica ASCII a 8 bit) con una struttura definita e
+conosciuta dai programmi che devono interagire con quei file
+• Ad es. il comando adduser conosce la struttura di questi file
+
+zuliani@di.uniroma1.it
+
+29
+
+Vediamo la struttura di questi file
+• Organizzati per righe
+• Riga = sequenza di caratteri terminata con line feed LF (0x0A)
+• Ogni riga contiene vari campi separati da :
+• passwd ha la seguente struttura
+• username:password:uid:gid:gecos:homedir:shell
+• al posto della password potete notare una x (cifrata)
+
+zuliani@di.uniroma1.it
+
+30
+
+Vediamo la struttura di questi file (II)
+• group ha la seguente struttura
+• groupname:password:groupID:lista utenti
+• Gli utenti nella Lista utenti sono separati da ,
+• Anche qui la password non è visualizzata
+• Nell’immagine a lato i gruppi sono quelli usati dal sistema
+e nessun utente vi appartiene
+
+• Solitamente se una riga inizia per # significa
+che contiene un commento o che il suo
+contenuto non deve essere interpretato
+dalle applicazioni che usano il file
+zuliani@di.uniroma1.it
+
+31
+
+Sgranchiamoci le dita
+• Fate la seguente prova
+• Verificare che utente3 non sia presente in /etc/passwd, createlo, e
+poi controllare che sia presente
+• Verificare che utente3 non sia nel gruppo sudo, aggiungerlo al gruppo
+sudo, e poi controllare che sia presente
+
+zuliani@di.uniroma1.it
+
+32
+
+Fine della III parte
+
+zuliani@di.uniroma1.it
+
+33
+
+I file
+• Ogni file nel filesystem è
+rappresentato da una struttura
+dati inode ed è univocamente
+identificato da un inode
+number
+• La cancellazione di un file libera
+l’inode number che verrà
+riutilizzato quando necessario
+per un nuovo file
+Struttura dati inode
+34
+
+Principali attributi struttura dati inode
+• Type: Tipo di file (regular, block, fifo ...)
+• User ID: id dell'utente proprietario del file
+• Group ID: id del gruppo a cui è associato il file
+• Mode: Permessi (read, write, execute) di accesso per il proprietario, il gruppo e
+tutti gli altri
+• Size: Dimensione in byte del file
+• Timestamps: ctime (inode changing time: cambiamento di un attributo), mtime
+(content modification time: solo scrittura), atime (content access time: solo lettura)
+
+• Link count: Numero di hard links (collegamenti “rigidi”)
+• Data pointers: Puntatore alla lista dei blocchi che compongono il file; se si tratta
+di una directory, il contenuto su disco è costituito da una tabella con 2 colonne:
+nome del file/directory e suo inode number
+zuliani@di.uniroma1.it
+
+35
+
+http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html
+
+Tabella inode
+• Si trova all’inizio del
+disco
+• Esempio per ext2
+
+inode per una directory
+
+zuliani@di.uniroma1.it
+
+36
+
+inode: come viene seguito un path
+
+zuliani@di.uniroma1.it
+
+37
+
+Come visualizzare le informazioni contenute
+nell’inode di un file?
+• ls [-a] [-c] [-u] [-R] [-l] [-i] [-n] [-S] [-h]
+[-1] [nomedir1] ... [nomedirn] [nomefile1] ...
+[nomefilen]
+• inode number: opzione -i
+• diritti, user, group, date, size, time: opzione -l
+
+zuliani@di.uniroma1.it
+
+38
+
+ls
+• Dimensione
+• quanto effettivamente occupato dal file
+• per le directory dimensione del file speciale contenente lista di coppie
+(nomefile, inode_number)- solitamente 4K ma più file ci sono più la
+dimensione è grande (anche se fossero tutti file vuoti)
+• Prova a vedere le dimensione /etc o /lost+found
+
+• Il numero dopo i diritti di accesso indica il numero di directory e file
+all’interno della directory (vengono contate anche . e .. ) - per i file è
+ovviamente 1
+zuliani@di.uniroma1.it
+
+39
+
+• Totale: si tratta delle dimensione della directory in blocchi su disco
+(normalmente, 1 blocco ha dimensione tra 1kB e 4kB)
+• riguarda solo la directory attuale, non tutto il sottoalbero
+• per ogni sottodirectory, ne considera solo la dimensione, come definita sopra
+(dimensione file speciale)
+
+zuliani@di.uniroma1.it
+
+40
+
+ls
+• opzione -n consente di visualizzare ID utente e ID gruppo invece del
+nome esteso
+• per vedere i timestamp sempre con l'opzione -l, ma in combinazione
+con
+• -c per ctime, ad es. ls -l -c nomefile oppure ls -lc nomefile
+• -u per atime
+• senza niente (per mtime)
+
+• Esercizio: creare un file, modificarlo, poi leggerlo e verificare che i
+valori per atime ed mtime cambino di conseguenza
+NOTA: notare che queste ed altre informazioni potrebbero non
+essere sono sul man. In tal caso, cercate nelle informazioni estese,
+reperibili
+con il comando info ls
+zuliani@di.uniroma1.it
+41
+
+stat [-c format] {nomefile}
+
+• Ad es:
+• stat filename restituisce varie informazioni
+
+• stat -c %B filename restituisce la dimensione del blocco su disco
+che coincide con la dimensione di un settore di disco
+• sudo fdisk -l /dev/sdax
+
+dove x=1, 2, …
+
+zuliani@di.uniroma1.it
+
+42
+
+Fine della IV parte
+
+zuliani@di.uniroma1.it
+
+43
+
+Permessi di accesso ai file: chi può fare cosa
+• Utente proprietario: solitamente chi crea il file/directory
+• Gruppo proprietario: gruppo primario dell’utente proprietario
+(specificato in /etc/passwd)
+• Proprietario definisce i permessi di accesso: chi può leggere, scrivere,
+eseguire un file/directory
+
+zuliani@di.uniroma1.it
+
+44
+
+Permessi di accesso a file
+
+Scrittura significa
+- Sovrascrivere
+- Append (scrivere alla fine)
+- Cancellare (ma servono specifici diritti
+sulla directory)
+
+zuliani@di.uniroma1.it
+
+45
+
+Permessi di accesso a directory
+Permesso Ottale
+
+Significato
+
+---
+
+0
+
+Non si può fare niente
+
+--x
+
+1
+
+Si può impostare come cwd (ma solo se il permesso c'è per tutte le directory nel
+path); si può anche “attraversare", se già se ne conosce il contenuto
+
+-w-
+
+2
+
+Non si può fare niente
+
+-wx
+
+3
+
+Come il permesso 7, ma non si può elencare il contenuto
+
+r--
+
+4
+
+Solo elencare il contenuto (senza vedere attributi file), non può essere
+«attraversata»
+
+r-x
+
+5
+
+Si può leggere (attributi compresi), impostare come cwd ed attraversare; non è
+possibile cancellare o aggiungere file/directory
+
+rw-
+
+6
+
+Come il permesso 4
+
+rwx
+
+7
+
+Elencare contenuto (attributi compresi), aggiungere file e directory, cancellare file
+contenuti in essa (anche senza avere il permesso di scrittura sul file! Correggibile
+con lo sticky bit, vedere più avanti), cancellare directory contenute in essa (ma
+occorrono tutti i permessi su zuliani@di.uniroma1.it
+tali directory)
+
+46
+
+Permessi speciali
+• sticky bit (t)
+• setuid bit (s)
+• setgid bit (s)
+• Possono essere applicati a file e directory
+
+zuliani@di.uniroma1.it
+
+47
+
+Sticky bit (t)
+• Inutile sui file
+• Applicato su directory corregge il comportamento di w+x
+permettendo la cancellazione di file se si hanno permessi di scrittura
+su di essi
+
+zuliani@di.uniroma1.it
+
+48
+
+Sticky bit (t)
+• Siano
+• D una directory,
+• Usr1 e Usr2 due utenti Usr1 ≠ Usr2
+• D appartiene a Usr1
+• D non appartiene a Usr2 ne’ al gruppo di Usr2
+• f un file in D
+
+• Se Usr2 cerca di cancellare f allora,
+• Senza sticky bit su D, sarà sufficiente avere i diritti di scrittura su D (nel
+Gruppo “other”...) per cancellare f, anche se non si hanno i permessi di
+scrittura su f (sempre su “other”).
+• Con sticky bit, è necessario anche il permesso di scrittura su f per cancellare f.
+zuliani@di.uniroma1.it
+
+49
+
+Setuid bit (s)
+• Si usa solo per i file eseguibili
+• quando vengono eseguiti, i privilegi con cui opera il corrispondente processo
+non sono quelli dell'utente che esegue il file, bensì quelli dell'utente
+proprietario del file
+• quindi, se il proprietario è root, viene eseguito con i privilegi di root,
+indipendentemente da chi lo ha eseguito
+
+• Ad esempio, il comando passwd ha il setuid, che permette ad un
+utente di modificare la propria password
+• Il proprietario del comando è root!
+
+• setuid può essere troppo ‘potente’, quindi si cerca di limitarlo:
+• https://blogs.oracle.com/solaris/post/when-setuid-root-no-longer-means-setuid-root-forced-privileges
+zuliani@di.uniroma1.it
+
+50
+
+Setgid bit (s)
+• Analogo di setuid ma con i gruppi
+• i privilegi sono quelli del gruppo che è proprietario del file eseguibile
+
+• Può essere applicato anche ad una directory, e allora ogni file creato lì
+dentro ha il gruppo della directory, anziché quello primario di chi crea
+i files
+
+zuliani@di.uniroma1.it
+
+51
+
+Visualizzazione attributi di accesso
+• Con comando ls o stat
+
+zuliani@di.uniroma1.it
+
+52
+
+Visualizzazione permessi speciali
+• Vengono visualizzati al posto del bit di esecuzione:
+• il setuid nella terna utente (user)
+• il setgid nella terna gruppo (group)
+• lo sticky nella terna altro (other)
+
+• Provate il commando
+• stat /tmp /usr/bin/passwd
+
+• Se il permesso di esecuzione c'è, allora la s o la t saranno minuscoli,
+altrimenti saranno Maiuscoli
+
+zuliani@di.uniroma1.it
+
+53
+
+Esercizio 2
+• Capire perché il comando adduser va usato solo da un utente
+amministratore, mentre il comando groups no
+
+zuliani@di.uniroma1.it
+
+54
+
+chmod mode[, mode...] filename
+• Cambia la modalità (diritti) di accesso a file o directory
+• Formato ottale
+• 4 numeri tra 0 e 7, come nelle Tabelle viste nelle precedenti slides;
+• il primo numero indica setuid (4), setgid (2) e sticky (1), gli altri sono per
+utente, gruppo ed altri
+
+• Si possono fornire 3 numeri se si assume setuid, setgid e sticky impostati a 0
+zuliani@di.uniroma1.it
+
+55
+
+Esercizio 3
+
+5 minuti
+
+creare un file e, usando la modalità ottale, impostarne i permessi a
+• rw- r-- r–
+
+poi a
+• rws r-S -w-
+
+ed infine a
+• rwx r-- -wT
+
+zuliani@di.uniroma1.it
+
+56
+
+chmod - modalità simbolica (lettere)
+• Per impostare il mode usando dei simboli il formato è
+• [ugoa][+-=][perms...]
+
+• Dove perms è
+• zero
+• una o più lettere nell'insieme {rxwXst}
+• oppure una lettera nell'insieme {ugo}
+
+• Capire dal manuale come funziona (attenzione alla a, che tiene conto
+del masking, di cui si tratterà più avanti)
+
+zuliani@di.uniroma1.it
+
+57
+
+Esercizi 4
+
+10 minuti
+
+1. Creare un file e, usando la modalità simbolica, impostarne i
+permessi a
+• rws r-S -w- e poi a
+• rwx r-- -wT
+
+2. Togliere il permesso di lettura ad un file di testo, e poi provare ad
+aprirlo con gedit/vi/nano
+3. Il comando chmod modica il ctime del file, verificarlo
+Precisazione su ctime: dovrebbe essere modificato ogni volta che cambiano gli
+attributi. C'è però un'eccezione: se si accede in lettura al file si modicano gli attributi,
+perché viene modificato il timestamp di accesso; tuttavia, il ctime, in questo caso, non
+viene modificato
+zuliani@di.uniroma1.it
+58
+
+chown [-R] proprietario {file}
+chgrp [-R] gruppo {file}
+• Possono essere usati solo da root (richiedono quindi sudo)
+• Se file è una directory con l’opzione -R si applica il comando a tutte
+le sotto directory
+• Esercizio 5:
+• riprendendo l'esempio (Esercizio 1) dell'albero di directory
+/home/utente1/dir1/dir3/dir7/, creare un file (vuoto) filei
+dentro ciascuna directory diri (i=1,3,7), e cambiare i proprietari in
+questo modo:
+• la directory dir3 diventa di utente3,
+• tutti i file dentro dir3 diventano di utente2,
+• dir7 diventa di utente2 e file7 diventa di utente3.
+
+• Dopodiché, provare a cambiare i permessi di file3 e dir7.
+zuliani@di.uniroma1.it
+
+59
+
+Esercizio 6
+
+10 minuti
+
+• Creare una nuova directory e copiarci (o spostarci) dentro
+• create_dirs_and_files.script
+• lo script è disponibile su classroom/Lezione 03
+
+• Eseguire con il seguente comando:
+
+• bash create_dirs_and_files.script
+
+• Eseguire ls -lR
+• Come si può vedere, ora ci sono 8 file, uno per ogni permesso, e 8 directory, una
+per ogni permesso all'interno di ciascuna directory, si ripete lo schema: 8 file e 8
+directory, ciascuna di queste ultime con dentro 8 file
+• Ora testare i vari permessi, come sono riportati nella tabella introdotta
+precedentemente. Ad esempio, provare a leggere un file solo eseguibile, o ad
+appendere testo ad un file solo leggibile, o ad attraversare una directory senza
+permesso di esecuzione...
+zuliani@di.uniroma1.it
+
+60
+
+• Esercizio 7: provare a fare un esempio funzionante di sticky bit. A tal proposito,
+creare da root (usando sudo) una directory avente tutti i diritti per tutti i gruppi, e
+crearci dentro un file, togliendo a quest'ultimo i permessi per il gruppo “other";
+infine, provare a cancellarlo. Fare lo stesso dopo aver aggiunto lo sticky bit alla
+directory.
+
+• Esercizo 8: provare a fare un esempio funzionante di setuid bit. A tal proposito,
+copiate /bin/cat in una directory, e abilitategli il setuid bit. Create un file da root
+(usando sudo), e dategli il solo permesso di lettura per il solo gruppo «owner».
+Provare a vedere il contenuto di questo file usando il comando cat di sistema:
+fallirà. Ora provate a farlo usando ./cat...
+zuliani@di.uniroma1.it
+
+61
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+62
+
+Il filesystem
+Lezione 3 - comandi
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Continuiamo con i comandi per la gestione del file system, ovvero di
+file e directory
+
+zuliani@di.uniroma1.it
+
+2
+
+Riepilogo Lezione 02
+• inode e attributi file;
+• come visualizzare attributi file: ls, stat, tree
+• come creare file e directory
+• File system, mounting
+• passwd, group
+• permessi accesso ai file
+• chmod, chown, chgrp
+
+zuliani@di.uniroma1.it
+
+3
+
+L03 - Comandi
+Consultate il man per i dettagli soffermandovi sulle opzioni indicate
+• umask [mode]
+la descrizione è nel man bash (cercate umask)
+• cp [-r] [-i] [-a] [-u] {filesorgenti} filedestinazione
+• mv [-i] [-u] [-f] {filesorgenti} filedestinazione
+• rm [-f] [-i] [-r] {file}
+• ln [-s] sorgente [destinazione]
+• touch [-a] [-m] [-t timestamp] {file}
+• du [-c] [-s] [-a] [-h] [--exclude=PATTERN] [files...]
+• df [-h] [-l] [-i] [file]
+• dd [opzioni]
+• mkfs [-t type fsoptions] device
+zuliani@di.uniroma1.it
+
+4
+
+umask [mode]
+• Imposta la maschera dei file a mode; ovvero i diritti di accesso al file o alle
+directory nel momento della loro creazione
+• Diritti accesso directory = 0777 AND NOT(umask)
+• L’operazione AND è bit a bit
+• 0666 per i file
+• Gli attributi speciali non sono impostati (notare il primo 0 ottale = 000)
+
+• Per i file però il diritto di esecuzione non viene impostato (e quindi le
+opzioni speciali non hanno effetto) [notare 666=110110110]
+• Esercizio 1: modificare l'umask in modo che, sia che venga creata una
+directory sia un file, i permessi siano 664. Dopodiché, modificare
+nuovamente in modo che il permesso per una nuova directory sia 775 e
+per un file sia 664.
+zuliani@di.uniroma1.it
+
+5
+
+cp [-r] [-i] [-a] [-u]
+{filesorgenti} filedestinazione
+• -r recursive per directory
+• -i interactive per essere avvisati in caso di sovrascrizione
+• -u la sovrascrittura avviene solo se l'mtime del sorgente e più recente di
+quello della destinazione
+• Esercizio 2: verificare il funzionamento di ciascuna delle opzioni mostrate.
+Per esempio, per l'opzione -i, provare a copiare un file sorgente in un file
+destinazione esistente e vedere che effettivamente viene chiesta conferma.
+Per l'opzione -a, e sufficiente creare un file ed aggiungere qualche
+permesso, poi fare la copia con e senza -a...
+• Esercizio 3: verificare il funzionamento del comando cp con diverse
+tipologie di argomenti: i) 2 file (tutti e 4 i casi tra esistenti e non); ii) 2
+directory (tutti e 4 i casi tra esistenti e non); iii) 3 file (l'ultimo sia esistente
+che non); iv) 3 directory (idem al caso precedente); v) 2 file e 2 directory...
+zuliani@di.uniroma1.it
+
+6
+
+mv [-i] [-u] [-f] {filesorgenti}
+filedestinazione
+• Sposta un file (o lo rinomina)
+• -i e -u hanno stesso significato di cp
+• -f force è il default
+• Esercizio 4: rifare gli esercizi 2 e 3 con mv al posto di cp
+
+zuliani@di.uniroma1.it
+
+7
+
+rm [-f] [-i] [-r] {file}
+• Ricordate che non c'è il cestino!!!!
+• -f forza la cancellazione (senza chiedere)
+• -r recursive
+• -i interactive
+• Esercizio 5: creare un file, guardare il suo inode, cancellarlo e poi
+creare subito dopo un altro file: quale è l'inode del nuovo file
+(supponendo che nessun altro utente stia usando il computer...)?
+
+zuliani@di.uniroma1.it
+
+8
+
+ln [-s] sorgente [destinazione]
+• Soft/symbolic e hard link
+• Un link lin1 ad un file f1 è un nuovo file lin1 che punta ad f1
+senza contenere in esso il contenuto di f1 (permette di risparmiare
+spazio)
+• Default hard link; -s soft link
+• Negli hard link non c'è il concetto di puntatore e puntato
+
+zuliani@di.uniroma1.it
+
+9
+
+Esercizio 7
+• Eseguite i seguenti comandi e verificate che si ottiene quanto
+mostrato nella figura mostrata nella slide seguente (usate stat o ls)
+mkdir d1 d2
+dd if=/dev/urandom of=d1/f1 bs=1M count=10
+dd if=/dev/urandom of=d1/f2 bs=1M count=10
+dd if=/dev/urandom of=d1/f3 bs=1M count=10
+dd if=/dev/urandom of=d2/f1 bs=1M count=10
+dd if=/dev/urandom of=d2/f2 bs=1M count=10
+ln d1/f1 d1/f4
+ln d1/f1 d2/f3 #sarebbe stato lo stesso ln d1/f4 d2/f3
+ln d2/f2 d2/f4
+
+zuliani@di.uniroma1.it
+
+10
+
+zuliani@di.uniroma1.it
+
+11
+
+Esercizio 8
+• Nell’Esercizio 7 sostituite
+ogni ln con ln -s e
+verificate che si ottiene la
+figura mostrata a lato
+(usate stat o ls)
+• Attenzione: ln –s NON
+controlla se il file sorgente
+esiste!! Per gli hard link il
+controllo viene invece
+effettuato. [Perché?]
+zuliani@di.uniroma1.it
+
+12
+
+• A seguito dell’esercizio svolto, che differenza avete notato tra link
+Hard e Soft?
+• I link funzionano anche per le directory.
+
+zuliani@di.uniroma1.it
+
+13
+
+touch [-a] [-m] [-t timestamp]
+{file}
+• Serve per modificare i timestamps («marcature/timbri temporali») di
+un file … e se il file non esiste lo crea
+• Può essere applicato anche su directory
+• -t imposta il timestamp desiderato
+• Esercizio 9: immaginare almeno due casi in cui touch non riesce a
+creare un file
+
+zuliani@di.uniroma1.it
+
+14
+
+du [-c] [-s] [-a] [-h] [--exclude=PATTERN]
+[files...]
+• Somma tutte le dimensioni dei file e/o directories dati come
+argomento
+• Studiate le opzioni indicate sopra (leggendo il man)
+• Esercizio 10: verificare le opzioni sopra riportate su alcune directory
+standard di Linux (ad es., /etc)
+
+zuliani@di.uniroma1.it
+
+15
+
+df [-h] [-l] [-i] [file]
+• Mostra la dimensione e l'attuale uso dei filesystem
+• Studiate le opzioni indicate sopra (leggendo il man)
+• Esercizio 11: vedere le statistiche di uso di tutti i filesystem, e poi solo
+del filesystem contenente i seguenti files (o folder): /etc/passwd
+e /proc
+
+zuliani@di.uniroma1.it
+
+16
+
+dd [opzioni]
+• Per convertire o copiare files in modo «sofisticato»
+• Le opzioni sono una sequenza variabile=valore
+• Le variabili più importanti sono:
+• bs dimensione di un singolo blocco in lettura/scrittura
+• count numero di blocchi da copiare
+• convert, in questo caso, il valore specifica una conversione, per esempio di
+codifica (da minuscolo a maiuscolo e viceversa, più svariate altre cose; vedere il man)
+• if file di input (se non dato, legge da tastiera (standard input))
+• of file di output (se non dato, scrive su schermo (standard output))
+
+• Oltre che per le conversioni si usa per copiare file speciali che non possono
+essere copiati con cp
+zuliani@di.uniroma1.it
+
+17
+
+dd (cont.)
+• Quando potrebbe essere utile usare dd nel modo appena visto?
+• Cancellare dati completamente da un supporto di memoria (e.g.,
+sovrascrivere le vostre informazioni private con dati casuali)
+• Preparare un file ad essere formattato
+• Copiare una parte di un file
+
+zuliani@di.uniroma1.it
+
+18
+
+• Esercizio 12: creare un file di testo, con il seguente contenuto:
+ciao1
+addio2
+via3
+ehila4
+dove vai5
+
+e poi copiarlo in un altro file in modo tale che quest'ultimo contenga
+solo i bytes che vanno dal decimo al ventesimo; usare sia 1 che 10
+come valori per bs; rifare nuovamente la copiatura sullo stesso file
+destinazione, ma questa volta fare in modo che il contenuto del file
+destinazione sia duplicato (ovvero, contenga per 2 volte consecutive i
+bytes che vanno dal decimo al ventesimo)
+zuliani@di.uniroma1.it
+
+19
+
+mkfs [-t type fsoptions] device
+• Crea un filesystem su device; a volte detto anche formattazione
+perché prepara i file a memorizzare file secondo un dato formato, ad
+es. ext4
+• I tipi type li abbiamo visti la scorsa lezione – vedi anche il man
+• fsoption può essere ro oppure rw
+• device: device file in /dev oppure file regolare, ad es. creato
+con dd
+• Se è un dispositivo, non deve essere montato (/dev/hda, /dev/hda2,
+/dev/sdb1 )
+
+• Se nella vostra distro non è disponibile mkfs usare /sbin/mkfs
+zuliani@di.uniroma1.it
+
+20
+
+Eseguire i seguenti comandi ad esempio nella home
+dd if=/dev/zero bs=1M count=100 of=fs-virtuale
+ls -l fs-virtuale
+sudo mkfs -t ext3 fs-virtuale
+mkdir dir
+sudo mount -t ext3 fs-virtuale dir
+# prima di continuare controllare ed eventualmente sistemare
+# i diritti di accesso a dir
+cd dir
+ls -l
+dd if=/dev/zero bs=1M count=2 of=file1
+cd ..
+Richiede sudo
+ls -l
+rm -rf dir
+cd dir
+dd if=/dev/zero bs=1M count=98 of=file2
+cd ..
+umount dir
+ls -l dir
+rm -rf dir
+sudo mount -t ext3 fs-virtuale dir
+cd dir
+ls -l
+umount .
+cd ..
+umount dir
+zuliani@di.uniroma1.it
+
+21
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+22
+
+I Processi
+Lezione 4
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• I processi
+• Comandi per la gestione dei processi
+
+zuliani@di.uniroma1.it
+
+2
+
+Processo
+• In Unix/Linux le due entità fondamentali sono
+• File - descrivono/rappresentano risorse, contengono dati e programmi
+• Processi - permettono di elaborare dati e usare le risorse di sistema
+
+• Processo = file eseguibile (programma) in esecuzione
+• Per «lanciare» un processo si deve eseguire il file corrispondente
+• Digitare il nome del file da shell come un normale commando; ovvero
+• Cliccare sull’icona corrispondente (ambienti grafici)
+zuliani@di.uniroma1.it
+
+3
+
+I processi (cont.)
+• Esempi di processi sono quelli creati eseguendo i comandi delle
+lezioni precedenti
+• dd, ls, cat, cp, ln, adduser, groups, sudo, su, …
+
+• Non tutti i comandi creano dei processi
+• echo
+• cd
+• Questi vengono eseguiti all’interno del processo di shell (la bash nel nostro
+caso) … sì, anche la bash è un processo
+
+zuliani@di.uniroma1.it
+
+4
+
+I processi (cont.)
+• Un file eseguibile può essere eseguito più volte dando vita ad un
+nuovo processo ogni volta
+• Non occorre aspettare il termine dell’esecuzione prima di lanciarlo
+nuovamente
+• Unix/Linux è multi-processo (multitasking)
+
+• Ad es:
+• Aprite due shell e lanciate in entrambe il comando
+cat /dev/random
+• Un flusso di dati casuali viene stampato sul terminale
+• CTRL+C per interrompere
+
+zuliani@di.uniroma1.it
+
+5
+
+Canali (dispositive/file) standard
+• Ogni processo Unix/Linux ha accesso ad almeno TRE canali/file:
+• Standard input (stdin)
+• Standard output (stdout)
+• Standard error (stderr)
+
+stdin
+
+mio_processo
+
+stdout
+
+stderr
+6
+
+Canali (dispositivi) standard
+• stdin: flusso dati in ingresso
+• default: tastiera
+• descrittore file: 0
+• stdout: flusso dati in uscita
+• default: schermo
+• descrittore file: 1
+• stderr: per eventuali messaggi di errore/diagnostica
+• default: schermo
+• descrittore file: 2
+• I tre canali possono essere ridirezionati indipendentemente
+7
+
+Ridirezione dei canali standard
+• I simboli > e < sono utilizzati per ridirezionare standard
+input/output/error di un comando da/su file
+• Vedi relativa sezione in man bash
+• Ad esempio:
+• ls > dirlist (stdout di ls ridirezionato sul file dirlist)
+• ls > dirlist 2>&1 (stdout di ls ridirezionato su dirlist, stderr (2)
+ridirezionato su stdout (1). Quindi sia standard error sia standard output sono
+ridirezionati su dirlist.)
+• ls 2>&1 > dirlist (standard error (2) ridirezionato su stdout (1).
+Standard output di ls ridirezionato su dirlist dopo che stderr è stato
+ridirezionato e quindi dirlist contiene solo lo standard output di ls.) [La
+ridirezione non è transitiva.]
+8
+
+Ridirezione dei canali standard
+• Provate:
+
+1. cat
+(cat senza argomenti copia stdin su stdout, linea
+per linea. Il tasto/carattere invio crea una nuova linea; CTRL+d
+è il carattere di fine input.)
+2. cat > fileditesto (stdout di ls ridirezionato su dirlist,
+stderr (2) ridirezionato su stdout (1). Quindi sia standard error
+sia standard output sono ridirezionati su dirlist.)
+3. cat < fileditesto (fate l’esempio 2. prima di questo)
+9
+
+Rappresentazione dei processi
+• Process IDentifier (PID)
+• Process Control Block (PCB)
+• Sei aree di memoria
+
+zuliani@di.uniroma1.it
+
+10
+
+PID - Process IDentifier
+• E’ un identificatore (numero intero) univoco di un processo
+• In un dato istante, non ci possono essere 2 processi con lo stesso PID
+• Una volta che un processo è terminato, il suo PID viene liberato, e
+potrebbe essere prima o poi riusato per un altro processo
+
+• Alcuni sistemi, Linux incluso, assegnano PID casuali ai processi per
+
+incrementare la sicurezza. [Ad esempio: in un sistema parzialmente
+compromesso, un attacco al processo web server dovrebbe prima di tutto
+scoprire il PID di tale processo.]
+• Nell’ultima decade aumento dell’uso della casualità (randomness) nei
+sistemi operativi per ridurne (mitigate) la superficie d’attacco
+zuliani@di.uniroma1.it
+
+11
+
+Process Control Block
+
+PCB è unico per ogni
+processo
+
+• PID: Process Identifier
+• PPID: Parent Process Identifier
+• Real UID: Real User Identifier
+• Real GID: Real Group ID
+• Effective UID: Effective User Identifier (UID assunto dal processo in esecuzione)
+• Effective GID: Effective Group ID (come sopra per GID)
+• Saved UID: Saved User Identifier (UID avuto prima dell’esecuzione del SetUID)
+• Saved GID: Saved Group Identifier (come sopra per GID)
+• Current Working Directory: directory di lavoro corrente
+• Umask: file mode creation mask
+• Nice: priorità statica del processo
+zuliani@di.uniroma1.it
+
+12
+
+Saved UID: Saved User Identifier
+• Permette ad un processo che gira come root (ad es. via setuid
+
+sull’eseguibile) di fare operazioni come utente non-privilegiato e poi
+ritornare ai privilegi di root:
+• Ad es: il processo crea dei file che apparterranno all’utente non-privilegiato
+
+(altrimenti apparterrebbero a root)
+• E’ buona regola per la sicurezza di usare i privilegi di root solo quando
+richiesti dal kernel
+
+zuliani@di.uniroma1.it
+
+13
+
+Aree di memoria
+• Text Segment: istruzioni da eseguire (in linguaggio macchina)
+• Data Segment: dati statici (ovvero, variabili globali e variabili locali
+
+static) inizializzati e alcune costanti di ambiente
+• BSS: dati statici non inizializzati (sta per block started from symbol); la
+distinzione dal segmento dati si fa per motivi di realizzazione
+hardware
+• Heap: dati dinamici (allocati con malloc e simili)
+• Stack: per le chiamate a funzioni, con i corrispondenti dati dinamici
+(parametri, variabili locali non static)
+• Memory Mapping Segment: tutto ciò che riguarda librerie esterne
+dinamiche usate dal processo, nonché estensione dello heap in alcuni
+casi
+zuliani@di.uniroma1.it
+
+15
+
+Aree di
+memoria
+Aree di memoria
+potrebbero essere
+condivise:
+- il text segment tra più
+istanze dello stesso
+processo
+- due processi potrebbero
+avere lo stesso BSS o
+Data segment o MMS
+- Lo stack non è mai
+condiviso
+zuliani@di.uniroma1.it
+
+16
+
+Stati di un processo
+• Running (R): in esecuzione su un processore
+• Runnable (R): pronto per essere eseguito (non è in attesa di alcun evento); in attesa che
+
+lo scheduler lo (ri)selezioni per l’esecuzione
+• (Interruptible) Sleep (S): è in attesa di un qualche evento (ad esempio, lettura di blocchi
+dal disco), e non può quindi essere scelto dallo scheduler
+• Zombie (Z): il processo è terminato e le sue 6 aree di memoria non sono più in memoria;
+tuttavia, il suo PCB viene ancora mantenuto dal kernel perché il processo padre non ha
+ancora richiesto il suo “exit status" (ritorneremo su questo punto)
+• Stopped (T): caso particolare di sleep: avendo ricevuto un segnale STOP, è in attesa di un
+segnale CONT
+• Traced (t): in esecuzione di debug, oppure in generale in attesa di un segnale (altro caso
+particolare di sleep; vedremo più avanti)
+• Uninterruptible sleep (D): come sleep, ma tipicamente sta facendo operazioni di I/O su
+dischi lenti e non può essere interrotto o ucciso
+zuliani@di.uniroma1.it
+
+17
+
+Modalità di Esecuzione dei processi
+• Foreground («in primo piano»):
+• praticamente tutti i casi visti finora
+• il comando può leggere l'input da tastiera e scrivere su schermo;
+• finche’ non termina, il prompt non viene restituito e non si possono lanciare
+altri comandi (o lavori, job...) alla shell
+
+• Background («in secondo piano», o «in sottofondo») :
+• il comando non può leggere l'input da tastiera ma può scrivere su schermo
+• il prompt viene immediatamente restituito
+• mentre il lavoro viene eseguito in background, si possono da subito dare altri
+comandi alla shell
+zuliani@di.uniroma1.it
+
+18
+
+Esecuzione in background
+• & (ampersand)
+• Non disponibile in tutte le shell
+• ma in bash si!!
+Numero del job (partono
+da 1) e PID
+
+• sleep mette in pausa per un tempo specificato nell’argomento (si
+
+veda il man)
+• Provate a lanciare 3 volte di seguito sleep 20s &
+• Cosa succede al numero del job?
+zuliani@di.uniroma1.it
+
+19
+
+Lista di job
+• Per vedere la lista di lavori
+in esecuzione
+• jobs [-l] [-p]
+
+• Se un lavoro è composto da
+più compiti (pipelining)
+
+zuliani@di.uniroma1.it
+
+20
+
+Comandi bg e fg
+• Comandi di bash (vedi man bash)
+
+• bg porta un processo in background
+• lancio processo; lo interrompo con
+CTRL+z; lo risveglio con bg
+• fg %n dove %n è il numero del
+
+job, lo riporta in foreground
+• bg %n porta in background il
+processo %n
+
+zuliani@di.uniroma1.it
+
+21
+
+Pipelining dei comandi
+stdin
+
+comando1
+
+stdout
+
+Una «catena di montaggio» per
+creare comandi complessi usando
+comandi più semplici
+
+comando2
+
+stdout
+
+stdin
+
+comandoN
+
+stdout
+
+22
+
+Pipelining dei comandi
+• Per eseguire un job composto da più comandi
+
+comando1 | comando2 | … comando n
+• Lo standard output di un comando i diventa l’input del comando i+1
+• Se uso |& è lo standard error che viene ridirezionato sullo standard
+
+input del comando successivo
+
+• Il comando i+1 non deve necessariamente usare l’output/stderr del
+
+comando i
+
+23
+
+Esercizio 1
+• Lanciare 3 comandi ed interromperli ogni volta con CTRL+z, ad
+
+esempio
+
+• sleep 60s CTRL+z
+• ls -R / CTRL+z
+• sleep 10s CTRL+z
+
+• Come faccio a riportare in esecuzione in background ls ?
+• prima cercate di capire come si fa e poi fatelo per evitare che ls termini!!!!
+
+• Perché continuo a vedere l’output di ls dopo averlo riportato in
+
+esecuzione?
+• Ovviamente potete scegliere di eseguire 3 comandi a piacere
+zuliani@di.uniroma1.it
+
+24
+
+Comandi bg e fg (cont.)
+• Si possono identificare job anche con:
+• %prefix: dove prefix e la parte iniziale del comando del job desiderato;
+• %+ oppure %%: l'ultimo job mandato
+• %-: il penultimo job mandato
+
+zuliani@di.uniroma1.it
+
+25
+
+Comando ps [opzioni] [pid...]
+• Mostra le informazioni dei
+processi in esecuzione
+• Legge le informazioni dai
+file virtuali in /proc
+• ps senza argomenti
+mostra i processi
+dell’utente attuale lanciati
+dalla shell corrente
+• Per ogni processo mostra
+PID, TTY, TIME e CMD
+zuliani@di.uniroma1.it
+
+26
+
+Opzioni ps [-e] [-u]
+
+[-p]
+
+• -e: tutti i processi di tutti gli utenti lanciati da tutte le shell o al boot
+(figli del processo 0)
+• -u {utente, }: tutti i processi degli utenti nella lista
+• Es: ps -u studente
+
+• -p {pid, }: tutti i processi con i PID nella lista
+
+zuliani@di.uniroma1.it
+
+27
+
+Opzioni ps [-f] [-l] [-o]
+
+• -o {field, } per scegliere i campi da visualizzare; nel man ci
+sono gli acronimi
+zuliani@di.uniroma1.it
+
+28
+
+Significato dei campi mostrati da ps
+• PPID parent pid, pid del processo che ha creato questo processo
+• C parte intera della percentuale di uso della CPU
+• STIME (o START)l'ora in cui è stato invocato il comando, oppure
+
+la data, se è stato fatto partire da più di un giorno
+• TIME tempo di CPU usato finora
+• CMD comando con argomenti
+• F flags associati al processo: 1 il processo è stato “biforcato", ma
+ancora non eseguito; 4, ha usato privilegi da superutente; 5, entrambi
+i precedenti; 0, nessuno dei precedenti
+• -y -l elimina questo campo che è poco utile
+zuliani@di.uniroma1.it
+
+29
+
+Significato dei campi mostrati da ps (cont.)
+• S stato (modalità) del processo in una sola lettera
+• vedere slide 13 (le lettere corrispondenti sono tra parentesi)
+
+• UID utente che ha lanciato il processo (se SetUID presente potrebbe non
+essere chi ha dato il comando)
+• PRI attuale priorità del processo (più il numero è alto, minore è la priorità)
+• NI valore di nice, da aggiungere alla priorità (vedere più avanti)
+• ADDR indirizzo in memoria del processo, ma è mostrato (senza valore) solo
+per compatibilità all'indietro
+• -y -l toglie questo campo e lo sostituisce con RSS (resident set size) dimensione
+del processo in memoria principale in KB (non tiene conto delle pagine su disco)
+
+zuliani@di.uniroma1.it
+
+30
+
+Significato dei campi mostrati da ps (cont.)
+• SZ - dimensione totale attuale del processo in numero di pagine
+(tutte le 6 aree di memoria del processo) RAM + disco (memoria
+virtuale)
+• WCHAN - se il processo è in attesa di un qualche segnale o comunque
+in sleep, qui c'è la funzione del kernel all'interno della quale si è
+fermato
+
+zuliani@di.uniroma1.it
+
+31
+
+Esercizio 2
+• Copiare /bin/sleep nella directory corrente, cambiargli
+proprietario e gruppo in root e mettergli il setuid (occorre sudo...);
+• Lanciare sleep che avete copiato nella cwd in background e farsi
+stampare sia l'utente reale sia quello effettivo del processo
+
+• Analizzando il man di ps potete scoprire tutti i campi che possono
+essere visualizzati
+
+zuliani@di.uniroma1.it
+
+32
+
+Comando top [-b] [-n num] [-p {pid,}]
+• Un ps interattivo
+• -b non accetta più comandi interattivi, ma aggiorna i dati ogni pochi secondi
+• -n num fa solo num aggiornamenti
+• -p come in ps
+
+• Una volta aperto in modo interattivo, basta premere ? per avere la
+lista dei comandi accettati (tipicamente, sono singole lettere)
+
+zuliani@di.uniroma1.it
+
+33
+
+Esercizio 3
+Fare in modo che ps abbia lo stesso output di top -b -n1
+
+zuliani@di.uniroma1.it
+
+34
+
+kill [-l [signal]] [-signal] [pid...]
+• Invia segnali ad un processo (non solo la terminazione)
+• -l mostra la lista dei segnali; un segnale signal è identificato dal
+
+numero oppure dal nome con SIG o senza SIG. Ad es:
+kill -9 pid = kill –s SIGKILL pid = kill –s KILL pid
+
+zuliani@di.uniroma1.it
+
+35
+
+kill (cont.)
+• I segnali verranno presi in considerazione solo se il real user del
+processo è lo stesso che invia il segnale (oppure, se lo invia un
+superuser)
+• Un processo che riceve un segnale fa o un'azione predefinita (vedere
+man 7 signal) o un'azione personalizzata (su questo torneremo
+in un'altra lezione)
+
+zuliani@di.uniroma1.it
+
+36
+
+Alcuni segnali
+• SIGSTOP, SIGSTP sospensione processo
+• SIGCONT per la continuazione di processi bloccati
+• SIGKILL, SIGINT per la terminazione dei processi
+• NOTA:
+• CTRL+z invia un SIGSTOP
+• se si manda SIGSTOP a sleep il comando continua a contare i secondi
+
+• CTRL+c invia un SIGINT
+• bg invia SIGCONT al job indicato
+• Con kill si può usare la notazione con % (usata in bg e fg) per indicare i
+job destinatari del messaggio
+zuliani@di.uniroma1.it
+
+37
+
+• Esercizio 4 - lanciare un processo in foreground, poi (usando un'altra
+shell...) simulare la pressione di CTRL+z e di CTRL+c, nonché il
+comando bg (per sapere il PID di un processo in esecuzione su
+un'altra shell, si può usare il nome del comando, vedere l'opzione -C
+di ps)
+• Esercizio 5 - verificare di avere almeno 1 GB di spazio, e creare con
+dd un file di 1 GB (tutto di zeri). Subito dopo aver lanciato il
+comando, mandare al processo di dd il segnale USR1. Cosa succede?
+Come lo possiamo interpretare? [Potete fare questo esercizio anche
+con il commando sleep.]
+
+zuliani@di.uniroma1.it
+
+38
+
+SIGUSR1 e SIGUSR2
+• I segnali SIGUSR1 e SIGUSR2 sono impostati per essere usati
+dall’utente per le proprie necessità.
+• Essi consentono una semplice forma di comunicazione tra processi
+• Ad es: In un programma P1 si può definire un gestore del segnale
+(signal handler) per SIGUSR1(o 2). Se un programma P2 invia un
+SIGUSR1 (o 2) a P1, questo eseguirà il codice del gestore del segnale
+• Vedremo esempi quando faremo programmazione di sistema
+
+39
+
+nice [-n num] [comando]
+• nice senza opzioni dice quant'è il niceness di partenza
+• il niceness
+• può essere pensato come una addizione sulla priorità: se positivo, ne
+aumenta il valore (quindi la priorità decresce), altrimenti ne diminuisce il
+valore (la priorità cresce)
+• va da -19 a +20, con default a 0
+
+• nice [-n num] comando lancia comando (che potrebbe avere
+delle sue opzioni, più o meno come con sudo) con niceness num (0 se
+non dato)
+
+zuliani@di.uniroma1.it
+
+40
+
+renice priority {pid }
+• Interviene su processi già in esecuzione infatti, richiede dei PID (ci
+sarebbero anche altre opzioni per fargli avere effetti sui processi di un
+dato utente/gruppo, ma soprassediamo)
+
+zuliani@di.uniroma1.it
+
+41
+
+strace [-p pid] [comando]
+• Lancia comando visualizzando tutte le sue chiamate di sistema
+• Oppure, visualizza le chiamate di sistema del processo pid
+• -o filename ridireziona l’output su di un file
+• Ci sarà utile per il debugging («disinfestazione») di programmi che
+utilizzano chiamate di sistema
+zuliani@di.uniroma1.it
+
+42
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+43
+
+Introduzione al C
+Lezione 5
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Ambiente di sviluppo ed esecuzione
+• Come compilare ed eseguire un programma C
+• Output/input
+• Variabili ed espressioni
+
+zuliani@di.uniroma1.it
+
+2
+
+Linguaggio di Programmazione C
+• Sviluppato da AT&T Bell Labs agli inizi degli anni ‘70
+
+• Usato per sviluppare il ‘nucleo’ di Unix (e successivamente Linux e
+altri sistemi operativi)
+• Standardizzato da American National Standards Institute (ANSI) e poi
+anche da International Organization for Standardization (ISO)
+• E’ indipendente dall’hardware (come Java, ad es.), quindi le
+applicazioni scritte in C possono essere eseguite (senza alcuna o con
+poche modifiche) su ogni tipo di processore (portabilità)
+• Previa eventuale ri-compilazione
+zuliani@di.uniroma1.it
+
+3
+
+Ambiente di sviluppo in C
+• gcc (GNU Compiler
+Collection) include il
+compilatore C che
+svolge le attività di
+• Pre-processamento,
+compilazione, linking
+
+Produce codice oggetto,
+memorizzato in un file .o
+
+zuliani@di.uniroma1.it
+
+4
+
+Differenze con Java (e Python)
+• La compilazione di un programma in Java mediante javac non produce codice
+eseguibile ma codice interpretabile dalla Java Virtual Machine (JVM) contenuto
+nel .class (bytecode)
+• Quando voglio eseguire un .class lo dò in pasto alla JVM
+• Il vero processo in esecuzione è la JVM che esegue il .class interpretandolo
+
+• La “compilazione” di un programma in C mediante gcc (fasi 2 - 4) produce un
+“object code” che è un file eseguibile
+• Eseguendo il file viene creato un processo indipendente dal gcc che eventualmente posso
+eseguire anche su altri sistemi senza necessità di ri-compilarlo.
+• Lo stesso è valido per un programma scritto in C++
+• Al contrario, il file .class dovrò sempre darlo in pasto ad una JVM
+• [GraalVM permette di compilare codice Java producendo un eseguibile]
+zuliani@di.uniroma1.it
+
+5
+
+File eseguibile in Linux
+• Risultato di una compilazione mediante gcc (o di altro compilatore) di
+un programma C, C++, assembly
+• Script con lo shebang
+• (vedremo più in là il significato)
+
+zuliani@di.uniroma1.it
+
+6
+
+Ambiente di esecuzione in C
+
+zuliani@di.uniroma1.it
+
+7
+
+Il C
+• Linguaggio di alto livello (anche detto «assembly portabile»), un
+programma è una sequenza di istruzioni
+• int x=0; y[1]=3
+• if a==b y=y+1
+• …
+
+• Le fasi e i tool per creare ed eseguire un programma C sono:
+• Edit (vi, gEdit, pico, emacs, nano, …)
+• Pre-process (cpp, ma invocato direttamente da gcc)
+• Compile (gcc)
+• Link (ld, invocato direttamente da gcc)
+• Load (SO)
+• Execute (SO)
+zuliani@di.uniroma1.it
+
+8
+
+Struttura di un programma C
+• main() function (OBBLIGATORIA)
+• Può semplicemente essere il punto da
+cui vengono invocate tutte le funzioni
+che compongono il programma o può
+contenere una logica complessa
+• Può anche essere l’unico blocco di
+codice del programma
+
+• Function i (Fi)
+
+• Un blocco di codice che esegue uno
+specifico compito
+• Identificato da un nome univoco
+
+• main() e le altre funzioni possono
+risiedere nello stesso file .c o in file
+diversi .c
+zuliani@di.uniroma1.it
+
+9
+
+Funzioni
+• Ogni funzione consiste di una intestazione (header) e di un blocco
+<return-type> function-name (parameter-list)
+basic block
+
+• Basic block
+{
+
+declaration of variables
+executable statements
+}
+• ; usato per terminare uno statement (dichiarazione): int x,y; x=0; x=y+1;
+• Un blocco può contenere 0 o più statement
+• I blocchi possono essere annidati
+zuliani@di.uniroma1.it
+
+10
+
+Return statement
+return expression
+
+• imposta il valore di ritorno al valore di expression
+• Ritorna il valore alla funzione chiamante
+
+• expression può essere una costante, una variabile, un’espressione
+logico-aritmetica, una funzione; ad es:
+• return 1;
+• return x;
+• return 3*x+1;
+• return fact(x);
+zuliani@di.uniroma1.it
+
+11
+
+Primo programma
+#include <stdio.h>
+
+int main() {
+printf(“Il mio primo programma C: Hello World! \n”);
+return 0; /*indica che il programma ha terminato con
+successo*/
+
+}
+
+Potete scrivere questo programma e salvarlo in un file helloworld.c
+
+zuliani@di.uniroma1.it
+
+12
+
+Per compilare ed eseguire
+gcc –Wall prog-name.c
+• In questo modo vengono stampati tutti i messaggi di avvertimento/warning (se ci sono!!!)
+
+gcc –Wall prog-name.c -lm
+• -lm va specificato se si includono le librerie matematiche <math.h>, ad esempio per
+usare funzioni come sin, cos, log, ln, …
+
+• Il risultato è un file eseguibile a.out che potete eseguire digitando ./a.out
+al prompt della shell
+• Per specificare il nome dell’eseguibile in output usare l’opzione -o
+gcc –Wall prog-name.c -o executable-name.o
+zuliani@di.uniroma1.it
+
+13
+
+Precompilazione, compilazione e linking
+• Solo precompilazione/preprocessamento
+• cpp helloworld.c > precompilato.c
+• Esegue tutte le direttive del compilatore; elimina i commenti
+• vediamo cosa c'è in precompilato.c
+
+• Solo compilazione (di un precompilato)
+• gcc -c precompilato.c -o covid19.o
+• controlla che la sintassi sia a posto
+• per ogni chiamata a funzione, controlla che venga rispettato la corrispettiva
+intestazione (che quindi deve esistere al momento della chiamata!)
+• crea effettivamente del codice macchina, ma solo per il contenuto delle funzioni
+• ogni chiamata a funzione ha una destinazione simbolica
+zuliani@di.uniroma1.it
+
+14
+
+Precompilazione, compilazione e linking
+(cont.)
+• Solo precompilazione+compilazione
+• gcc -c file.c -o file.o
+
+• Solo linking
+
+• gcc file.o
+• risolve tutte le chiamate a funzione: adesso, per ogni funzione chiamata non
+basta più l’intestazione, ci deve essere anche l'implementazione (blocco di
+istruzioni)
+• l'implementazione può essere o data dal programmatore (vedere la funzione f
+nell'esempio fornito) o fornita da librerie di sistema (come per la funzione
+printf)
+• L’inclusione delle librerie può essere automatica o specificata dall’utente
+• Ad esempio la libreria libc.a che contiene la printf è inclusa automaticamente
+zuliani@di.uniroma1.it
+
+15
+
+Precompilazione, compilazione e linking
+(cont.)
+• Linking di più file
+• gcc file1.o file2.o file3.o
+• si possono anche mischiare file .c (sorgenti) e file .o (oggetti)
+
+• tutto (un solo file): gcc file.c
+• tutto (piu file): gcc file1.c ... filen.c
+
+zuliani@di.uniroma1.it
+
+16
+
+Commenti
+• Linee di testo ignorate dal compilatore
+• Due modalità: // e /* */
+#include <stdio.h>
+int main() {
+printf(“Hello World!!!!\n”); //stampa a video
+return 0; /*indica che il programma ha terminato
+con
+successo*/
+
+}
+zuliani@di.uniroma1.it
+
+17
+
+Direttive al preprocessore #
+• Con # si indicano le direttive a preprocessore
+• #include filename dice di includere il contenuto di
+filename specificato al posto di #
+• Il file (usualmente .h) è detto header file
+• #include <stdio.h>
+• <> indicano che il file header è un file standard del C in /usr/include
+• “” indicano che il file header è dell’utente e si trova nella directory corrente o
+in un path specificato
+• -I permette di specificare le directory in cui cercare gli header file
+
+zuliani@di.uniroma1.it
+
+18
+
+Esercizio 1
+• Compiliamo ed eseguiamo hello_world (lo facciamo insieme)
+• Provare a fare in modo che hello_world.1.c sia incluso
+direttamente dentro hello_world.2.c . Si può ancora fare la
+compilazione separata (ovvero, prima si compilano separatamente
+hello_world.1.c e hello_world.2.c, e poi si linkano
+insieme)? Si può fare anche l'inclusione inversa?
+• Il codice si trova nel file archivio lezione5.tgz
+• Per scompattare il file usate: tar -xzf lezione5.tgz
+
+zuliani@di.uniroma1.it
+
+19
+
+Perché devo scrivere ./a.out?????
+• La shell cerca i comandi in alcune cartelle specificate all’avvio della
+shell stessa
+• Digitate il comando env
+• Stampa una lista di “variabili di ambiente” (environment variables)
+• Cercate la variabile PATH: contiene una lista di cartelle dove la shell
+cerca i file eseguibili
+• Digitando ./a.out “diciamo” alla shell che a.out e’ nella cwd!!
+
+zuliani@di.uniroma1.it
+
+20
+
+Input e Output
+• Input: letto da tastiera o altro dispositivo e memorizzato in variabili
+• Output: visualizzato a monitor o inviato a altro dispositivo (es.
+stampante) prendendo valori da variabili
+• L‘ambiente run-time del C, quando un programma viene eseguito,
+apre tre file: stdin, stdout e stderr
+• Tutte le funzioni essenziali per l’I/O sono nell’include file stdio.h
+
+zuliani@di.uniroma1.it
+
+21
+
+Output
+• printf("format string", value-list);
+• value-list può contenere
+• sequenze di caratteri
+• variabili
+• costanti
+• espressioni logico-matematiche
+
+• printf riceve valori, ma il C permette di manipolare anche indirizzi di
+memoria e passarli come input a funzioni.
+• Per stampare il contenuto di una locazione di memoria di cui si conosce l’indirizzo si
+usa scanf
+
+• Vedremo che ci sono altre funzioni per gestire l’output
+zuliani@di.uniroma1.it
+
+22
+
+• Nella printf possiamo controllare la
+spaziatura orizzontale e verticale, e
+l’output di caratteri speciali usando le
+sequenze di escape \
+• printf(“#iorestoacasa
+#andratuttobene !!!!\n”);
+//dopo aver stampato la stringa
+va a capo
+
+zuliani@di.uniroma1.it
+
+https://www.geeksforgeeks.org/escape-sequences-c/
+
+Output
+
+23
+
+Esercizio 2
+• Spiegare l'output del seguente codice:
+#include <stdio.h>
+int main()
+{
+
+printf("aaaaa\nbbbbb\f\rccccc\r\fddddd\reeeee\ffffff\n");
+}
+
+zuliani@di.uniroma1.it
+
+24
+
+Variabili ed espressioni
+
+zuliani@di.uniroma1.it
+
+25
+
+Parole riservate e identificatori
+• In C esistono parole riservate, ovvero che appartengono all’«alfabeto» del
+linguaggio
+• if, return, do, for, while, int, double, …
+
+• Un identificatore è una parola che viene utilizzata per identificare una variabile o
+costante
+VALIDI
+distance
+distance32
+milesPerHour
+_voltage
+goodChoice
+MIN_RATE
+Min_rate
+min_rate
+
+NON VALIDI
+x-ray
+2ndGrade
+$amount
+two&four
+after five
+return
+
+zuliani@di.uniroma1.it
+
+26
+
+Regole per costruire identificatori validi
+1. Il primo carattere in un identificatore deve essere una lettera o
+underscore ( _ ) e può essere seguito solo da qualsiasi lettera, numero o
+underscore
+2. Non devono iniziare con una cifra (perché?)
+3. Le lettere MAIUSCOLE e minuscole sono distinte. Cioè, gli identificatori
+fanno distinzione tra maiuscole e minuscole
+4. Le virgole o gli spazi vuoti non sono consentiti all'interno di un
+identificatore
+5. Le parole chiave non possono essere utilizzate come identificatore
+6. Gli identificatori non devono avere una lunghezza superiore a 31 caratteri
+zuliani@di.uniroma1.it
+
+27
+
+Esercizio (da fare tra qualche giorno)
+• Scrivere un programma che controlli se un identificatore è valido
+ovvero, data una stringa verificare che siano rispettate le condizioni
+1 - 6 elencate nella slide precedente.
+• NOTA: ora non avete tutte le conoscenze per risolvere il problema …
+ma se qualcuno le ha può iniziare a cimentarsi.
+
+zuliani@di.uniroma1.it
+
+28
+
+Variabili
+• Una locazione di memoria dove può essere memorizzato un valore che verrà
+utilizzato da un programma
+• I valori nelle variabili possono essere modificati una o più volte durante
+l’esecuzione di un programma
+• Una variabile può contenere un solo valore alla volta, ovvero se scrivo in una
+variabile, il valore attualmente memorizzato viene sovrascritto
+int x=1;
+printf(``Questo è il valore di x %d \n’’, x);
+x=3;
+printf(``Questo è il nuovo valore di x %d \n’’, x);
+
+zuliani@di.uniroma1.it
+
+29
+
+Variabili (cont.)
+• Deve essere un identificatore valido
+• Va dichiarato il nome e tipo prima di poterla utilizzare
+int x; double y; char c;
+
+• Il nome dovrebbe essere descrittivo del contenuto
+
+zuliani@di.uniroma1.it
+
+30
+
+Dichiarazione di variabili e constanti
+• optional_modifier data_type name_list;
+• optional_modifier
+• signed, unsigned
+• short, long
+• const
+
+• data_type
+• specifica il tipo di valore
+• permette al compilatore di sapere quali sono le operazioni consentite sul tipo
+di dato e come deve essere rappresentato in memoria
+
+• name_list
+• lista di identificatori
+zuliani@di.uniroma1.it
+
+31
+
+Tipi di dato numerici
+Formalmente (i.e., matematicamente)
+questi numeri sono frazioni con
+denominatore una potenza di due
+
+zuliani@di.uniroma1.it
+
+32
+
+Tipo
+
+Dimensione
+
+Intervallo di valori
+
+char
+
+1 byte
+
+-128 a 127 o 0 a 255
+
+unsigned
+char
+
+1 byte
+
+0 a 255
+
+signed
+char
+
+1 byte
+
+int
+
+2 or 4 bytes
+
+-32,768 a 32,767 or 2,147,483,648 a 2,147,483,647
+
+unsigned
+int
+
+2 or 4 bytes
+
+0 a 65,535 or 0 a 4,294,967,295
+
+short
+
+2 bytes
+
+-32,768 a 32,767
+
+unsigned
+short
+
+2 bytes
+
+0 a 65,535
+
+long
+
+8 bytes
+
+-9223372036854775808 a
+9223372036854775807
+
+unsigned
+long
+
+8 bytes
+
+0 a 18446744073709551615
+
+Tipo
+
+Dimensione
+
+Intervallo di
+valori
+
+Precisione
+
+float
+
+4 byte
+
+1.2E-38 a
+3.4E+38
+
+6 decimal
+places
+
+double
+
+8 byte
+
+2.3E-308 a
+1.7E+308
+
+15 decimal
+places
+
+long double
+
+10 byte
+
+3.4E-4932
+to
+1.1E+4932
+
+19 decimal
+places
+
+-128 a 127
+
+zuliani@di.uniroma1.it
+
+33
+
+Ci sono costanti che contengono le
+dimensioni dei vari tipi numerici
+Esercizio 3
+• Guardare il codice in integerSize.c e and realSize.c
+• Compilarlo ed eseguirlo
+• Cercare di capire perché serve includere le librerie stdlib, limits e
+float (sono in /usr/include )
+• #include <stdlib.h>
+• #include <limits.h>
+• #include <float.h>
+
+• La dimensione di un tipo di dato può essere ottenuta anche usando la
+funzione sizeof(datatype)
+• Riscrivere i 2 programmi usando sizeof
+zuliani@di.uniroma1.it
+
+34
+
+Caratteri char (1byte, tutti i caratteri ASCII)
+
+http://www.asciitable.com/
+
+zuliani@di.uniroma1.it
+
+35
+
+Boolean data type
+• _Bool
+• Può memorizzare solo 0 e 1
+• Valori diversi da 0 vengono memorizzati come 1
+
+• bool
+• Richiede l’uso di <stdbool.h>
+• Memorizza true e false
+
+• In ogni espressione logica
+• Risultato 0 significa false
+• Risultato 1 significa true
+
+zuliani@di.uniroma1.it
+
+36
+
+Dichiarazione di variabili (già vista!!)
+
+zuliani@di.uniroma1.it
+
+37
+
+Assegnazione di valori a variabili
+• Quando una variabile viene dichiarata e non inizializzata assume un
+valore indeterminato
+• Perché? Provate
+
+• Assegnazione di un valore può essere fatta
+• In fase di dichiarazione
+• int x=3, y=2; char c=‘a’; double dd=9.3;
+
+• In fase di elaborazione mediante l’operatore di assegnazione =
+• Leggendo un valore in input, ad esempio con scanf
+
+zuliani@di.uniroma1.it
+
+38
+
+Ancora su assegnazione
+• = operatore binario
+• l_value = r_value
+• l_value solitamente una variabile o un puntatore
+• r_value un valore o una espressione
+
+• E’ possibile scrivere cose tipo
+• a = b = 0;
+• In fase di esecuzione prima viene valutata l’espressione b=0 e poi il risultato, ovvero il
+valore di b viene assegnato ad a.
+
+• Un esempio di espressione
+• x = y + 5;
+• Anche qui’ viene prima valutata l’espressione e viene prodotto il risultato (r_value)
+che viene assegnato a x (l_value)
+zuliani@di.uniroma1.it
+
+39
+
+Altri esempi di assegnazione
+distanza = velocita *
+
+tempo;
+
+dailyRate= 65.3;
+hours=8;
+hourlyRate = pay/hours;
+E se hours=0? Provate!!
+
+zuliani@di.uniroma1.it
+
+40
+
+Output di variabili
+• Vediamo come con printf possiamo scrivere su stdout il valore di
+una variabile (lo avete già visto nell’esempio precedente!!!)
+• printf(format_string, expression_list)
+• format_string deve contenere dei placeholders o «segnaposti»
+• Un segnaposto inizia con %
+• Un segnaposto dice che al suo posto ci andrà il valore di una variabile e che
+tipo di dato deve essere scritto
+• Ad es:
+• printf("%d, %l",
+
+Stampa un intero
+
+integerVariable, longVariable);
+
+Stampa un intero «lungo»
+
+Stampa una virgola e uno spazio
+zuliani@di.uniroma1.it
+
+41
+
+Segnaposti più comuni per integer e float
+• %d oppure %i per interi, %l per long
+• %o per interi in ottale
+• %x per interi in esadecimale
+• %f, %e, %g per virgola mobile
+• f - formato standard
+• e - notazione scientifica
+• g - sceglie automaticamente il formato migliore tra f ed e
+• %lf per double
+zuliani@di.uniroma1.it
+
+E’ possibile comporre
+stringhe che vengono
+completate dal
+valore delle variabili
+
+42
+
+Ancora su printf
+• La funzione restituisce come risultato il numero di caratteri stampati
+
+• Esercizio 4: Che valore assumerà printCount? Provate!! Anche con
+diverse stringhe e numero di variabili
+
+zuliani@di.uniroma1.it
+
+43
+
+Il formato completo di un segnaposto
+• %[parameter][flags][width][.precision][length]type
+• Al link https://en.wikipedia.org/wiki/Printf_format_string andando nella sezione
+“Format placeholder specification” trovate tutti i dettagli
+
+• Esercizio 5: studiate la pagina wikipedia e scrivete un programma C in cui
+mostrate varie opzioni di formattazione per i tipi di dato reali, interi e carattere
+usando tutti i campi sopra indicati, ovvero
+[parameter] [flags] [width] [.precision] [length]
+
+zuliani@di.uniroma1.it
+
+44
+
+Costanti
+• Ovvero i valori che assegnate alle variabili
+• Interi:
+• 23, 59874, -89, etc.
+• Non vanno usati delimitatori (ad es. per le migliaia)
+• In modalità decimale come sopra oppure in
+• Ottale
+• Esadecimale
+• Carattere ASCII
+
+1328
+0x5A
+‘Z’
+
+• I tre esempi sopra corrispondono al decimale 90
+• 90 = 1328 = 0x5A = ‘Z’
+zuliani@di.uniroma1.it
+
+45
+
+Costanti
+• Il C è molto ‘liberale’: le seguenti istruzioni sono valide (!)
+int x;
+x = 47 + ‘Z’ + 0x5A;
+Quanto vale x?
+
+227
+zuliani@di.uniroma1.it
+
+46
+
+Costanti
+• Virgola mobile (floating point):
+• Decimale: 3.14, 2.0, …
+• Notazione scientifica: 5.5E10 (= 5.5 x 1010)
+
+• Le seguenti istruzioni sono valide:
+float f;
+f = 47.1 + ‘Z’ + 0x5A;
+Quanto vale f?
+
+227.100006103515625
+
+0.1 non può essere scritto come una frazione
+con denominatore una potenza di 2!
+zuliani@di.uniroma1.it
+
+47
+
+Costanti
+• Caratteri:
+• ‘A’, ‘a’, ‘€’, ‘{‘, etc.
+• Segnaposto: %c
+
+• Stringhe:
+• “La Sapienza”, “Questa è una stringa”, “1”, etc.
+• Segnaposto: %s
+
+zuliani@di.uniroma1.it
+
+48
+
+Input da terminale - scanf
+• scanf(format-string, address-list)
+• format-string
+• Contiene segnaposti che dicono a scanf in che tipo di dato la stringa in input
+viene convertita
+• https://en.wikipedia.org/wiki/Scanf_format_string
+
+• address-list
+• contiene gli indirizzi di memoria in cui devono essere memorizzati i valori
+ricevuti in input (in effetti, una lista di puntatori)
+
+• Es: int peso; scanf(”%d”, &peso);
+• peso è una variabile intera; l’operatore & estrae il suo indirizzo di
+memoria e lo passa a scanf
+zuliani@di.uniroma1.it
+
+49
+
+Ancora su scanf
+• La funzione restituisce come risultato il numero di valori di input letti
+
+• Esercizio 6: Che valore assumerà dataCount? Provate!! Anche con
+diverso numero e tipo di variabili
+
+zuliani@di.uniroma1.it
+
+50
+
+Esercizio 7: scanf
+• Basandosi su questo esempio
+scrivete un programma che
+consente di leggere diversi tipi
+di dati in input da tastiera
+• Provate anche a leggere più dati
+con la stessa scanf
+• Cosa accade se inserite un dato
+di input sbagliato ovvero di un
+formato diverso da quello
+atteso? Ad esempio un carattere
+al posto di un intero?
+zuliani@di.uniroma1.it
+
+51
+
+Operatori
+• Aritmetici: +, -, *, /, %
+• Relazionali: ==, !=, <, <=, >, >=
+• Logici: !, &&, ||
+• Bit a bit (bitwise): &, |, ~, ^
+• Shift (scorrimento): <<, >>
+
+zuliani@di.uniroma1.it
+
+52
+
+Operatori aritmetici - regole di precedenza
+• () valutate per prime. In caso di parentesi annidate si inizia a
+valutare dalla più interna
+• x = a + (a + (3/5 + c * (c - 3) ) )
+
+• *, /, o % valutate per seconde. Se ce ne sono diverse la valutazione è
+da sinistra a destra
+•x
+
+= a * b / c
+
+• + o - valutate per ultime
+• x = a + b + c / 3 ???
+• Come devo scrivere per calcolare la media delle variabili a, b e c?
+
+zuliani@di.uniroma1.it
+
+53
+
+Operatore di divisione /
+• Il risultato dipende dai tipi di dato degli operandi
+• Il risultato è dello stesso tipo di dato dell’operando più grande (in
+termini di tipo di dato)
+• Vediamo il file divisione.c
+
+• Esercizio
+• Verificare in che ordine vengono fatte le divisioni delle seguenti espressioni e
+calcolatene il risultato
+• 11 / 2 / 2.0 / 2
+• 11 / 2 / 2 / 2
+zuliani@di.uniroma1.it
+
+54
+
+Operatore resto %
+• Ritorna il resto della divisione
+• 7%2=1
+• 7%5=2
+•…
+
+(7 = 2 x 3 + 1)
+(7 = 1 x 5 + 2)
+
+zuliani@di.uniroma1.it
+
+55
+
+Altre regole
+• Troncamento
+int x;
+x=3.14
+
+// x conterrà solo 3, senza avvertire
+
+• Casting (conversione); vedi file casting.c
+
+zuliani@di.uniroma1.it
+
+56
+
+Abbreviazioni
+Assegnamento
+d = d - 4
+a = a + 3
+e = e * 5
+f = f / 3
+g = g % 9
+
+Abbreviazione (shortcut)
+d -= 4
+a += 3
+e *= 5
+f /= 3
+g %= 9
+
+zuliani@di.uniroma1.it
+
+57
+
+Abbreviazioni
+• intVar++ corrisponde a intVar=intVar+1
+• intVar-- corrisponde a intVar=intVar-1
+• Due opzioni:
+• Post-incremento x++ (prima usa il valore di x, poi incrementa x, cioè x=x+1)
+• Pre-incremento ++x (prima incrementa x, cioè x=x+1, poi usa il valore di x)
+• Vedi file prepost.c
+
+zuliani@di.uniroma1.it
+
+58
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+59
+
+Introduzione al C
+Lezione 6
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Perché i cicli (iterazione o loop)
+• I cicli while, for, do-while
+• Blocchi
+• Condizionale
+• Array
+
+zuliani@di.uniroma1.it
+
+2
+
+Quando usare i loop
+• Ciclo, Loop, Iterazione, Iteration statement
+• Quando dobbiamo eseguire ripetutamente un blocco di codice
+• Blocco di codice = corpo del ciclo (body of loop)
+
+• Il blocco di codice può contenere istruzioni il cui risultato è
+dipendente o indipendente dalla specifica iterazione in cui vengono
+eseguiti
+loop statement {
+body of loop
+}
+zuliani@di.uniroma1.it
+
+3
+
+Tre tipi di costrutti iterativi
+• while statement
+• Più flessibile
+• Nessun tipo di restrizione
+
+• for statement
+• Ciclo ripetuto un numero finito di volte
+
+• do-while statements
+• Esegue il corpo almeno una volta
+
+zuliani@di.uniroma1.it
+
+4
+
+Ciclo while
+• Condition valutata prima di entrare
+nel loop
+• Se condition è vera, allora viene
+eseguito il corpo una volta e poi
+viene ri-valutata la condizione
+
+• Nel corpo deve accadere qualcosa che
+possa «cambiare» la condizione
+• Un evento esterno deve «cambiare» la
+condizione
+• Altrimenti ciclo infinito (che potrebbe
+anche essere una scelta!)
+
+• Il ciclo termina quando condition è
+falsa (oppure quando si usa un break
+– vedi dopo)
+zuliani@di.uniroma1.it
+
+5
+
+Ciclo while
+while (expression)
+basic block
+
+• expression è la condizione da testare.
+Deve risolversi in true o false
+• Basic block
+• racchiuso tra {} se contiene più di un istruzione
+
+zuliani@di.uniroma1.it
+
+i=0;
+while (i<7)
+i++;
+i=0;
+while (i<7){
+i++;
+y=y*i;
+}
+6
+
+Loop Control Variable (LCV) - variabile di
+controllo del ciclo
+• Ci deve essere almeno una variabile il cui valore controlla la
+ripetizione del ciclo
+• Altrimenti condition è sempre vera (ciclo infinito) o sempre falsa (corpo non
+eseguito, si passa al comando successivo)
+
+• Per un esecuzione corretta del while le LCV devono
+• Essere dichiarate e inizializzate prima del ciclo
+• Lette nella condizione del ciclo (altrimenti non sono LCV!!!)
+• Aggiornate nel corpo del ciclo in modo che prima o poi la condizione diventi
+falsa
+• Altrimenti loop infinito (in alcuni casi può essere una scelta voluta)
+
+zuliani@di.uniroma1.it
+
+7
+
+Ciclo controllato da variabile contatore
+• Il corpo viene eseguito
+un numero definito di
+volte, noto a priori
+• Requisiti
+• LCV inizializzata ad un
+valore iniziale
+• Condizione testa il valore
+finale di LCV
+• Incremento/decremento
+costante di LCV
+zuliani@di.uniroma1.it
+
+8
+
+Errori comuni
+• Analizzate questo codice (magari copiatelo ed eseguitelo)
+• Cosa c'è di sbagliato? Perché il programma rimane bloccato dopo che
+avete inserito un numero?
+
+zuliani@di.uniroma1.it
+
+9
+
+Ciclo for
+• Noto a priori il numero di iterazioni
+• tale comportamento può essere sovvertito
+
+• Inizializzazione LCV, test condizione su LCV e
+incremento/decremento LCV sono definite
+nello statement
+for (initialization; test; increment)
+basic block
+Ad es: for (i=1; i<5; i++)
+
+zuliani@di.uniroma1.it
+
+10
+
+Ciclo for: esempi
+• for
+
+• while
+
+zuliani@di.uniroma1.it
+
+11
+
+Ciclo for: esempi
+• Esercizio 2: Quante volte viene eseguito il ciclo seguente?
+int count;
+for (count = 0; count < 3; count++) {
+printf(“Gnam %d – “, count+1);
+printf(“Yum!\n”);
+}
+
+zuliani@di.uniroma1.it
+
+12
+
+Ciclo do-while
+• Simile al while, ma la condizione è
+testata alla fine
+• Il corpo è eseguito almeno una volta
+do {
+statements
+} while ( condition );
+
+zuliani@di.uniroma1.it
+
+13
+
+Ciclo do-while (cont.)
+• Esempio 1 - conta interi da
+1 a 10
+
+• Esempio 2 - controlla che
+l’input sia corretto e non
+termina fino a che non si
+inserisce un valore corretto
+
+zuliani@di.uniroma1.it
+
+14
+
+• Esercizio 3. Provare ad implementare l’esempio 2 (slide precedente)
+con il while loop
+• Esercizio 4. Scrivere un programma che riceva come input (del
+comando) un valore n che indica il numero di dati che debbono
+essere letti da stdin. Per ogni dato letto da stdin verifica e impone che
+esso sia maggiore di 0 e minore di 10. Dopo aver letto gli n dati di
+input ne calcola e stampa il valore della somma ed il valore medio.
+Implementare la soluzione con 3 diverse combinazioni di cicli:
+• Solo while
+• While + do-while
+• For + while o do-while
+NOTA: realizzare i programmi con il minor numero di righe di codice.
+zuliani@di.uniroma1.it
+
+15
+
+break
+• Si usa per uscire da un ciclo
+• for, while, do-while
+
+• Si usa per uscire da uno switch (lo vedremo
+più in là)
+• Quando viene eseguito break il ciclo
+termina indipendentemente dal valore della
+condizione
+
+zuliani@di.uniroma1.it
+
+16
+
+continue
+• Il controllo passa all’iterazione successiva
+
+zuliani@di.uniroma1.it
+
+17
+
+Blocchi
+
+zuliani@di.uniroma1.it
+
+18
+
+Blocchi
+• blocco = porzione di codice racchiusa da {}
+• Le variabili definite in un blocco sono locali al blocco:
+• Vengono allocate e sono accessibili solo quando il blocco è eseguito
+• Non sono più accessibili dopo che il blocco è stato eseguito
+• Nel blocco, «oscurano» eventuali variabili con lo stesso nome definite al di
+fuori del blocco
+
+zuliani@di.uniroma1.it
+
+19
+
+Blocchi
+int main() {
+{
+int i = 0;
+printf("i = %d\n", ++i);
+}
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Alloca la variabile i
+
+Cosa stampa?
+i = 1
+i viene deallocata
+
+20
+
+Blocchi
+int main() {
+{
+int i = 0;
+printf("i = %d\n", ++i);
+}
+printf("i = %d\n", ++i);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Questo programma è errato
+sintatticamente e il compilatore
+ve lo dice: provate!
+
+In questo punto non c'è alcuna
+variabile i ‘visibile’ al codice.
+
+21
+
+Blocchi: «Oscuramento» di variabili omonime
+int main() {
+int i = -1;
+{
+int i = 0;
+printf("i = %d\n", i++);
+}
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+Cosa stampa?
+i = 0
+Cosa stampa?
+i = -1
+
+22
+
+Blocchi e ciclo for
+int i = 0;
+…
+for (i = 1; i < 100; i++)
+{
+…
+
+}
+
+int i = 0;
+…
+{
+…
+for (i = 1; i < 100; i++)
+{
+…
+
+}
+In entrambi i casi c'è una variabile i
+‘visibile’ al codice.
+
+}
+
+zuliani@di.uniroma1.it
+
+23
+
+Blocchi e ciclo for
+int i = 0;
+…
+for (int i = 1; i < 100; i++)
+{
+
+Alloca la variabile i in
+nuovo blocco!
+
+…
+
+}
+
+zuliani@di.uniroma1.it
+
+24
+
+Blocchi e ciclo for
+int main() {
+int i = -1;
+for (int i = 1; i < 3; i++)
+printf("i = %d\n", i);
+printf("i = %d\n", i);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+Cosa stampa?
+i = 1
+i = 2
+Cosa stampa?
+i = -1
+
+25
+
+Blocchi e ciclo for
+Esercizio:
+Trasformate, preservandone la semantica, il codice seguente inserendo
+la dichiarazione int i = 1 del ciclo for in un nuovo blocco
+int main() {
+int i = -1;
+for (int i = 1; i < 3; i++)
+printf("i = %d\n", i);
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+26
+
+Blocchi e ciclo for
+Soluzione:
+int main() {
+int i = -1;
+{
+int i;
+for (i = 1; i < 3; i++)
+printf("i = %d\n", i);
+}
+printf("i = %d\n", i);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+27
+
+Condizionale
+
+zuliani@di.uniroma1.it
+
+28
+
+Condizionale
+if (espressione_booleana) {
+// ramo espressione_booleana VERA
+} else {
+// ramo espressione_booleana FALSA
+// il ramo else è opzionale
+}
+
+zuliani@di.uniroma1.it
+
+29
+
+Condizionale (annidato)
+if (espressione_booleana_1) {
+// un codice
+} else if (espressione_booleana_2) {
+// un altro codice
+} else if (espressione_booleana_3) {
+// ancora codice
+} else { // bla bla
+}
+zuliani@di.uniroma1.it
+
+30
+
+Array
+
+zuliani@di.uniroma1.it
+
+31
+
+Array
+• Un tipo di dato ‘strutturato’
+• Letteralmente ‘schiera’ di variabili
+• Dello stesso tipo
+• Occupano una regione contigua di memoria
+• La dimensione rimane inalterata nel corso dell’esecuzione del codice
+
+• Usabili singolarmente o come una singola entità
+• Essenzialmente una lista finita indicizzata da un numero intero >= 0
+
+zuliani@di.uniroma1.it
+
+32
+
+Array: Dichiarazione
+• La memoria per gli array viene interamente allocata quando il programma
+è caricato in memoria (sono variabili statiche)
+unsigned int data[3];
+char alfabeto[21];
+double temp_max[365];
+
+// una data gg/mm/aaaa
+// l’alfabeto italiano
+// temperatura max di
+ogni giorno dell’anno
+
+zuliani@di.uniroma1.it
+
+33
+
+Array: Dichiarazione
+• Usate costanti o il preprocessore per dichiarazioni più chiare e
+maneggevoli
+const unsigned int GIORNI=365;
+double temp_max[GIORNI];
+oppure, (quasi) equivalentemente:
+#define GIORNI 365
+double temp_max[GIORNI];
+zuliani@di.uniroma1.it
+
+Direttiva del preprocessore: è
+una manipolazione puramente
+sintattica del codice
+
+34
+
+Array: Dichiarazione
+double temp_max[365];
+temp_max[0] = -4.5;
+
+dati
+
+-4.5
+0
+
+indici
+
+?
+1
+
+?
+2
+
+?
+3
+
+temp_max[]
+
+…
+
+?
+362
+
+?
+363
+
+?
+364
+
+Questa è un’astrazione utile al programmatore: in C, la variabile
+temp_max è un puntatore al primo elemento dell’array!
+zuliani@di.uniroma1.it
+
+35
+
+Array: Dichiarazione
+• Autoinizializzazione di array:
+double
+
+tmax_week[7]={-2.3, 0.97};
+-2.3 -0.97
+
+0.0
+
+0.0
+
+0.0
+
+0.0
+
+0.0
+
+0
+
+2
+
+3
+
+4
+
+5
+
+6
+
+1
+
+// inizializza tutto a 0
+double tmax_week[7]={};
+
+zuliani@di.uniroma1.it
+
+36
+
+Array: Dichiarazione
+• Array multi-dimensionali:
+#define MESI 12
+#define GIORNI_M 31
+double temp_max[MESI][GIORNI_M]; //372 elementi
+• L’accesso è via due indici: ‘righe’ e ‘colonne’, come per una matrice
+• Si possono definire array a tre dimensioni e oltre
+zuliani@di.uniroma1.it
+
+37
+
+Array: Uso
+Un’espressione che
+ritorna un intero
+
+double temp_max[365];
+int i = 0;
+temp_max[i] = -4.5;
+Cosa stampa?
+temp_max[1] = -3.8
+temp_max[++i] = -3.8;
+printf("temp_max[%d] = %lf\n", i, temp_max[i]);
+-4.5
+
+-3.8
+
+?
+
+?
+
+0
+
+1
+
+2
+
+3
+
+…
+
+zuliani@di.uniroma1.it
+
+?
+
+?
+
+?
+
+362
+
+363
+
+364
+
+38
+
+Array: Uso della memoria
+double temp_max[365];
+Cosa stampa?
+2920 bytes
+temp_max[0] = -4.5;
+temp_max[1] = -3.8;
+printf("%ld bytes\n", sizeof(temp_max));
+-4.5
+0
+
+-3.8
+1
+
+?
+2
+
+?
+3
+
+…
+
+?
+362
+
+?
+363
+
+?
+364
+
+La memoria per l’intero array è allocata all’inizio del programma e sizeof ritorna la
+dimensione di tale memoria.
+Il programmatore (voi!) deve tener traccia di quali elementi dell’array sono stati scritti.
+zuliani@di.uniroma1.it
+
+39
+
+Array: Uso
+• Gli array sono pensati per l’uso con il ciclo for
+• Esempio: inizializzazione a zero di un intero array
+#define GIORNI 365
+double temp_max[GIORNI];
+
+ATTENTI a non sovrascrivere
+memoria che non vi è stata
+allocata!! Il compilatore C
+non controlla per tali errori.
+
+for (int i = 0; i < GIORNI; i++)
+temp_max[i] = 0.0;
+zuliani@di.uniroma1.it
+
+40
+
+Array: Uso improprio
+• Cosa succede se leggo/scrivo oltre l’ultimo elemento di un array?
+1. Il programma potrebbe continuare, con/senza errori
+2. Il sistema operativo intercetta la violazione e uccide il processo
+
+• Provate!
+
+#define GIORNI 365
+double temp_max[GIORNI];
+for (int i = 0; i < GIORNI; i++)
+temp_max[i] = 0.0;
+zuliani@di.uniroma1.it
+
+1. Aumentate questo
+valore finche’ il processo
+non viene ucciso.
+2. Provate a stampare
+elementi di temp_max
+invece che scriverli.
+
+41
+
+Array: Esercizi
+• Implementare una ricerca sequenziale in un array di interi
+definito all’interno di un programma:
+1. Usate un ciclo while
+2. Usate un ciclo for
+
+• Scrivete un programma che calcoli e stampi la media aritmetica
+di un array di max 10 numeri in virgola mobile:
+1. Definite l’array all’intero del programma
+2. Leggete con scanf l’array da stdin, terminato da CTRL-d (ricordatevi
+che potete ridirezionare lo stdin)
+zuliani@di.uniroma1.it
+
+42
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+43
+
+Introduzione al C
+Lezione 7
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Funzioni
+• Stringhe
+
+zuliani@di.uniroma1.it
+
+2
+
+Funzioni
+• Ne abbiamo già vista una: main!
+<tipo di ritorno> nomefunzione (lista di parametri)
+• Lista di parametri può essere vuota
+• Il tipo di ritorno può essere qualsiasi tipo del C, anche quelli definiti dal
+programmatore (che vedremo più avanti)
+• Usate il tipo void per una funzione che non ritorna alcunché
+zuliani@di.uniroma1.it
+
+3
+
+Funzioni
+Una funzione per la somma di due interi quadrati (a2 + b2)
+
+Passaggio parametri
+per valore.
+
+int somma_quadrata (int a, int b){
+a *= a;
+• I parametri sono variabili locali!!
+• Dove vengono allocate?
+b *= b;
+return a + b;
+}
+
+Ricordate la definizione generale:
+<tipo di ritorno> nomefunzione (lista di parametri)
+zuliani@di.uniroma1.it
+
+4
+
+Funzioni
+Il quadrato di un vettore di interi (a[0]2,a[1]2 ,a[2]2,…)
+
+In C non si può passare
+un array per valore.
+(Molto inefficiente.)
+
+void array_quadro (int a[], unsigned int n){
+for (int i = 0; i < n; i++)
+a[i] *= a[i];
+}
+La funzione non ritorna
+alcunché.
+
+zuliani@di.uniroma1.it
+
+5
+
+Esercizio 1 (in classe)
+Usate la funzione array_quadro su questo vettore di 5 double:
+{1.0, 4.2, -2.0, 2.0, 0.1}
+
+zuliani@di.uniroma1.it
+
+6
+
+Funzioni
+• Ricordate che l’identificatore di un array non è altro che un puntatore al
+primo elemento dell’array.
+• Posso quindi scrivere equivalentemente:
+
+void array_quadro (int *a, unsigned int n){
+for (int i = 0; i < n; i++)
+a[i] *= a[i];
+}
+Sintassi per il passaggio di
+parametri per riferimento
+zuliani@di.uniroma1.it
+
+7
+
+Esercizio 2 (in classe)
+Cambiate l’intestazione della funzione array_quadro dell’esercizio
+precedente e ricompilate.
+
+zuliani@di.uniroma1.it
+
+8
+
+Stringhe
+
+zuliani@di.uniroma1.it
+
+9
+
+Stringhe
+• Array di caratteri … ma un array speciale
+• Ogni elemento dell’array è un carattere della stringa
+• Ultimo elemento dell’array contiene carattere di fine stringa
+• ``Hello´´→ {H,e,l,l,o,\0} dove \0 è detto NULL
+
+zuliani@di.uniroma1.it
+
+10
+
+Stringhe: Inizializzazione
+• char s[10]=“Lezione 7”;
+s[0]
+
+s[1]
+
+s[2]
+
+s[3]
+
+s[4]
+
+S[5]
+
+s[6]
+
+L
+
+e
+
+z
+
+i
+
+o
+
+n
+
+e
+
+s[7]
+
+s[8]
+
+s[9]
+
+7
+
+\0
+
+• char r[10]=“L7 3Apr”;
+r[0]
+L
+
+r[1] r[2] r[3] r[4]
+7
+
+3
+
+A
+
+r[5]
+p
+
+r[6] r[7] r[8] r[9]
+r
+
+\0
+
+?
+
+?
+
+• Carattere fine stringa aggiunto automaticamente
+• char r[10]={`L´,`7´,` ´,`3´,`A´,`p`,`r´};
+• \0, non inserito automaticamente, quindi non è una stringa. Sconsigliato
+
+• char r[10]={`L´,`7´,` ´,`3´,`A´,`p`,`r´,`\0´}; OK
+zuliani@di.uniroma1.it
+
+11
+
+Stringhe: Inizializzazione (cont.)
+• char r[10]=``L9 4apr´´;
+• r[1] è `9´
+• r[4] è `a´
+• r[7] è `\0´
+• r[8] e r[9] sono invece indeterminati
+
+• char r[]=``L9 4apr´´;
+• OK, viene allocata una stringa di dimensione 8
+
+zuliani@di.uniroma1.it
+
+12
+
+Lunghezza, Copia, confronto, Concatenazione
+• Nel file stringhe.c esempi di uso funzioni per
+• Calcolo lunghezza
+• Copia stringhe
+• Confronto stringhe
+• Concatenazione stringhe
+
+[ strlen(s)]
+[ strcpy(s1, s2)]
+[ strcmp(s1, s2)]
+[ strcat(s1, s2) ]
+
+• Leggete il man per vedere come funzionano esattamente.
+• Attenti alla lunghezza delle stringhe per le operazione di copia e
+concatenazione!!
+zuliani@di.uniroma1.it
+
+13
+
+Altre funzioni
+• char *strncpy(char *dest, const char *src,
+size_t n);
+• Al più n bytes di src sono copiati
+
+• char *strncat(char *dest, const char *src,
+size_t n);
+• Al più n bytes di src sono concatenati
+
+• int strncmp(const char *s1, const char *s2,
+size_t n);
+• Confronta i primi n bytes di s1 e s2
+
+zuliani@di.uniroma1.it
+
+14
+
+Esercizio 3 (in classe)
+• Scrivere un programma che, date due stringhe s1 e s2 con
+strlen(s1)>5 e strlen(s2)>5, copi i primi 5 caratteri di s2 in s1. Usare la
+funzione strncpy
+• Scrivere un programma che date 2 stringhe s1 e s2 concateni i primi
+n caratteri di s1 ad s2. Usare la funzione strncat
+• Scrivere un programma che date 2 stringhe s1 e s2 determini quella
+di dimensione minore, denotata come nMin, e confronti i primi nMin
+caratteri di s1 e s2.
+
+zuliani@di.uniroma1.it
+
+15
+
+Esercizio 4
+• Progettare ed implementare una funzione che abbia lo stesso
+comportamento di
+char *strncpy(char *dest, const char *src,
+size_t n);
+• Per casa
+
+zuliani@di.uniroma1.it
+
+16
+
+Esercizio 5
+• Progettare ed implementare una funzione che abbia lo stesso
+comportamento di
+char *strncat(char *dest, const char *src,
+size_t n);
+• Per casa
+
+zuliani@di.uniroma1.it
+
+17
+
+Input / output
+• printf usando %s come segnaposto
+• ma vediamo funzioni più flessibili
+• Output
+• int putchar(int c);
+• int puts(const char *s);
+• int fputs(const char *s, FILE *stream);
+
+• Input
+• char *gets(char *s); DEPRECATED (obsoleta)
+• char *fgets(char *s, int size, FILE *stream);
+• int getchar(void);
+
+zuliani@di.uniroma1.it
+
+18
+
+Nota su putchar() e getchar()
+int getchar(void)
+int putchar(int c)
+
+(I)
+
+//perché c non è char?
+
+Queste funzioni ritornano int per gestire eventuali errori di
+input/ouput tramite la costante EOF (di solito vale -1):
+• getchar()ritorna EOF quando l’input da stdin termina (ad es.
+premendo Ctrl-D), altrimenti ritorna il carattere letto;
+• putchar(c)ritorna EOF se si verifica un errore di scrittura su
+stdout, altrimenti ritorna c.
+zuliani@di.uniroma1.it
+
+19
+
+Nota su putchar() e getchar()
+
+(II)
+
+• Di norma funzionano in modalità buffered («tamponata»)
+• A basso livello, NON fanno input/output di un singolo carattere
+• I caratteri sono inseriti in un buffer (‘memoria tampone’) che viene svuotato
+quando pieno o quando lo segnala il programmatore
+
+• Ad esempio, getchar() ritorna al chiamante solo quando:
+• incontra un Ctrl-D e il buffer è vuoto; oppure
+• incontra ‘\n’ e il buffer non è vuoto
+
+zuliani@di.uniroma1.it
+
+20
+
+Esercizio 6
+• Scrivere un programma che, facendo uso della funzione getchar()
+legga dallo stdin una stringa di lunghezza arbitraria (ovvero
+lunghezza non nota a priori)
+
+zuliani@di.uniroma1.it
+
+21
+
+Esempio (getch.c in Lezione7.tgz)
+#include <stdio.h>
+
+Una soluzione più portabile: funziona su Mac e Linux
+
+#define MAX 10
+
+#include <stdio.h>
+
+void main() {
+
+#define MAX 10
+
+int nc = -1;
+char str[MAX+1];
+
+void main() {
+
+// un char in più per '\0'
+
+char str[MAX+1];
+
+// un char in più per '\0'
+
+Cosa succede
+se EOF < -128??
+// lettura (‘bufferizzata’) da stdin
+
+int c, nc = 0;
+
+// scrive direttamente nella stringa
+
+// getchar() ritorna un int!
+
+while ((str[++nc] = getchar()) != EOF) ;
+
+while ((c = getchar()) != EOF)
+
+// memorizza c solo se diverso da EOF
+str[nc++] = c;
+
+// vediamo cosa c'è nella stringa
+for (int i = 0; i < MAX+1; i++)
+
+// vediamo cosa c'è nella stringa
+
+printf("carattere = %d\n", str[i]);
+
+for (int i = 0; i < MAX+1; i++)
+printf("carattere = %d\n", str[i]);
+
+// scrive '\0' a fine stringa
+str[(nc > MAX) ? MAX : nc] = '\0';
+
+// scrive '\0' a fine stringa
+str[(nc > MAX) ? MAX : nc] = '\0';
+
+printf("nc = %d; str = %s\n", nc, str);}
+printf("nc = %d; str = %s\n", nc, str);}
+zuliani@di.uniroma1.it
+
+22
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+23
+
+Introduzione al C
+Lezione 8
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Progetti C su più file
+• Il comando make
+
+zuliani@di.uniroma1.it
+
+2
+
+Costruire applicazioni in C
+• Il codice sorgente di un programma C può essere suddiviso su più files
+• Riduce i tempi di compilazione (compilo solo i sorgenti modificati)
+• Facilita il riutilizzo del codice (ad es. sotto forma di librerie di funzioni)
+• Facilita lo sviluppo del codice in gruppo
+File: myapp_main.c
+
+#include <stdio.h>
+void main(){
+int q=0;
+q = myfunc(q);
+printf(“q = %d\n”, q);
+}
+
+File: mylib.c
+
+int myfunc(int a){
+⋮
+return …
+
+}
+zuliani@di.uniroma1.it
+
+3
+
+Costruire applicazioni in C
+Eseguibile!
+
+myapp_main.c
+
+mylib.c
+
+myapp_main.o
+
+mylib.o
+
+a.out
+linker
+(gcc myapp_main.o mylib.o)
+
+compilatore
+(gcc -c ….)
+standard
+library
+
+zuliani@di.uniroma1.it
+
+4
+
+Costruire applicazioni in C
+• Prima di usare una funzione/variabile in C, questa deve essere
+dichiarata. Ad esempio:
+• prima di usare printf()devo aggiungere #include <stdio.h>
+• in stdio.h c'è la dichiarazione di printf (e di molte altre funzioni)
+File: myapp_main.c
+
+File: mylib.c
+
+#include <stdio.h>
+void main(){
+int q=0;
+q = myfunc(q);
+printf(“q = %d\n”, q);
+}
+
+int myfunc(int a){
+⋮
+
+return …
+}
+
+myfunc() non è dichiarata in myapp_main.c
+e il compilatore dà errore. Come faccio ad usarla?
+zuliani@di.uniroma1.it
+
+5
+
+Costruire applicazioni in C
+File: myapp_main.c
+
+File: mylib.c
+
+#include <stdio.h>
+
+int myfunc(int a){
+⋮
+
+int myfunc(int a);
+
+void main(){
+int q=0;
+q = myfunc(q);
+printf(“q = %d\n”, q);
+}
+
+return …
+}
+
+Dichiaro che in qualche file oggetto o sorgente
+(che verrà specificato dopo) c'è il codice di una
+funzione con questa intestazione.
+
+zuliani@di.uniroma1.it
+
+6
+
+Make e Makefile
+• Meccanismo per automatizzare la compilazione di file sorgenti
+• Definisce un semplice linguaggio per descrivere le relazioni tra
+• sorgenti, file oggetto ed eseguibili
+
+• Motivazioni
+• I tempi di compilazione possono essere molto lunghi per programmi grandi
+(provate a compilare Google Chromium …). Conviene ricompilare solamente
+se un sorgente è stato aggiornato
+• Più agevole rispetto alla compilazione manuale
+
+• Può essere utilizzato con qualsiasi linguaggio che abbia un
+compilatore eseguibile da riga di comando
+zuliani@di.uniroma1.it
+
+7
+
+Make e makefile (cont.)
+• In assenza di indicazioni esplicite, make cerca nella directory corrente
+un file (nell’ordine) con questi nomi:
+• GNUmakefile
+• makefile
+• Makefile
+
+zuliani@di.uniroma1.it
+
+8
+
+Make e makefile
+• make attua regole della forma
+Target: Prerequisites
+<TAB>Recipe
+<TAB>Recipe
+...
+<TAB>Recipe
+
+• Queste regole sono contenute nel makefile
+• Il carattere <TAB> che precede ogni Recipe è obbligatorio
+• Target è tipicamente un file (ad es., un eseguibile o file oggetto)
+• Prerequisites è una lista di file o altri target
+• Recipe è un comando da eseguire (è una parte della «ricetta» per
+raggiungere il target)
+zuliani@di.uniroma1.it
+
+9
+
+Esempio
+• La recipe associata ad un target viene eseguita quando:
+• non esiste (nella directory in cui make è invocato) un file di nome target
+*e* vi sono dei prerequisites
+• Il file di target esiste ma uno o più prerequisiti sono stati aggiornati dopo la
+sua generazione
+
+• Esempio di makefile
+merge_sorted_lists: merge_sorted_lists.c
+gcc -Wall -Wextra -O3 merge_sorted_lists.c -o merge_sorted_lists
+
+• Il target è l'eseguibile merge_sorted_lists
+• La lista dei prerequisiti contiene il file merge_sorted_lists.c
+• Il recipe è il comando per la compilazione
+zuliani@di.uniroma1.it
+
+10
+
+Nome Makefile
+• Non dobbiamo necessariamente chiamare il file Makefile o
+makefile
+• make -f my_make_file
+
+• In un makefile possono esserci più target
+• Si può specificare il target che si vuole eseguire
+• Ad es.:
+• make merge_sorted_lists
+
+• Se non si specificano target viene valutato solamente il primo
+
+zuliani@di.uniroma1.it
+
+11
+
+Phony target (azione)
+• Un target senza prerequisiti è chiamato azione o target phony (finto,
+fasullo)
+clean:
+rm -f *.o merge_sorted_lists
+
+• Bisogna dichiarare esplicitamente che il target è phony
+.PHONY clean
+• altrimenti se viene creato un file di nome clean nella directory in cui si
+esegue il make, l’azione sopra definita non verrà mai eseguita
+• infatti, un target senza prerequisiti si considera sempre aggiornato se esiste
+un file con quel nome
+zuliani@di.uniroma1.it
+
+12
+
+Esecuzione di più target
+ESEMPIO Makefile
+merge_sorted_lists: merge_sorted_lists.c
+gcc -Wall -Wextra -O3 merge_sorted_lists.c \
+-o merge_sorted_lists
+sort_file_int: sort_file_int.c
+gcc -Wall -Wextra -O3 sort_file_int.c \
+-o sort_file_int
+.PHONY: clean
+clean:
+rm -f *.o merge_sorted_lists
+
+• Nel caso di più target dobbiamo esplicitare quello che vogliamo eseguire
+• make marge_sorted_list
+• make sort_file_int
+• make clean
+zuliani@di.uniroma1.it
+
+13
+
+Esecuzione di più target
+• Per eseguire tutti i target si crea tipicamente un target phony,
+chiamato all, il cui prerequisito è l'elenco dei target
+all: marge_sorted_list sort_file_int
+.PHONY: clean, all
+
+zuliani@di.uniroma1.it
+
+14
+
+Variabili
+• Assegnazione base: VAR := val
+• Accesso al contenuto di una variabile: $(VAR)
+• Assegnazione di una variabile
+• Espansione completa di una variabile alla lettura
+VAR := val
+• Espansione testuale di una variabile (val non viene ulteriormente espansa)
+VAR = val
+• Definizione condizionale: assegna a VAR il valore val solamente se VAR è vuota
+VAR ?= val
+• Concatenazione
+VAR += val
+zuliani@di.uniroma1.it
+
+15
+
+Esempio
+CC := gcc
+CFLAGS := -Wall -Wextra -O3
+all:
+
+merge_sorted_lists \
+sort_file_int
+
+merge_sorted_lists: merge_sorted_lists.c
+
+$(CC) $(CFLAGS) merge_sorted_lists.c -o merge_sorted_lists
+sort_file_int: sort_file_int.c
+$(CC) $(CFLAGS) sort_file_int.c -o sort_file_int
+
+zuliani@di.uniroma1.it
+
+16
+
+Variabili automatiche
+• Variabili specifiche di make utilizzabili solo nelle recipe. Permettono di
+semplificarne la scrittura.
+• Principali variabili
+• $^ : lista di prerequisiti del target
+• $< : primo prerequisito del target
+• $@ : target
+merge_sorted_lists: merge_sorted_lists.c
+$(CC) $(CFLAGS) $^ -o $@
+sort_file_int: sort_file_int.c
+$(CC) $(CFLAGS) $^ -o $@
+zuliani@di.uniroma1.it
+
+17
+
+Esempio
+
+CC := gcc
+CFLAGS := -Wall -Wextra -O3
+PROGS := merge_sorted_lists \
+sort_file_int
+all: $(PROGS)
+merge_sorted_lists: merge_sorted_lists.c
+$(CC) $(CFLAGS) $^ -o $@
+sort_file_int: sort_file_int.c
+$(CC) $(CFLAGS) $^ -o $@
+.PHONY: clean
+clean:
+rm -f *.o $(PROGS)
+
+zuliani@di.uniroma1.it
+
+18
+
+Esempio
+
+Makefile
+CFLAGS := -O2
+CC := gcc
+helloworld : helloworld.o myfunction.o
+$(CC) $^ -o $@
+%.o : %.c
+$(CC) $(CFLAGS) -c $< -o $@
+.PHONY: clean
+clean:
+rm -f *.o
+$make helloworld
+gcc -O2 -c helloworld.c -o helloworld.o
+gcc -O2 -c myfunction.c -o myfunction.o
+gcc helloworld.o myfunction.o -o helloworld
+zuliani@di.uniroma1.it
+
+19
+
+Esercizio
+• Usando getch.c, scrivere un programma C che legga da tastiera una stringa
+arbitraria e stampi a video se la stringa è palindroma
+• Strutturare il codice in almeno tre file sorgenti C:
+• un file per la funzione main()
+• uno per una funzione che legge la stringa
+• uno per una funzione che controlli se una stringa è palindroma
+• PRIMA DI SCRIVERE IL CODICE C scrivere un makefile per generare l’eseguibile
+• L’eseguibile deve essere generato eseguendo make senza alcun parametro
+• Aggiungere un target clean per cancellare tutti i file oggetto .o
+
+• Usare make invece di invocare gcc etc. durante lo sviluppo!!
+
+zuliani@di.uniroma1.it
+
+20
+
+Regole e Variabili implicite
+• make possiede un insieme di regole implicite che coprono casi
+comuni (ad es., la generazione di un eseguibile a partire da un
+sorgente C)
+• Permettono di scrivere regole formate dal solo target o da target e
+prerequisiti, senza una recipe esplicita
+• Esempio:
+• main: main.c list.h list.c
+• crea un eseguibile main a partire da prerequisite
+
+• Se il target dipende da un solo prerequisito con il suo stesso nome (a
+meno dell'estensione), il prerequisito si può omettere
+• make cerca un file con il nome del target e sceglie il recipe implicito da
+utilizzare in base alla sua estensione
+• es: merge_sorted_lists:
+zuliani@di.uniroma1.it
+
+21
+
+Regole e Variabili implicite (cont.)
+• Le regole implicite usano variabili implicite
+• Essendo ridefinibili dall'utente permettono di "controllare" l'esecuzione delle
+recipe implicite
+• Principali variabili (modificabili dall’utente)
+• CC : compilatore
+• CFLAGS : flag per la fase di compilazione
+• LDFLAGS : flag per il linker (-L)
+• LDLIBS : flag per il linker: aggiunge librerie (-l<libname>)
+
+• La recipe implicita eseguita per la compilazione di un eseguibile x a partire da un
+singolo sorgente x.c è:
+• $(CC) $(CFLAGS) $(LDFLAGS) x.c $(LDLIBS) -o x
+
+• Quindi ad esempio il target main: main.c list.h list.c eseguirà la
+regola implicita
+•
+
+$(CC) $(CFLAGS) $(LDFLAGS) main.c list.h list.c $(LDLIBS) -o main
+zuliani@di.uniroma1.it
+
+22
+
+Esempio
+
+CC := gcc
+CFLAGS := -Wall -Wextra -O3
+PROGS := merge_sorted_lists \
+sort_file_int \
+main
+all: $(PROGS)
+main: main.c list.h list.c
+.PHONY: all clean
+clean:
+rm -f *.o $(PROGS)
+zuliani@di.uniroma1.it
+
+23
+
+Introduzione al C
+Lezione 9
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+(Materiale didattico per cortesia del Prof. Emiliano Casalicchio)
+
+Agenda
+• Leggere la linea di comando
+• Allocazione dinamica della memoria
+• Strutture
+• Input/Output da file
+
+zuliani@di.uniroma1.it
+
+2
+
+Leggere la linea di comando
+
+zuliani@di.uniroma1.it
+
+3
+
+Linea di comando
+• main ha due parametri, convenzionalmente chiamati argc e argv
+int argc
+// il numero di ‘parole’
+char *argv[]
+// le ‘parole’ digitate
+Ad esempio, digitando:
+$: cat file.txt
+Avremo che:
+argc = 2
+argv[0] = ”cat”
+argv[1] = ”file.txt”
+zuliani@di.uniroma1.it
+
+4
+
+Linea di comando: Esercizio
+Completare il seguente codice in modo tale che il programma stampi tutta le
+parole della sua linea di comando.
+int main(int argc, char *argv[]) {
+while (??? >= 0)
+printf("argv[%d] = %s\n", ???, argv[???]);
+return 0;
+}
+zuliani@di.uniroma1.it
+
+5
+
+Linea di comando: Soluzione
+int main(int argc, char *argv[]) {
+while (--argc >= 0)
+printf("argv[%d] = %s\n", argc, argv[argc]);
+return 0;
+}
+
+zuliani@di.uniroma1.it
+
+6
+
+Allocazione dinamica della
+memoria
+
+zuliani@di.uniroma1.it
+
+7
+
+I puntatori
+• Abbiamo finora visto cose tipo:
+• char *strncpy(char *dest, const char *src, size_t
+n);
+• scanf(``...´´, &varname);
+
+• Hanno a che fare con i puntatori, ossia variabili che contengono
+l’indirizzo di un’altra variabile (i.e., una locazione di memoria)
+• <tipo> *var_name;
+• Ad es:
+• char *dest;
+• int *intPointer;
+
+// puntatore ad un carattere
+// puntatore ad un intero
+zuliani@di.uniroma1.it
+
+8
+
+Valori associati ad una variabile puntatore
+• int *integer_ptr;
+• Valore diretto
+• Indirizzo di un’altra cella di memoria (ad es: 0x4d56)
+• Vi si accede mediante il nome della variabile (ad es:
+integer_ptr)
+
+• Valore indiretto
+
+Integer_ptr 0x4d56
+
+• Valore contenuto dalle cella di memoria in cui indirizzo è il
+valore diretto
+• Vi si accede mediante, ad es:, *integer_ptr
+
+0x4d56
+
+• Ad es:
+• Valore diretto = 0x4d56
+• Valore indiretto = 4
+zuliani@di.uniroma1.it
+
+9
+
+Operatori & e *
+int num=5;
+int *numPtr;
+• numPtr = &num;
+• assegna a numPtr l’indirizzo di num
+
+• *numPtr = 10;
+• assegna alla locazione di memoria puntata da numPtr il valore 10
+
+• Vedi il file pointer.c
+zuliani@di.uniroma1.it
+
+10
+
+Aritmetica dei puntatori
+• Un puntatore contiene un numero intero: è l’indirizzo di una cella
+di memoria.
+• Possiamo quindi applicare alcune operazioni aritmetiche, ad es.:
+int *ptr;
+ptr = ptr + 1;
+ptr = ptr + n;
+
+//ptr viene incrementato di 4 bytes
+(sizeof(int)) (locazioni di memoria)
+//ptr viene incrementato di 4n bytes
+(locazioni di memoria)
+
+Vedi aritmeticaPtr.c
+zuliani@di.uniroma1.it
+
+11
+
+Vettori (array) e puntatori
+int vect[10];
+int *ptr = NULL; //puntatore ‘nullo’
+ptr = &vect[0]; //puntatore al primo elemento
+ptr = vect;
+//puntatore al vettore
+
+Puntatore al primo elemento e variabile vettore/array sono la stessa
+cosa!!
+Vedi arrayPtr.c
+zuliani@di.uniroma1.it
+
+12
+
+Allocazione
+dinamica
+• Vettori e altre variabili
+sono allocate nello stack a
+tempo di compilazione
+• La memoria richiesta a
+tempo di esecuzione viene
+allocata nello heap
+zuliani@di.uniroma1.it
+
+13
+
+Allocazione dinamica
+• La memoria richiesta a tempo di esecuzione viene allocata nello heap
+• Vediamo come allocare memoria a tempo di esecuzione
+void *calloc(size_t nmemb, size_t size);
+void *malloc(size_t size);
+void free(void *ptr);
+Vedi heapAlloc.c
+zuliani@di.uniroma1.it
+
+14
+
+Allocazione dinamica
+1. Si richiede memoria dinamica tramite calloc o malloc
+2. Dopo l’uso rilasciare la memoria con free
+• Il programmatore C deve farsi carico del garbage collection (‘raccolta
+della spazzatura’, i.e., liberare memoria dinamica non più in uso)
+• Il parametro di free deve essere un puntatore ritornato da
+calloc/malloc, altrimenti il comportamento di free è indefinito
+• Chiamare free più di una volta con lo stesso puntatore è un uso
+indefinito
+zuliani@di.uniroma1.it
+
+15
+
+Esercizio 5
+Leggete ATTENTAMENTE il man per le differenze tra
+calloc e malloc
+
+• Implementare l’esempio heapAlloc.c usando malloc
+
+zuliani@di.uniroma1.it
+
+16
+
+Esercizio 6 (a casa)
+• Progettare ed implementare un programma che
+• Allochi dinamicamente 2 blocchi di memoria, chiamiamoli m1 e m2. I due
+blocchi hanno dimensione arbitraria (ad esempio letta come argomento di
+main)
+• Inizializzi il blocco m1 con dei dati, ad esempio leggendoli da un file di input
+(passato da stdin)
+• Copi il blocco di memoria m1 in m2 (usare memcpy())
+• Devono essere fatti gli opportuni controlli sulle dimensioni dei 2 blocchi di memoria, ad
+esempio se m2 è più piccolo copiare solo parzialmente m1.
+
+• Produca come output il contenuto di m2 (ridirezionare stdout su di un file
+di testo)
+zuliani@di.uniroma1.it
+
+17
+
+Strutture
+
+zuliani@di.uniroma1.it
+
+18
+
+Strutture (structures)
+• Definizione di nuovi tipi di dato che combinano tipi di dato
+eterogenei
+• Possiamo vederla come un contenitore di una collezione di variabili di vari tipi
+• Permette di trattare tale collezione come un tipo di dato da noi definito
+
+• Devono essere definite prima di essere usate (ovvio!!!)
+• Tre modi per definirle
+• Variabile struttura (variable)
+• Struttura etichettata (tagged)
+• Definizione di tipo struttura (type-defined)
+
+zuliani@di.uniroma1.it
+
+19
+
+Variabile struttura
+struct { // x,y: nomi dei membri della strutura
+double x; // coordinata x
+double y; // coordinata y
+} point2D; // point2D: nome variabile
+• Poco portabile, tutte le variabili struttura vanno definite qui:
+struct {
+...
+} pA, pB, pC; // point2D: nome variabile
+zuliani@di.uniroma1.it
+
+20
+
+Tagged structure
+struct point3D {
+// point3D: tag
+// x,y,z: nomi dei membri della strutura
+double x; // coordinata x
+double y; // coordinata y
+double z; // coordinata z
+};
+struct point3D pointA, pointB, pointC;
+
+• Soluzione più portabile, potrei mettere la definizione di struct
+point3D in un header file e riutilizzarla
+zuliani@di.uniroma1.it
+
+21
+
+Type-defined structure
+typedef struct {
+char ID[17]; //ad es: codice fiscale
+long int income;
+float taxRate;
+} taxpayer_t; //nome del nuovo tipo di dato
+taxpayer_t person1, person2;
+taxpayer_t persons[100];
+zuliani@di.uniroma1.it
+
+22
+
+Inizializzazione strutture
+struct point3D pointA={1.1, 1.2, 3.5},
+pointB={0.3, 4.5};
+• Inizializzare meno campi è legale
+
+zuliani@di.uniroma1.it
+
+23
+
+Allocazione dinamica di strutture
+• Vedi taxPayersAlloc.c
+
+zuliani@di.uniroma1.it
+
+24
+
+Vediamo taxPayers.c
+• Esercizio 1. in taxPayers.c modificare la funzione newTP in
+modo che prenda come parametro di input anche la data di nascita
+come tipo di dato birthdate_t (fatelo subito 10min)
+• Esercizio 2. in taxPayers.c modificare main in modo che i dati del
+contribuente siano inseriti da linea di comando (uso di argc e argv)
+• Esercizio 3. in taxPayers.c modificare il codice in modo che i dati
+del contribuente siano letti da file di testo (uso ridirezione stdin)
+
+zuliani@di.uniroma1.it
+
+25
+
+Passaggio delle strutture come parametri a
+funzione
+• Per valore
+• Vantaggio: più semplice/intuitivo
+• Svantaggio: dati vengono copiati nello stack
+
+• Per riferimento (puntatore)
+• Vantaggio: i parametri non vengono memorizzati nello stack andando così ad
+ottimizzarne l’uso essendo una risorsa limitata
+
+• Vedi taxPayersParams.c
+
+zuliani@di.uniroma1.it
+
+26
+
+File Input/Output
+
+zuliani@di.uniroma1.it
+
+27
+
+Tipi di file
+• Testo
+• Binari
+• Buffer
+• Area di memorizzazione temporanea che mantiene i dati non ancora trasferiti
+dal disco alla memoria o viceversa
+
+zuliani@di.uniroma1.it
+
+28
+
+File di testo
+• Tutte le funzioni per la loro gestione sono in stdio.h
+• Ogni linea (riga) finisce con \n
+• Il file finisce con EOF (definito in stdio.h)
+
+zuliani@di.uniroma1.it
+
+29
+
+Passi per usare i file
+
+vedi file.c
+
+1. Dichiarare un file pointer
+2. Aprire il file
+• Viene creata una struttura dati con le info necessarie per gestire il file
+• Viene allocato l’area di buffer
+• Collega il file pointer con la struttura
+
+3. Usare le funzioni di I/O
+• Processo (progr. in esec.) → buffer → disco (e viceversa)
+
+4. Chiudere il file
+• Scrive il contenuto buffer nel file (se necessario)
+• Libera la memoria associata al file pointer
+zuliani@di.uniroma1.it
+
+30
+
+Input/output
+• int fscanf(FILE *stream, const char *format, ...);
+• int fprintf(FILE *stream, const char *format, ...);
+• char *fgets(char *s, int size, FILE *stream);
+• legge size caratteri o fino a \n
+• int fputs(const char *s, FILE *stream);
+• int feof(FILE *stream);
+• restituisce un valore diverso da 0 quando ha trovato EOF
+
+zuliani@di.uniroma1.it
+
+31
+
+fscanf/fprintf
+• vedi filefsfpf.c
+• Richiedono la conoscenza della struttura del file
+
+zuliani@di.uniroma1.it
+
+32
+
+fgets
+• Vedi filefgets.c
+• Esercizio 4
+• Modificare filefgets.c in modo che il programma legga tutto il
+contenuto del file, fino alla fine
+• Suggerimento: leggete il man di fgets (specialmente la parte sul valore di
+ritorno)!
+
+zuliani@di.uniroma1.it
+
+33
+
+fputs
+• Vedi filefputs.c
+• Esercizio 5
+• scrivere un programma che legge un intero file e lo riscrive in altro file
+
+• Esercizio 6
+• considerate l’esercizio 3. Modificate il programma in modo che i dati del tax
+payer vengano letti da un file di testo usando sia fscanf sia fgets
+
+zuliani@di.uniroma1.it
+
+34
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+35
+
+

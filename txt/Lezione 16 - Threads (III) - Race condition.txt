@@ -1,0 +1,250 @@
+Threads (III):
+Una race condition
+Lezione 16
+
+Sistemi Operativi - II Modulo
+(Canale A - L)
+
+Prof. Paolo Zuliani
+Dipartimento di Informatica
+
+Agenda
+• Un esempio «insidioso» di race condition con flussi di esecuzione
+(threads) concorrenti
+
+zuliani@di.uniroma1.it
+
+2
+
+Flussi di esecuzione concorrente
+• La fonte di maggior complicazione nei sistemi operativi è costituita
+dall’esistenza di flussi di esecuzione concorrenti:
+• In una applicazione multithread, ciascun thread è un flusso di esecuzione “in
+competizione” con quelli degli altri thread
+• In un sistema multiprogrammato con prelazione, ciascun processo può essere
+interrotto da un altro processo
+• In un sistema multiprocessore, diversi processi o gestori di interruzione sono in
+esecuzione contemporaneamente
+
+• La coerenza delle strutture di dati private di ciascun flusso di esecuzione è
+garantita dal meccanismo di cambio di flusso (contesto)
+• La coerenza delle strutture di dati condivise tra i vari flussi di esecuzione
+concorrenti non è garantita da tale meccanismo
+zuliani@di.uniroma1.it
+
+3
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di main()
+0
+i
+
+zuliani@di.uniroma1.it
+
+4
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+?
+p
+zuliani@di.uniroma1.it
+
+5
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+6
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+0
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+7
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+8
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+p
+zuliani@di.uniroma1.it
+
+9
+
+Esempio
+Flusso di main()
+…
+for (i = 0; i < T; i++) {
+…
+s=pthread_create(&tid[i],NULL,job,&i);
+…
+}
+…
+
+Funzione per nuovi flussi
+void *job(void *arg){
+int *p=arg;
+printf(”%d”,*p);
+}
+
+Memoria di job()
+
+Memoria di main()
+1
+i
+
+arg
+
+Il flusso di job() «vede» 1 invece di 0!
+zuliani@di.uniroma1.it
+
+p
+10
+
+Cosa fare?
+• Evitare soluzioni «complicate»
+• Preferire soluzioni concettualmente semplici (ed eventualmente
+inefficienti) rispetto a soluzioni «efficienti» ma di cui non si è certi
+della correttezza
+• Nel nostro caso, meglio inizializzare la memoria condivisa nella parte
+seriale del codice
+
+zuliani@di.uniroma1.it
+
+11
+
+Domande?
+
+zuliani@di.uniroma1.it
+
+12
+
+
