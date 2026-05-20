@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/appunti-so2/',
   title: 'Sistemi Operativi 2',
   description: 'Appunti e concetti logici del corso di Sistemi Operativi 2',
   appearance: 'dark',
