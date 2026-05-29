@@ -26,6 +26,10 @@
 - Processi: isolamento forte, IPC piu' lento.
 - Thread: isolamento debole, condivisione immediata.
 
+### Risorse condivise e private
+- Condivise tra thread: codice, strutture dati e file aperti.
+- Private per thread: registri CPU e stack.
+
 ## Modelli di implementazione
 - Many-to-one (user-level): un thread kernel per tanti thread utente.
 - One-to-one (kernel-level): ogni thread utente ha thread kernel.
@@ -76,6 +80,17 @@ int pthread_join(pthread_t tid, void **retval);
 - Basata su `clone()` con flag `CLONE_XXX`.
 - `fork()` = `clone()` senza condivisioni.
 - `pthread_create()` = `clone()` con condivisione completa.
+
+## Race condition e sezione critica
+- Una race condition dipende dalla temporizzazione degli accessi concorrenti ai dati condivisi.
+- Una sezione critica e' una porzione di codice che non deve essere eseguita in parallelo con altre sezioni critiche.
+- Attenzione ai dati condivisi come l'indice di un ciclo: passare `&i` a piu thread puo' portare a risultati errati; meglio usare copie per thread.
+
+## Sincronizzazione (POSIX)
+- Semaforo binario (mutex): accesso esclusivo ai dati condivisi (`pthread_mutex_*`).
+- Attributi del mutex: fast (default), recursive, error-checking.
+- Barriera: tutti i thread proseguono solo quando tutti hanno raggiunto il punto di sincronizzazione (`pthread_barrier_*`).
+- Condition variable: un thread attende un predicato su dati condivisi; va sempre associata a un mutex per evitare race (`pthread_cond_*`).
 
 ### Cenni su `clone`
 - `clone` con flag `CLONE_VM`, `CLONE_THREAD`, `CLONE_FILES` implementa i thread.

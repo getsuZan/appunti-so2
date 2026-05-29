@@ -52,6 +52,7 @@ numPtr = &num;   // numPtr punta a num
 int vect[10];
 int *ptr = vect;      // = &vect[0]
 ```
+- `NULL` indica un puntatore che non punta a nessuna area valida.
 
 ## Allocazione dinamica (heap)
 - Memoria richiesta a runtime:

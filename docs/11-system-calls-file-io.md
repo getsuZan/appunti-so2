@@ -14,6 +14,12 @@
   - 2: stderr
 - I fd sono riutilizzati quando un file viene chiuso.
 
+## Sequenza tipica di uso
+- `open` per ottenere un file descriptor.
+- `read`/`write` per operare sul file.
+- `close` per chiudere esplicitamente il file.
+- Alla terminazione del processo i file aperti vengono chiusi automaticamente, ma e' buona pratica chiudere sempre in modo esplicito.
+
 ## Flag associati
 - File status flags: modalita' di accesso, apertura, operazione.
 - File descriptor flags: proprieta' del fd, indipendenti dal file.
@@ -21,12 +27,13 @@
 
 ### Categorie principali
 - Modalita' accesso: `O_RDONLY`, `O_WRONLY`, `O_RDWR`.
-- Apertura: `O_CREAT`, `O_EXCL`, ecc.
+- Apertura: `O_CREAT`, `O_EXCL`, ecc. (definiscono il comportamento di `open` e non vengono mantenuti).
 - Operative: `O_APPEND`, `O_SYNC`, `O_TRUNC`.
 
 ### Note sui flag di `open`
 - I flag di accesso non sono modificabili dopo l'apertura.
 - `O_CREAT` richiede il parametro `mode` (es. 0644).
+- `O_EXCL` insieme a `O_CREAT` genera errore se il file esiste gia.
 - `O_TRUNC` tronca il file a zero se e' apribile in scrittura.
 
 ## `open`
@@ -56,12 +63,15 @@ ssize_t write(int fd, const void *buf, size_t count);
 
 ### Nota su scritture parziali
 - Se `write` scrive meno di `count`, occorre ripetere la scrittura.
+- Una scrittura puo' essere parziale se `write` viene interrotta (es. da un segnale).
 
 ## `close`
 ```c
 int close(int fd);
 ```
 - Ritorna 0 o `-1`.
+- Chiude il file descriptor e lo rende riutilizzabile.
+- Se si chiude l'ultimo fd che riferisce un file gia rimosso, il file viene eliminato.
 
 ## `fopen` vs `open`
 - `fopen` restituisce `FILE *` con buffering.
@@ -69,6 +79,7 @@ int close(int fd);
 
 ## Altre syscall utili
 - `dup`: duplica fd.
+- `lseek`: sposta l'offset del file.
 - `stat`/`fstat`: informazioni su file.
 - `chmod`/`fchmod` e `chown`.
 - `rename`, `mkdir`, `rmdir`, `chdir`.

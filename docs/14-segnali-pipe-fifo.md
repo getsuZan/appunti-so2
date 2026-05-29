@@ -13,6 +13,13 @@
 	- CTRL+Z -> SIGSTOP
 	- divisione per zero -> SIGFPE
 	- segfault -> SIGSEGV
+- Possono anche derivare da eventi non anomali:
+	- terminazione di un figlio -> SIGCHLD
+	- scadenza di `alarm` -> SIGALRM
+	- `kill` tra processi o da terminale
+	- dati urgenti su rete -> SIGURG
+	- scrittura su pipe senza lettori -> SIGPIPE
+- La lista completa dei segnali e' in `<signal.h>`.
 
 ### Segnali comuni
 - SIGINT, SIGTERM, SIGKILL, SIGSTOP, SIGSEGV, SIGPIPE, SIGALRM.

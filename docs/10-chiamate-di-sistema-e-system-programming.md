@@ -17,6 +17,16 @@
 - Funzioni di libreria: piu' comode, spesso usano system call.
 - Esempio: `malloc` usa `sbrk`/`mmap`.
 - Esempio pratico: `printf` usa `write` per scrivere su stdout.
+- Alcune funzioni di libreria non invocano system call (es. `strcpy`, `atoi`).
+
+## Categorie di system call (panoramica)
+- File e directory (creazione, lettura/scrittura, attributi).
+- IPC locale: pipe e FIFO.
+- Socket e networking.
+- Gestione memoria.
+- Gestione processi e sincronizzazione.
+- Segnali e sezione critica.
+- Thread POSIX.
 
 ## Documentazione
 - System call: `man 2 <nome>`.
@@ -27,6 +37,7 @@
 - Molte system call ritornano `-1` in caso di errore.
 - In errore, `errno` viene impostato a un codice specifico.
 - Usare `errno` solo dopo aver verificato il valore di ritorno.
+- Cause tipiche di errore: privilegi insufficienti, risorse esaurite, argomenti invalidi.
 
 ### `perror`
 ```c

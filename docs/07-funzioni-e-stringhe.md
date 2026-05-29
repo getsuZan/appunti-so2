@@ -23,6 +23,7 @@ int somma_quadrata(int a, int b) {
 }
 ```
 - I parametri sono variabili locali (passaggio per valore).
+- Sono allocati nello stack della funzione chiamata.
 
 ### Array come parametri
 - Un array non si passa per valore; si passa il suo indirizzo.

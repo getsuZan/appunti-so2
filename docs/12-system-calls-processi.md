@@ -23,6 +23,7 @@
 ## System call di base
 - `getpid`, `getppid`, `getuid`, `geteuid`.
 - `setuid`, `setgid` (richiedono privilegi).
+- Le prime terminano sempre con successo, `setuid`/`setgid` ritornano `-1` in caso di errore.
 
 ## `fork`
 ```c
@@ -34,16 +35,12 @@ pid_t fork(void);
 - Ritorna `-1` su errore.
 
 ### Attributi ereditati e non ereditati
-- Ereditati: UID/GID reali, cwd, ambiente, file descriptor aperti, maschera segnali.
-- Non ereditati: PID, contatori risorse, timer, lock.
-
-### Attributi ereditati
-- UID/GID reali, cwd, ambiente, fd aperti.
-- Non ereditati: PID, timers, contatori risorse, lock.
+- Ereditati: UID/GID reali ed effective, gruppi, cwd, ambiente, file descriptor aperti, terminale di controllo, memoria condivisa.
+- Non ereditati: PID, contatori risorse, timer, record/memory lock; la coda dei segnali pendenti viene svuotata nel figlio.
 
 ## Terminazione: `_exit` vs `exit`
-- `_exit` (syscall): termina subito, non svuota buffer stdio.
-- `exit` (libreria): chiama handler `atexit`, svuota buffer.
+- `_exit` (syscall): termina subito, non svuota buffer stdio, chiude i file descriptor e invia `SIGCHLD` al genitore.
+- `exit` (libreria): chiama handler `atexit`/`on_exit`, svuota gli stream stdio e chiude i file descriptor.
 
 ### Nota su Linux
 - La syscall `_exit` termina un singolo thread.

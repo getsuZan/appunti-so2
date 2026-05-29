@@ -78,8 +78,10 @@ int main() {
   - `cpp helloworld.c > precompilato.c`
 - Solo compilazione:
   - `gcc -c precompilato.c -o file.o`
+- In compilazione si controlla la sintassi e la correttezza delle intestazioni delle funzioni usate.
 - Solo linking:
   - `gcc file.o` (risolve le chiamate a funzioni)
+- Il linking richiede le implementazioni: possono essere in altri file o in librerie di sistema (libc inclusa automaticamente).
 - Più file:
   - `gcc file1.o file2.o`
   - `gcc file1.c file2.c`

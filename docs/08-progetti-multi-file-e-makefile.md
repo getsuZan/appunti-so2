@@ -30,6 +30,7 @@
 - `make` automatizza compilazione e linking.
 - Cerca un file:
   - `GNUmakefile`, `makefile`, `Makefile`.
+- Se il file ha un nome diverso: `make -f nome_file`.
 
 ### Regola base
 ```

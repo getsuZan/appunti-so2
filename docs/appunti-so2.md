@@ -1,4 +1,4 @@
- # Sistemi Operativi - II Modulo: Appunti riformulati
+# Sistemi Operativi - II Modulo: Appunti riformulati
 
 Questo file riorganizza gli appunti in forma discorsiva, mantenendo il lessico tecnico. L'ordine segue la progressione del corso: dalla shell e dal filesystem, alla programmazione in C, fino alle system call, ai meccanismi di concorrenza e alla rete.
 
@@ -80,29 +80,55 @@ Le system call si dividono per categoria: file (`open`, `read`, `write`), proces
 
 ---
 
-## 11. Processi, segnali e pipe
+## 11. System call per file I/O
 
-### Flag di open e file descriptor
+Le system call di file I/O lavorano su file descriptor, piccoli interi che identificano file aperti (0 stdin, 1 stdout, 2 stderr). L'uso tipico e' `open` per ottenere il fd, `read`/`write` per operare sui byte, e `close` per chiuderlo. `read` ritorna il numero di byte letti (0 a EOF), `write` puo' scrivere meno di `count` se interrotta e va ripetuta.
 
-Nel file I/O a basso livello, `open` riceve un insieme di flag combinati con OR bitwise. I flag si dividono in file status flags (associati all'open file description, quindi condivisi da fd duplicati con `dup` e che condividono anche l'offset) e file descriptor flags (associati al singolo fd). Il flag di descriptor piu comune e `FD_CLOEXEC`, che chiude il fd in caso di `exec` riuscita; lo stesso effetto si ottiene con `O_CLOEXEC` in `open`. Con `fcntl(F_SETFL)` si possono modificare solo alcuni flag operativi (tipicamente `O_APPEND` e `O_NONBLOCK`), non la modalita di accesso.
-
-Le modalita di accesso sono mutualmente esclusive e mascherate da `O_ACCMODE`: `O_RDONLY` apre in sola lettura, `O_WRONLY` in sola scrittura, `O_RDWR` in lettura e scrittura. Questa scelta non puo essere cambiata dopo l'apertura.
-
-I flag di apertura includono: `O_CREAT`, che crea il file se non esiste e richiede il parametro `mode` (permessi) che viene mascherato dalla `umask`; `O_EXCL`, che usato con `O_CREAT` fa fallire l'apertura se il file esiste gia (utile per evitare race di creazione); `O_TRUNC`, che se il file esiste, e un file regolare, e la modalita di accesso consente la scrittura, tronca il file dalla posizione 0 portandone la dimensione a zero; `O_DIRECTORY`, che fallisce se il path non e una directory; `O_NOFOLLOW`, che fallisce se il path finale e un symlink; `O_NOCTTY`, che evita che un terminale diventi controlling terminal del processo; `O_TMPFILE`, che crea un file temporaneo senza nome nella directory, visibile solo tramite il fd finche rimane aperto.
-
-I flag operativi includono: `O_APPEND`, che forza ogni `write` ad avvenire in coda (il kernel imposta l'offset alla fine in modo atomico prima della scrittura, anche se si e fatto `lseek`); `O_NONBLOCK`, che rende non bloccanti apertura e I/O su FIFO, pipe, socket e dispositivi (su file regolari in genere non ha effetto), con possibili errori `EAGAIN`/`EWOULDBLOCK`; `O_SYNC`, che richiede il completamento su storage di dati e metadati prima del ritorno di `write`; `O_DSYNC`, che sincronizza i dati e solo i metadati necessari per recuperarli; `O_RSYNC`, che estende la semantica sincrona anche alle letture secondo quanto previsto dallo standard.
-
-La creazione dei processi in Unix avviene con `fork`, che duplica il processo corrente. Il figlio puo poi sostituire il proprio codice con `exec`, mentre il padre attende la terminazione con `wait` per evitare zombie. Le pipe forniscono un canale unidirezionale tra processi correlati, mentre le FIFO estendono il meccanismo a processi non imparentati tramite il filesystem.
-
-I segnali sono interruzioni software inviate dal kernel a un processo o da un processo a un altro processo. Rappresentano eventi asincroni che possono arrivare in qualunque momento: condizioni anomale (CTRL+Z -> `SIGSTOP`, CTRL+C -> `SIGINT`, eccezioni hardware come divisione per zero o segfault) ma anche eventi normali come la terminazione di un figlio (`SIGCHLD`), la scadenza di `alarm` (`SIGALRM`), un `kill` da processo o terminale, dati urgenti in rete (`SIGURG`) o scritture su pipe senza lettori (`SIGPIPE`). La lista dei segnali e in `<signal.h>` e a ogni evento e associato un segnale; il processo comunica al kernel l'azione da eseguire quando il segnale arriva: ignorare, usare l'azione di default, oppure catturare con un handler (tipicamente con `signal` o `sigaction`). `SIGKILL` e `SIGSTOP` non possono essere catturati o bloccati, cosi il sistema mantiene sempre il controllo. Quando un segnale viene consegnato, il processo interrompe il proprio flusso, esegue l'handler e poi riprende; se il segnale e bloccato con la maschera (`sigprocmask`) resta pendente finche non viene sbloccato.
+I flag di `open` si combinano in OR bitwise e si dividono in modalita di accesso (`O_RDONLY`, `O_WRONLY`, `O_RDWR`), flag di apertura (`O_CREAT`, `O_EXCL`, `O_TRUNC`) e flag operativi (`O_APPEND`, `O_SYNC`). I flag di accesso non sono modificabili dopo l'apertura, mentre quelli operativi possono essere gestiti con `fcntl`.
 
 ---
 
-## 12. Rete, thread e Rust
+## 12. System call per i processi
 
-La programmazione di rete usa i socket come file descriptor. Il modello tipico prevede `socket`, `bind`, `listen`, `accept` lato server e `connect` lato client. I socket permettono di inviare e ricevere stream di byte come in un normale I/O.
+I processi in Unix formano una gerarchia con `init` come radice. `fork()` duplica il processo chiamante e crea un figlio, che eredita ambiente, cwd e file descriptor; quando il figlio termina, il padre usa `wait`/`waitpid` per leggere l'exit status ed evitare zombie.
 
-I thread (pthreads) consentono concorrenza nello stesso processo condividendo lo stesso spazio di indirizzamento. Questa condivisione introduce race condition e richiede sincronizzazione tramite mutex e, quando necessario, condition variable. Rust affronta questi problemi con un sistema di ownership e borrowing che impedisce, a compile time, molte forme di accesso concorrente non sicuro.
+La terminazione puo' avvenire con `_exit` (syscall, termina subito) o `exit` (libreria, svuota gli stream stdio e chiama gli handler). `exec` sostituisce l'immagine del processo mantenendo PID, cwd e fd (salvo `FD_CLOEXEC`). Le funzioni `getpid`, `getppid`, `getuid` e `geteuid` leggono gli identificatori, mentre `setuid`/`setgid` richiedono privilegi.
+
+---
+
+## 13. Funzioni e variabili esterne/statiche, gdb
+
+Le variabili globali sono visibili dal punto di dichiarazione alla fine del file; con `extern` si dichiara una variabile definita in un altro file. Le variabili `static` locali mantengono il valore tra chiamate, mentre le `static` globali e le funzioni `static` sono visibili solo nel file corrente.
+
+La ricorsione permette funzioni che richiamano se stesse, mentre i puntatori a funzione consentono di passare funzioni come argomenti (es. `qsort`). Per il debug, `gdb` usa simboli generati con `-g`; comandi base: `break`, `run`, `next`, `step`, `print`, `backtrace`.
+
+---
+
+## 14. Segnali, pipe, FIFO
+
+I segnali sono interruzioni software asincrone inviate dal kernel o da altri processi: possono derivare da eventi anomali (divisione per zero, segfault, CTRL+C/CTRL+Z) o da eventi normali (terminazione di un figlio, `alarm`, `kill`, `SIGPIPE`). Ogni segnale ha un'azione di default, ma puo' essere ignorato o gestito con un handler; `SIGKILL` e `SIGSTOP` non sono gestibili o bloccabili. La maschera dei segnali (`sigprocmask`) permette di bloccarli, rendendoli pendenti finche non vengono sbloccati.
+
+Le pipe sono canali unidirezionali in memoria creati con `pipe`: leggere da pipe vuota blocca, scrivere su pipe piena blocca, e scrivere senza lettori genera `SIGPIPE`. Le FIFO (`mkfifo`) sono pipe con nome nel filesystem e permettono comunicazione tra processi non imparentati.
+
+---
+
+## 15. Socket
+
+Le socket forniscono comunicazione full-duplex tra processi locali o remoti secondo il modello client-server. Le system call principali sono `socket`, `bind`, `listen`, `accept` lato server e `connect` lato client. I domini piu comuni sono `AF_LOCAL`/`AF_UNIX` (locale) e `AF_INET`/`AF_INET6` (rete); i tipi `SOCK_STREAM` (TCP) e `SOCK_DGRAM` (UDP). In `sockaddr_in` porte e indirizzi devono essere in network byte order (`htons`, `htonl`).
+
+---
+
+## 16. Thread
+
+Un thread e' un flusso di esecuzione dentro un processo: piu thread condividono memoria e risorse, con overhead minore rispetto ai processi ma con rischi di race condition. I modelli principali sono many-to-one, one-to-one e many-to-many; in Linux la libreria pthread implementa il modello one-to-one.
+
+Le funzioni fondamentali sono `pthread_create`, `pthread_join` e `pthread_exit`. `exit()` termina l'intero processo, mentre `pthread_exit()` termina solo il thread chiamante.
+
+---
+
+## 17. Introduzione a Rust
+
+Rust nasce per ridurre gli errori di memoria tipici di C/C++ (buffer overflow, use-after-free) senza garbage collection. Il modello di ownership assegna un unico proprietario a ogni allocazione; il borrowing usa riferimenti `&T` o `&mut T` con la regola "molti immutabili o uno mutabile". Il borrow checker applica queste regole a compile time, prevenendo use-after-free e data race.
 
 ---
 

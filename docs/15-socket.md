@@ -9,7 +9,7 @@
 ## Pipe: riepilogo
 - Pipe e' unidirezionale.
 - Per comunicazione bidirezionale servono due pipe.
-- Dopo `fork`, chiudere i canali non usati.
+- Dopo `fork`, chiudere i canali non usati (es. il parent chiude lettura su pipe1 e scrittura su pipe2; il child fa il contrario).
 
 ## Socket
 - Permettono comunicazione tra processi su stessa macchina o in rete.

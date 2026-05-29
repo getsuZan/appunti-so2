@@ -51,6 +51,7 @@ int main(void) {
 ## Funzioni statiche
 - `static` su una funzione ne limita la visibilita' al file corrente.
 - Utile per nascondere implementazioni interne.
+- `static` modifica la visibilita' dell'oggetto, non la sua permanenza in memoria.
 
 ### Nota su visibilita'
 - Una funzione `static` non puo' essere richiamata da altri file anche se dichiarata.

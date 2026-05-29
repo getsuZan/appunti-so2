@@ -52,6 +52,7 @@ do {
 
 ## `break` e `continue`
 - `break` interrompe il ciclo.
+- `break` si usa anche per uscire da uno `switch`.
 - `continue` salta alla prossima iterazione.
 
 ## Blocchi e scope

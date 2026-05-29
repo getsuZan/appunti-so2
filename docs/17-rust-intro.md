@@ -21,7 +21,13 @@
 ## Storia breve
 - Iniziato da Graydon Hoare (Mozilla) nel 2006.
 - Rust 1.0 nel 2015.
+- Versione attuale indicata nelle slide: 1.95 (aprile 2026).
 - Open source, usa LLVM.
+
+## Dove viene usato
+- Mozilla Firefox.
+- Librerie critiche di Windows.
+- Kernel Linux (driver e componenti di sistema).
 
 ## Caratteristiche principali
 - Linguaggio di sistema, ma memory-safe.

@@ -72,6 +72,7 @@
 
 ### Condivisione
 - Il text segment puo' essere condiviso tra istanze.
+- BSS, Data segment e Memory Mapping Segment possono essere condivisi in casi specifici.
 - Stack non e' condivisibile.
 
 ## Stati dei processi
