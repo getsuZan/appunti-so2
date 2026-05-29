@@ -8,10 +8,6 @@ Benvenuto negli appunti del corso di Sistemi Operativi 2. Questo sito raccoglie 
 - Ogni capitolo contiene una sezione di "Intuizione Logica" e una lista di "Punti Chiave".
 - Le note sono pensate per essere riusate nella stesura di un sito di studio.
 
-## Sincronizzazione appunti
-
-- [Indice completo e collegamenti](/appunti-completi)
-
 ## Lezioni
 
 1. Primi passi: Shell, Utenti, Filesystem
